@@ -1,0 +1,103 @@
+{
+  "name": "moedux",
+  "version": "0.0.1",
+  "description": "A decentralized state manager for react",
+  "keywords": [
+    "react",
+    "state",
+    "management",
+    "moedux"
+  ],
+  "author": "acrazing <joking.young@gmail.com>",
+  "main": "dist/moedux.cjs.js",
+  "module": "dist/moedux.esm.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "src/",
+    "dist/"
+  ],
+  "scripts": {
+    "clean": "rm -rf dist",
+    "bundle": "rollup --config src/build/rollup.config.ts",
+    "build": "run-s clean bundle",
+    "test": "jest",
+    "prepublishOnly": "run-s test build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:acrazing/dpdm.git"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^16.0.0",
+    "@types/express": "^4.17.8",
+    "@types/jest": "^26.0.15",
+    "@types/react-dom": "^16.9.9",
+    "express": "^4.17.1",
+    "husky": "^4.3.0",
+    "immutable": "^4.0.0-rc.12",
+    "jest": "^26.6.2",
+    "lint-staged": "^10.5.1",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^2.1.2",
+    "react-dom": "^17.0.1",
+    "rollup": "^2.33.1",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-sourcemaps": "^0.6.3",
+    "rollup-plugin-typescript2": "^0.29.0",
+    "ts-jest": "^26.4.3",
+    "typescript": "^4.0.5"
+  },
+  "dependencies": {
+    "@types/react": "^16.9.55",
+    "react": "^17.0.1",
+    "tslib": "^2.0.3"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,json,css,less,scss,md}": [
+      "prettier --write"
+    ]
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json",
+      "node",
+      "mjs"
+    ],
+    "cacheDirectory": ".cache/jest",
+    "collectCoverage": false,
+    "collectCoverageFrom": [
+      "<rootDir>/src/**/*.{ts,tsx}",
+      "!**/*.d.ts"
+    ],
+    "coverageDirectory": "temp/coverage",
+    "testMatch": [
+      "<rootDir>/src/**/*.spec.{ts,tsx}"
+    ],
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    }
+  },
+  "prettier": {
+    "printWidth": 80,
+    "tabWidth": 2,
+    "useTabs": false,
+    "semi": true,
+    "singleQuote": true,
+    "jsxSingleQuote": false,
+    "trailingComma": "all",
+    "bracketSpacing": true,
+    "jsxBracketSameLine": false,
+    "arrowParens": "always",
+    "endOfLine": "lf"
+  }
+}

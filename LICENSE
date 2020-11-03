@@ -1,31 +1,3 @@
-# moedux
-
-A decentralized state manager for react.
-
-## Features
-
-The API is almost like `redux`, which is the industry standard, but, it
-improved the experience of `redux` with the following changes:
-
-- Decentralized the state declaration, you do not need `compose` anymore
-- Strong typed, all the API with full TypeScript supports
-- Out of the box, no middlewares, no toolkit, no reselect
-
-Something else:
-
-- Full-featured: supports `SSR`, `hook`, `class`
-- Action is async natively, likes `mobx`
-
-## Usage
-
-You can get example usage in example directory:
-
-- server side [example/server](./src/example/server.tsx)
-- client side [example/client](./src/example/client.tsx)
-
-## License
-
-```
 The MIT License (MIT)
 
 Copyright (c) 2020 acrazing
@@ -47,4 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-```
