@@ -5,7 +5,7 @@
 
 declare const __magicType: unique symbol;
 
-export type JSONValue<R> = R extends { [__magicType]: infer E } ? E : R;
+type JSONValue<R> = R extends { [__magicType]: infer E } ? E : R;
 
 export type JSONState<S> = JSONValue<
   S extends { toJSON(): infer R }
@@ -19,46 +19,47 @@ export type JSONState<S> = JSONValue<
     : S
 >;
 
-export type Mutator<S, A> = (state: S, action: A) => S;
-
-export type MutatorSet<S> = Record<string, Mutator<S, any>>;
-
-export type Box<S = any, MS extends MutatorSet<S> = any> = {
-  object: 'box';
-  state: S;
-} & {
-  [P in keyof MS]: MS[P] extends Mutator<S, infer A> ? (action: A) => A : never;
-};
-
-export interface BoxOptions<S = any, MS extends MutatorSet<S> = any> {
-  preload: (state: S, preloadedState: JSONState<S>) => S;
-  mutators: MS;
-}
-
-export interface BoxFactory<S = any, MS extends MutatorSet<S> = any>
-  extends BoxOptions<S, MS> {
-  object: 'box_factory';
+export interface Box<S = any> {
   key: string;
-  initialState: S;
+  initialState: S | (() => S);
+  preload: (state: S, preloadedState: JSONState<S>) => S;
 }
 
-export type BoxType<BF extends BoxFactory> = BF extends BoxFactory<
-  infer S,
-  infer MS
->
-  ? Box<S, MS>
-  : never;
+export type BoxState<B> = B extends Box<infer S> ? S : never;
 
-/**
- * create a store box factory
- * @param key - the key should be unique in a context
- * @param initialState - the initial state
- * @param options - options
- */
-export function box<S, MS extends MutatorSet<S>>(
+export function box<S>(
   key: string,
-  initialState: S,
-  options: BoxOptions<S, MS>,
-): BoxFactory<S, MS> {
-  throw new Error('TODO');
+  initialState: S | (() => S),
+  preload: (state: S, preloadedState: JSONState<S>) => S,
+): Box<S> {
+  return { key, initialState, preload };
+}
+
+export interface Atom<S = any, A = any> {
+  object: 'atom';
+  action: A;
+  factory: AtomFactory<S, A>;
+}
+
+export interface AtomFactory<S = any, A = any> {
+  type: string;
+  box: Box<S>;
+  atom: (state: S, action: A) => S;
+  (action: A): Atom<S, A>;
+}
+
+export function atom<S, A>(
+  box: Box<S>,
+  atom: (state: S, action: A) => S,
+  type: string = atom.name,
+): AtomFactory<S, A> {
+  const factory = Object.assign(
+    (action: A): Atom<S, A> => ({
+      object: 'atom',
+      action,
+      factory,
+    }),
+    { box, type, atom },
+  );
+  return factory;
 }

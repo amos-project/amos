@@ -3,22 +3,31 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { Store } from './store';
+import { Dispatch, Store } from './store';
 
-export interface Action<R = any> {
+export interface Action<A extends any[] = any[], R = any> {
   object: 'action';
-  type: string;
-  payload: () => R;
+  args: A;
+  factory: ActionFactory<A, R>;
 }
 
-export interface ActionFactory<A extends any[], R> {
-  object: 'action_factory';
-  (...args: A): Action<R>;
+export interface ActionFactory<A extends any[] = any[], R = any[]> {
+  type: string;
+  action: (store: Store, dispatch: Dispatch, ...args: A) => R;
+  (...action: A): Action<A, R>;
 }
 
 export function action<A extends any[], R>(
-  actor: (store: Store, ...args: A) => R,
-  type?: string,
+  action: (store: Store, dispatch: Dispatch, ...args: A) => R,
+  type: string = action.name,
 ): ActionFactory<A, R> {
-  throw new Error('TODO');
+  const factory = Object.assign(
+    (...args: A): Action<A, R> => ({
+      object: 'action',
+      args,
+      factory,
+    }),
+    { type, action },
+  );
+  return factory;
 }

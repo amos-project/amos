@@ -3,76 +3,86 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { List, Record } from 'immutable';
-import { box } from '../../../box';
-import { RecordProps } from './todo_actions';
+import { atom, box } from '../../../box';
 
-export type PartialRequired<T, K extends keyof T> = Partial<Omit<T, K>> &
+export type PartialRequired<T, K extends keyof T> = Partial<T> &
   Required<Pick<T, K>>;
 
-export class TodoRecord extends Record({
-  id: 0,
-  title: '',
-  done: false,
-}) {}
+export interface TodoModel {
+  id: number;
+  title: string;
+  done: boolean;
+}
 
 export type TodoVisibleMode = 'ALL' | 'DONE' | 'NEW';
 
-export interface MergeTodoAction {
-  visibleMode?: TodoVisibleMode;
-  todos?: PartialRequired<RecordProps<TodoRecord>, 'id'>[];
+export interface TodoStateModel {
+  visibleMode: TodoVisibleMode;
+  todos: TodoModel[];
 }
 
-export class TodoStateRecord extends Record({
-  visibleMode: 'ALL' as TodoVisibleMode,
-  todos: List<TodoRecord>(),
-}) {}
+export const Todo = box(
+  'todo',
+  (): TodoStateModel => ({
+    visibleMode: 'ALL',
+    todos: [],
+  }),
+  (state, preloadedState) => preloadedState,
+);
 
-function mergeState(
-  state: TodoStateRecord,
-  { visibleMode, todos }: MergeTodoAction,
+function mergeList<T, K extends keyof T>(
+  original: T[],
+  added: PartialRequired<T, K>[] | undefined,
+  key: K,
+  defaults: T,
 ) {
-  return state.merge({
-    visibleMode: visibleMode ?? state.visibleMode,
-    todos: todos
-      ? state.todos.withMutations((state) => {
-          todos.forEach((item) => {
-            const index = state.findIndex((t) => t.id === item.id);
-            if (index > -1) {
-              state.update(index, (t) => t.merge(item));
-            } else {
-              state.push(new TodoRecord(item));
-            }
-          });
-        })
-      : state.todos,
-  });
+  if (!added?.length) {
+    return original;
+  }
+  original = original.slice();
+  for (const item of added) {
+    const index = original.findIndex(
+      (o) => o[key] === ((item[key] as unknown) as T[K]),
+    );
+    if (index === -1) {
+      original.unshift({ ...defaults, ...item });
+    } else {
+      original[index] = { ...original[index], ...item };
+    }
+  }
+  return original;
 }
 
-export const Todo = box('todo', new TodoStateRecord(), {
-  preload: (state, preloadedState) => mergeState(state, preloadedState),
-  mutators: {
-    merge: (state, action: MergeTodoAction) => mergeState(state, action),
-    add: (state, action: RecordProps<TodoRecord>) => {
-      return state.merge({
-        todos: state.todos.unshift(new TodoRecord(action)),
-      });
-    },
-    update: (state, action: PartialRequired<RecordProps<TodoRecord>, 'id'>) => {
-      const index = state.todos.findIndex((t) => t.id === action.id);
-      return index > -1
-        ? state.merge({
-            todos: state.todos.update(index, (t) => t.merge(action)),
-          })
-        : state;
-    },
-    remove: (state, action: PartialRequired<RecordProps<TodoRecord>, 'id'>) => {
-      const index = state.todos.findIndex((t) => t.id === action.id);
-      return index > -1
-        ? state.merge({
-            todos: state.todos.remove(index),
-          })
-        : state;
-    },
-  },
-});
+export interface MergeTodosAction {
+  visibleMode?: TodoVisibleMode;
+  todos?: PartialRequired<TodoModel, 'id'>[];
+}
+
+export const mergeTodos = atom(
+  Todo,
+  (state, { visibleMode, todos }: MergeTodosAction) => ({
+    visibleMode: visibleMode ?? state.visibleMode,
+    todos: mergeList(state.todos, todos, 'id', {
+      id: 0,
+      done: false,
+      title: '',
+    }),
+  }),
+);
+
+export const addTodo = atom(Todo, (state, action: TodoModel) => ({
+  ...state,
+  todos: [action].concat(state.todos),
+}));
+
+export type UpdateTodoAction = PartialRequired<TodoModel, 'id'>;
+
+export const updateTodo = atom(Todo, (state, action: UpdateTodoAction) => ({
+  ...state,
+  todos: state.todos.map((t) => (t.id === action.id ? { ...t, ...action } : t)),
+}));
+
+export const removeTodo = atom(Todo, (state, action: number) => ({
+  ...state,
+  todos: state.todos.filter((t) => t.id !== action),
+}));

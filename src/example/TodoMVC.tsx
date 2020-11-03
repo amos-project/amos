@@ -7,10 +7,10 @@ import React, { memo } from 'react';
 import { useDispatch } from '../provider';
 import { useSelector } from '../selector';
 import {
-  addTodo,
-  removeTodo,
+  addTodoAsync,
+  removeTodoAsync,
   setVisibleMode,
-  updateTodo,
+  updateTodoAsync,
 } from './store/todo/todo_actions';
 import { TodoVisibleMode } from './store/todo/todo_box';
 import {
@@ -34,7 +34,7 @@ export const TodoMVC = memo<TodoMVCProps>(({ className }) => {
   }: React.KeyboardEvent<HTMLInputElement>) => {
     const value = currentTarget.value.trim();
     if (keyCode === 13 && value) {
-      await dispatch(addTodo(value));
+      await dispatch(addTodoAsync(value));
       currentTarget.value = '';
     }
   };
@@ -42,10 +42,10 @@ export const TodoMVC = memo<TodoMVCProps>(({ className }) => {
     dispatch(setVisibleMode(mode));
   };
   const handleDone = async (id: number) => {
-    await dispatch(updateTodo({ id, done: true }));
+    await dispatch(updateTodoAsync({ id, done: true }));
   };
   const handleDelete = async (id: number) => {
-    await dispatch(removeTodo(id));
+    await dispatch(removeTodoAsync(id));
   };
   return (
     <div className={className}>

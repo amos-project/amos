@@ -3,7 +3,7 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-export { Box, BoxFactory, BoxType, box } from './box';
+export { JSONState, Box, box, Atom, AtomFactory, atom } from './box';
 export { Action, ActionFactory, action } from './action';
 export { Selector, SelectorFactory, selector, useSelector } from './selector';
 export {
@@ -13,4 +13,4 @@ export {
   useDispatch,
   connect,
 } from './provider';
-export { Dispatch, Store, createStore } from './store';
+export { Mutation, Dispatch, Store, createStore } from './store';
