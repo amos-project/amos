@@ -20,10 +20,7 @@ app.get('/todos', async (req, res) => {
 <head>
 <title>Todo MVC</title>
 <script>
-var __INITIAL_STATE__ = ${JSON.stringify(store.getState()).replace(
-    /</g,
-    '\\u003c',
-  )};
+var __INITIAL_STATE__ = ${JSON.stringify(store.getState()).replace(/</g, '\\u003c')};
 </script>
 </head>
 <body>

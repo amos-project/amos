@@ -12,25 +12,15 @@ export interface Dispatch {
   <R>(main: Mutation<R>, ...others: Mutation[]): R;
   <R1>(mutations: readonly [Mutation<R1>]): [R1];
   <R1, R2>(mutations: readonly [Mutation<R1>, Mutation<R2>]): [R1, R2];
-  <R1, R2, R3>(
-    mutations: readonly [Mutation<R1>, Mutation<R2>, Mutation<R3>],
-  ): [R1, R2, R3];
-  <R1, R2, R3, R4>(
-    mutations: readonly [
-      Mutation<R1>,
-      Mutation<R2>,
-      Mutation<R3>,
-      Mutation<R4>,
-    ],
-  ): [R1, R2, R3, R4];
+  <R1, R2, R3>(mutations: readonly [Mutation<R1>, Mutation<R2>, Mutation<R3>]): [R1, R2, R3];
+  <R1, R2, R3, R4>(mutations: readonly [Mutation<R1>, Mutation<R2>, Mutation<R3>, Mutation<R4>]): [
+    R1,
+    R2,
+    R3,
+    R4,
+  ];
   <R1, R2, R3, R4, R5>(
-    mutations: readonly [
-      Mutation<R1>,
-      Mutation<R2>,
-      Mutation<R3>,
-      Mutation<R4>,
-      Mutation<R5>,
-    ],
+    mutations: readonly [Mutation<R1>, Mutation<R2>, Mutation<R3>, Mutation<R4>, Mutation<R5>],
   ): [R1, R2, R3, R4, R5];
   <R1, R2, R3, R4, R5, R6>(
     mutations: readonly [
@@ -88,9 +78,7 @@ export interface Store {
   getState: () => unknown;
 }
 
-export function createStore(
-  preloadedState: Record<string, unknown> = {},
-): Store {
+export function createStore(preloadedState: Record<string, unknown> = {}): Store {
   const state: Record<string, unknown> = {};
   const listeners: Array<() => void> = [];
   let dispatching = 0;
@@ -110,18 +98,12 @@ export function createStore(
   const exec = (mutation: Mutation) => {
     if (mutation.object === 'atom') {
       ensure(mutation.factory.box);
-      return mutation.factory.atom(
-        state[mutation.factory.box.key],
-        mutation.action,
-      );
+      return mutation.factory.atom(state[mutation.factory.box.key], mutation.action);
     } else {
       return mutation.factory.action(store, store.dispatch, ...mutation.args);
     }
   };
-  const dispatch: Dispatch = (
-    first: Mutation | readonly Mutation[],
-    ...others: Mutation[]
-  ) => {
+  const dispatch: Dispatch = (first: Mutation | readonly Mutation[], ...others: Mutation[]) => {
     dispatching++;
     if (process.env.NODE_ENV === 'development' && dispatching > 64) {
       throw new Error(`[Moedux] max dispatch depth exceeded.`);

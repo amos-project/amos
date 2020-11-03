@@ -54,17 +54,16 @@ export function connect<TOwnedProps, TMappedProps>(
     TProps extends TOwnedProps & TMappedProps,
     C extends ComponentType<TProps>
   >(Component: C) {
-    return forwardRef<
-      React.ElementRef<C>,
-      Omit<ComponentProps<C>, keyof TMappedProps>
-    >((props, ref) => {
-      const store = useStore();
-      const mappedProps = mapProps(store, (props as unknown) as TOwnedProps);
-      return (
-        <Component {...mappedProps} {...(props as any)} ref={ref}>
-          {props.children}
-        </Component>
-      );
-    });
+    return forwardRef<React.ElementRef<C>, Omit<ComponentProps<C>, keyof TMappedProps>>(
+      (props, ref) => {
+        const store = useStore();
+        const mappedProps = mapProps(store, (props as unknown) as TOwnedProps);
+        return (
+          <Component {...mappedProps} {...(props as any)} ref={ref}>
+            {props.children}
+          </Component>
+        );
+      },
+    );
   };
 }

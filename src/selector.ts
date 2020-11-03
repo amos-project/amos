@@ -6,21 +6,13 @@
 import { Box } from './box';
 import { Store } from './store';
 
-export interface Selector<
-  A extends any[] = any[],
-  R = any,
-  Bs extends Box[] = any[]
-> {
+export interface Selector<A extends any[] = any[], R = any, Bs extends Box[] = any[]> {
   object: 'selector';
   args: A;
   factory: SelectorFactory<A, R, Bs>;
 }
 
-export interface SelectorFactory<
-  A extends any[] = any[],
-  R = any,
-  Ss extends any[] = any[]
-> {
+export interface SelectorFactory<A extends any[] = any[], R = any, Ss extends any[] = any[]> {
   deps: Box[];
   lastValue?: R;
   lastKey?: unknown[];
@@ -67,8 +59,6 @@ export type MapSelector<Rs extends Selector[]> = {
   [P in keyof Rs]: Rs[P] extends Selector<infer A, infer R> ? R : never;
 };
 
-export function useSelector<Rs extends Selector[]>(
-  ...selectors: Rs
-): MapSelector<Rs> {
+export function useSelector<Rs extends Selector[]>(...selectors: Rs): MapSelector<Rs> {
   throw new Error('TODO');
 }

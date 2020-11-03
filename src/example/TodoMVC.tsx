@@ -13,25 +13,16 @@ import {
   updateTodoAsync,
 } from './store/todo/todo_actions';
 import { TodoVisibleMode } from './store/todo/todo_box';
-import {
-  selectVisibleMode,
-  selectVisibleTodos,
-} from './store/todo/todo_selectors';
+import { selectVisibleMode, selectVisibleTodos } from './store/todo/todo_selectors';
 
 export interface TodoMVCProps {
   className?: string;
 }
 
 export const TodoMVC = memo<TodoMVCProps>(({ className }) => {
-  const [visibleMode, todos] = useSelector(
-    selectVisibleMode(),
-    selectVisibleTodos(),
-  );
+  const [visibleMode, todos] = useSelector(selectVisibleMode(), selectVisibleTodos());
   const dispatch = useDispatch();
-  const handleKeyup = async ({
-    currentTarget,
-    keyCode,
-  }: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyup = async ({ currentTarget, keyCode }: React.KeyboardEvent<HTMLInputElement>) => {
     const value = currentTarget.value.trim();
     if (keyCode === 13 && value) {
       await dispatch(addTodoAsync(value));

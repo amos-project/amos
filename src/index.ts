@@ -6,11 +6,5 @@
 export { JSONState, Box, box, Atom, AtomFactory, atom } from './box';
 export { Action, ActionFactory, action } from './action';
 export { Selector, SelectorFactory, selector, useSelector } from './selector';
-export {
-  ProviderProps,
-  Provider,
-  useStore,
-  useDispatch,
-  connect,
-} from './provider';
+export { ProviderProps, Provider, useStore, useDispatch, connect } from './provider';
 export { Mutation, Dispatch, Store, createStore } from './store';

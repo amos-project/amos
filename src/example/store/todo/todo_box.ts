@@ -5,8 +5,7 @@
 
 import { atom, box } from '../../../box';
 
-export type PartialRequired<T, K extends keyof T> = Partial<T> &
-  Required<Pick<T, K>>;
+export type PartialRequired<T, K extends keyof T> = Partial<T> & Required<Pick<T, K>>;
 
 export interface TodoModel {
   id: number;
@@ -41,9 +40,7 @@ function mergeList<T, K extends keyof T>(
   }
   original = original.slice();
   for (const item of added) {
-    const index = original.findIndex(
-      (o) => o[key] === ((item[key] as unknown) as T[K]),
-    );
+    const index = original.findIndex((o) => o[key] === ((item[key] as unknown) as T[K]));
     if (index === -1) {
       original.unshift({ ...defaults, ...item });
     } else {
@@ -58,17 +55,14 @@ export interface MergeTodosAction {
   todos?: PartialRequired<TodoModel, 'id'>[];
 }
 
-export const mergeTodos = atom(
-  Todo,
-  (state, { visibleMode, todos }: MergeTodosAction) => ({
-    visibleMode: visibleMode ?? state.visibleMode,
-    todos: mergeList(state.todos, todos, 'id', {
-      id: 0,
-      done: false,
-      title: '',
-    }),
+export const mergeTodos = atom(Todo, (state, { visibleMode, todos }: MergeTodosAction) => ({
+  visibleMode: visibleMode ?? state.visibleMode,
+  todos: mergeList(state.todos, todos, 'id', {
+    id: 0,
+    done: false,
+    title: '',
   }),
-);
+}));
 
 export const addTodo = atom(Todo, (state, action: TodoModel) => ({
   ...state,
