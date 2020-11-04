@@ -17,7 +17,7 @@ async function dummyFetch<R>(req: R): Promise<R> {
   return req;
 }
 
-export const loadTodos = action(async (store, dispatch, limit: number = 10) => {
+export const loadTodos = action(async ({ dispatch }, limit: number = 10) => {
   const todos = await dummyFetch(
     Array(limit)
       .fill(0)
@@ -26,21 +26,21 @@ export const loadTodos = action(async (store, dispatch, limit: number = 10) => {
   return dispatch(mergeTodos({ todos }));
 });
 
-export const setVisibleMode = action((store, dispatch, visibleMode: TodoVisibleMode) => {
+export const setVisibleMode = action(({ dispatch }, visibleMode: TodoVisibleMode) => {
   return dispatch(mergeTodos({ visibleMode }));
 });
 
-export const addTodoAsync = action(async (store, dispatch, title: string) => {
+export const addTodoAsync = action(async ({ dispatch }, title: string) => {
   const todo = await dummyFetch({ id: Date.now(), title, done: false });
   return dispatch(addTodo(todo));
 });
 
-export const updateTodoAsync = action(async (store, dispatch, input: UpdateTodoAction) => {
+export const updateTodoAsync = action(async ({ dispatch }, input: UpdateTodoAction) => {
   await dummyFetch(input);
   return dispatch(updateTodo(input));
 });
 
-export const removeTodoAsync = action(async (store, dispatch, id: number) => {
+export const removeTodoAsync = action(async ({ dispatch }, id: number) => {
   await dummyFetch(id);
   return dispatch(removeTodo(id));
 });

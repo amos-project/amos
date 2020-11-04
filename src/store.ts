@@ -5,11 +5,13 @@
 
 import { Action } from './action';
 import { Atom, Box } from './box';
+import { Selector } from './selector';
+import { arrayEqual, isArray } from './utils';
 
-export type Mutation<R = any> = Action<any, R> | Atom<R>;
+export type Mutation<R = any> = Atom<R> | Action<any[], R>;
 
 export interface Dispatch {
-  <R>(main: Mutation<R>, ...others: Mutation[]): R;
+  <R>(mutation: Mutation<R>): R;
   <R1>(mutations: readonly [Mutation<R1>]): [R1];
   <R1, R2>(mutations: readonly [Mutation<R1>, Mutation<R2>]): [R1, R2];
   <R1, R2, R3>(mutations: readonly [Mutation<R1>, Mutation<R2>, Mutation<R3>]): [R1, R2, R3];
@@ -74,74 +76,95 @@ export interface Dispatch {
 export interface Store {
   dispatch: Dispatch;
   pick: <S>(box: Box<S>) => S;
+  select: <R>(selector: Selector<any[], R>) => R;
   subscribe: (fn: () => void) => () => void;
   getState: () => unknown;
 }
 
-export function createStore(preloadedState: Record<string, unknown> = {}): Store {
+export function createStore(
+  preloadedState: Record<string, unknown> = {},
+  ...enhancers: Array<(store: Store) => Store>
+): Store {
   const state: Record<string, unknown> = {};
   const listeners: Array<() => void> = [];
-  let dispatching = 0;
   const ensure = (box: Box) => {
     if (state.hasOwnProperty(box.key)) {
       return;
     }
-    let initialState = box.initialState;
-    if (typeof initialState === 'function') {
-      initialState = initialState();
-    }
+    let initialState = box.initialState();
     if (preloadedState.hasOwnProperty(box.key)) {
       initialState = box.preload(initialState, preloadedState[box.key]);
     }
     state[box.key] = initialState;
   };
+
+  let dispatching = 0;
+  let mutated = false;
+
   const exec = (mutation: Mutation) => {
     if (mutation.object === 'atom') {
-      ensure(mutation.factory.box);
-      return mutation.factory.atom(state[mutation.factory.box.key], mutation.action);
+      const {
+        action,
+        factory: {
+          box,
+          box: { key },
+          atom,
+        },
+      } = mutation;
+      ensure(box);
+      mutated ||= state[key] !== (state[key] = atom(state[key], action));
+      return action;
     } else {
-      return mutation.factory.action(store, store.dispatch, ...mutation.args);
-    }
-  };
-  const dispatch: Dispatch = (first: Mutation | readonly Mutation[], ...others: Mutation[]) => {
-    dispatching++;
-    if (process.env.NODE_ENV === 'development' && dispatching > 64) {
-      throw new Error(`[Moedux] max dispatch depth exceeded.`);
-    }
-    try {
-      let result: any;
-      if (Array.isArray(first)) {
-        result = first.map((m) => exec(m));
-      } else {
-        result = exec(first as Mutation);
-        others.forEach((m) => exec(m));
-      }
-      if (dispatching === 1) {
-        listeners.forEach((fn) => fn());
-      }
-      return result;
-    } finally {
-      dispatching--;
+      return mutation.factory.action(store, ...mutation.args);
     }
   };
 
-  const pick = <S>(box: Box<S>): S => {
-    ensure(box);
-    return state[box.key] as S;
-  };
-
-  const subscribe = (fn: () => void): (() => void) => {
-    listeners.push(fn);
-    return () => {
-      const index = listeners.indexOf(fn);
-      if (index > -1) {
-        listeners.splice(index, 1);
+  let store: Store = {
+    dispatch: (atoms: Mutation | readonly Mutation[]) => {
+      mutated &&= dispatching !== 0;
+      dispatching++;
+      try {
+        if (isArray(atoms)) {
+          return atoms.map((atom) => exec(atom));
+        } else {
+          return exec(atoms);
+        }
+      } finally {
+        dispatching--;
+        if (dispatching === 0 && mutated) {
+          listeners.forEach((fn) => fn());
+        }
       }
-    };
+    },
+    pick: <S>(box: Box<S>): S => {
+      ensure(box);
+      return state[box.key] as S;
+    },
+    subscribe: (fn) => {
+      listeners.push(fn);
+      return () => {
+        const index = listeners.indexOf(fn);
+        if (index > -1) {
+          listeners.splice(index, 1);
+        }
+      };
+    },
+    getState: () => state,
+    select: ({ factory, args }) => {
+      const ss = factory.deps.map(store.pick);
+      const input = [store].concat(ss, args);
+      if (factory.cacheKey) {
+        const key = factory.cacheKey(...input);
+        if (factory.lastKey && arrayEqual(factory.lastKey, key)) {
+          return factory.lastValue!;
+        }
+        factory.lastValue = factory.selector(...input);
+        factory.lastKey = key;
+        return factory.lastValue;
+      }
+      return factory.selector(...input);
+    },
   };
-
-  const getState = () => state;
-
-  const store: Store = { dispatch, pick, subscribe, getState };
+  store = enhancers.reduce((previousValue, currentValue) => currentValue(previousValue), store);
   return store;
 }

@@ -3,17 +3,8 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import React, {
-  ComponentProps,
-  ComponentType,
-  createContext,
-  forwardRef,
-  ReactElement,
-  useContext,
-  useEffect,
-  useState,
-} from 'react';
-import { Dispatch, Store } from './store';
+import React, { createContext, ReactNode, useEffect, useState } from 'react';
+import { Store } from './store';
 
 export interface ContextState {
   store: Store;
@@ -23,47 +14,30 @@ export const __Context = createContext<ContextState | null>(null);
 
 export interface ProviderProps {
   store: Store;
-  children: ReactElement;
+  children: ReactNode;
 }
 
-export function Provider({ store, children }: ProviderProps) {
+export const Provider = ({ store, children }: ProviderProps) => {
   const [state, setState] = useState<ContextState>({ store });
   useEffect(() => {
     state.store !== state.store && setState({ store });
   }, [store]);
   return <__Context.Provider value={state}>{children}</__Context.Provider>;
+};
+
+export interface ConsumerProps {
+  children: (store: Store) => ReactNode;
 }
 
-export function useStore(): Store {
-  const state = useContext(__Context);
-  if (!state) {
-    throw new Error('[Moedux] you are using hooks without <Provider />.');
-  }
-  return state.store;
-}
-
-export function useDispatch(): Dispatch {
-  const store = useStore();
-  return store.dispatch;
-}
-
-export function connect<TOwnedProps, TMappedProps>(
-  mapProps: (store: Store, ownedProps: TOwnedProps) => TMappedProps,
-) {
-  return function connector<
-    TProps extends TOwnedProps & TMappedProps,
-    C extends ComponentType<TProps>
-  >(Component: C) {
-    return forwardRef<React.ElementRef<C>, Omit<ComponentProps<C>, keyof TMappedProps>>(
-      (props, ref) => {
-        const store = useStore();
-        const mappedProps = mapProps(store, (props as unknown) as TOwnedProps);
-        return (
-          <Component {...mappedProps} {...(props as any)} ref={ref}>
-            {props.children}
-          </Component>
-        );
-      },
-    );
-  };
-}
+export const Consumer = ({ children }: ConsumerProps) => {
+  return (
+    <__Context.Consumer>
+      {(value) => {
+        if (!value) {
+          throw new Error('[Moedux] <Consumer /> should use inside <Provider />.');
+        }
+        return children(value.store);
+      }}
+    </__Context.Consumer>
+  );
+};

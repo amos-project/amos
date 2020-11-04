@@ -21,40 +21,43 @@ export type JSONState<S> = JSONValue<
 
 export interface Box<S = any> {
   key: string;
-  initialState: S | (() => S);
+  initialState: () => S;
   preload: (state: S, preloadedState: JSONState<S>) => S;
 }
-
-export type BoxState<B> = B extends Box<infer S> ? S : never;
 
 export function box<S>(
   key: string,
   initialState: S | (() => S),
   preload: (state: S, preloadedState: JSONState<S>) => S,
 ): Box<S> {
-  return { key, initialState, preload };
+  return {
+    key,
+    initialState:
+      typeof initialState === 'function' ? (initialState as () => S) : () => initialState,
+    preload,
+  };
 }
 
-export interface Atom<S = any, A = any> {
+export interface Atom<A = any, S = any> {
   object: 'atom';
   action: A;
-  factory: AtomFactory<S, A>;
+  factory: AtomFactory<A, S>;
 }
 
-export interface AtomFactory<S = any, A = any> {
+export interface AtomFactory<A = any, S = any> {
   type: string;
   box: Box<S>;
   atom: (state: S, action: A) => S;
-  (action: A): Atom<S, A>;
+  (action: A): Atom<A, S>;
 }
 
 export function atom<S, A>(
   box: Box<S>,
   atom: (state: S, action: A) => S,
   type: string = atom.name,
-): AtomFactory<S, A> {
+): AtomFactory<A, S> {
   const factory = Object.assign(
-    (action: A): Atom<S, A> => ({
+    (action: A): Atom<A, S> => ({
       object: 'atom',
       action,
       factory,

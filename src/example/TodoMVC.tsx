@@ -4,8 +4,7 @@
  */
 
 import React, { memo } from 'react';
-import { useDispatch } from '../provider';
-import { useSelector } from '../selector';
+import { useDispatch, useSelector } from '../hooks';
 import {
   addTodoAsync,
   removeTodoAsync,

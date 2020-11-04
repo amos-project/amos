@@ -14,7 +14,7 @@ const app = e();
 
 app.get('/todos', async (req, res) => {
   const store = createStore();
-  await store.dispatch(loadTodos());
+  await store.dispatch(loadTodos(10));
   res.end(`<!DOCTYPE html>
 <html>
 <head>

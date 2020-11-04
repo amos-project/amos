@@ -27,14 +27,14 @@ export function selector<A extends any[], R>(
 ): SelectorFactory<A, R, []>;
 export function selector<S1, A extends any[], R>(
   box1: Box<S1>,
-  selector: (state: S1, store: Store, ...args: A) => R,
-  cacheKey?: (state: S1, store: Store, ...args: A) => unknown[],
+  selector: (store: Store, state: S1, ...args: A) => R,
+  cacheKey?: (store: Store, state: S1, ...args: A) => unknown[],
 ): SelectorFactory<A, R, [S1]>;
 export function selector<S1, S2, A extends any[], R>(
   box1: Box<S1>,
   box2: Box<S2>,
-  selector: (state1: S1, state2: S2, store: Store, ...args: A) => R,
-  cacheKey?: (state1: S1, state2: S2, store: Store, ...args: A) => unknown[],
+  selector: (store: Store, state1: S1, state2: S2, ...args: A) => R,
+  cacheKey?: (store: Store, state1: S1, state2: S2, ...args: A) => unknown[],
 ): SelectorFactory<A, R, [S1, S2]>;
 export function selector(...args: any[]): SelectorFactory {
   const fnIndex = args.findIndex((a) => typeof a === 'function');
@@ -53,12 +53,4 @@ export function selector(...args: any[]): SelectorFactory {
     { deps, selector, cacheKey },
   );
   return factory;
-}
-
-export type MapSelector<Rs extends Selector[]> = {
-  [P in keyof Rs]: Rs[P] extends Selector<infer A, infer R> ? R : never;
-};
-
-export function useSelector<Rs extends Selector[]>(...selectors: Rs): MapSelector<Rs> {
-  throw new Error('TODO');
 }

@@ -3,7 +3,7 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { Dispatch, Store } from './store';
+import { Store } from './store';
 
 export interface Action<A extends any[] = any[], R = any> {
   object: 'action';
@@ -13,12 +13,12 @@ export interface Action<A extends any[] = any[], R = any> {
 
 export interface ActionFactory<A extends any[] = any[], R = any[]> {
   type: string;
-  action: (store: Store, dispatch: Dispatch, ...args: A) => R;
+  action: (store: Store, ...args: A) => R;
   (...action: A): Action<A, R>;
 }
 
 export function action<A extends any[], R>(
-  action: (store: Store, dispatch: Dispatch, ...args: A) => R,
+  action: (store: Store, ...args: A) => R,
   type: string = action.name,
 ): ActionFactory<A, R> {
   const factory = Object.assign(

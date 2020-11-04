@@ -24,7 +24,7 @@ export default {
     typescript({
       tsconfigOverride: {
         compilerOptions: { module: 'esnext' },
-        exclude: ['src/example', 'src/build'],
+        exclude: ['src/example', 'src/build', 'src/**/*.spec.ts'],
       },
     }),
     commonjs(),
