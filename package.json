@@ -11,6 +11,7 @@
   "author": "acrazing <joking.young@gmail.com>",
   "main": "dist/moedux.cjs.js",
   "module": "dist/moedux.esm.js",
+  "umd": "dist/moedux.umd.js",
   "types": "dist/index.d.ts",
   "files": [
     "src/",
@@ -47,6 +48,7 @@
     "rollup": "^2.33.1",
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-sourcemaps": "^0.6.3",
+    "rollup-plugin-terser": "^7.0.2",
     "rollup-plugin-typescript2": "^0.29.0",
     "ts-jest": "^26.4.3",
     "typescript": "^4.0.5"

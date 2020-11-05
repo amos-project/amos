@@ -1,27 +1,210 @@
 # moedux
 
-A decentralized state manager for react.
+A decentralized state manager for react, inspired by Redux, Vuex and Recoil.
 
-## Features
+## Highlights
 
-The API is almost like `redux`, which is the industry standard, but, it
-improved the experience of `redux` with the following changes:
+- **😘 Decentralized**, no `compose`, no `root`, state is registered automatically
+- **😍 Out of the box**, no `plugins`, no `middlewares`, no `toolkits`, and no `xxx-react`
+- **🤩 Lightweight**, the package size is only `1.8kb` after gzip
+- **😲 Tiny**, `functional`, no `reducers`, every dead line could be dropped by [Tree-shaking](https://developer.mozilla.org/en-US/docs/Glossary/Tree_shaking)
 
-- Decentralized the state declaration, you do not need `compose` anymore
-- Strong typed, all the API with full TypeScript supports
-- Out of the box, no middlewares, no toolkit, no reselect
+**WARNING: THE API IS DESIGNING**
 
-Something else:
+## Table of Contents
 
-- Full-featured: supports `SSR`, `hook`, `class`
-- Action is async natively, likes `mobx`
+- [Quick start](#Quick-start)
+- [Concepts](#Concepts)
+  - [Boxes](#Boxes)
+  - [Mutations](#Mutations)
+  - [Actions](#Actions)
+  - [Events](#Events)
+  - [Selectors](#Selectors)
+  - [Store](#Store)
+- [Tutorials](#tutorials)
+  - [Transactions](#transactions)
+  - [Selector caches](#selector-caches)
+  - [Server side rendering(SSR)](#server-side-renderingssr)
+- [API Reference](#API-Reference)
+  - Core
+  - [box()](#box)
+  - [mutation()](#mutation)
+  - [action()](#action)
+  - [event()](#event)
+  - [selector()](#selector)
+  - [createStore()](#createstore)
+    - [store.getState()](#storegetstate)
+    - [store.pick()](#storepick)
+    - [store.dispatch()](#storedispatch)
+    - [store.subscribe()](#storesubscribe)
+    - [store.select()](#storeselect)
+  - React binding
+  - [\<Provider />](#provider-)
+  - [\<Consumer />](#consumer-)
+  - [useSelector()](#useselector)
+  - [useDispatch()](#usedispatch)
+  - [useStore()](#usestore)
+  - [connect()](#connect)
 
-## Usage
+## Quick start
 
-You can get example usage in example directory:
+You can get example usage in [example](./src/example) directory.
 
-- server side [example/server](./src/example/server.tsx)
-- client side [example/client](./src/example/client.tsx)
+1. create `Todo` store
+
+   1. create box
+
+      ```typescript jsx
+      import { box } from 'moedux';
+
+      export const Todo = box(
+        'todo', // <= key
+        { visibleMode: 'ALL', todos: [] }, // <= initial state
+        (state, preloadedState) => preloadedState, // <= load preloaded state
+      );
+      ```
+
+   2. create mutations
+
+      ```typescript jsx
+      import { mutation } from 'moedux';
+
+      export const addTodo = mutation(
+        Todo, // <= box
+        (state, todo) => ({ ...state, todos: [todo].concat(state.todos) }), // <= mutator
+      );
+      ```
+
+   3. create actions
+
+      ```typescript jsx
+      import { action } from 'moedux';
+
+      export const addTodoAsync = action(
+        // executor
+        async ({ dispatch }, title: string) => {
+          const todo = await myDBCreateTodo(title);
+          return dispatch(addTodo(todo));
+        },
+      );
+      ```
+
+   4. create selectors
+
+      ```typescript jsx
+      import { selector } from 'moedux';
+
+      export const selectLatestTodos = selector(
+        Todo, // <= box
+        (store, state, limit: number) => state.todos.slice(0, limit), // <= selector
+        (store, state, limit) => [state.todos, limit], // <= cache key
+      );
+      ```
+
+2. use with react
+
+   1. render component with store
+
+      ```typescript jsx
+      import { createStore, Provider } from 'moedux';
+      import { render } from 'react-dom';
+
+      const store = createStore(); // <= no box(reducer) needed
+
+      render(
+        <Provider store={store}>
+          <TodoMVC />
+        </Provider>,
+        document.querySelector('#root'),
+      );
+      ```
+
+   2. use in react components
+
+      ```typescript jsx
+      import { useSelector, useDispatch } from 'moedux';
+
+      export function TodoMVC() {
+        const [latestTodos] = useSelector(selectLatestTodos);
+        const dispatch = useDispatch();
+        const handleKeyUp = (e) => {
+          if (e.keyCode === 13) {
+            dispatch(addTodoAsync(e.currentTarget.value));
+          }
+        };
+
+        return (
+          <div>
+            <div>
+              <input onKeyUp={handleKeyUp} />
+            </div>
+            <ul>
+              {latestTodos.map((t) => (
+                <li key={t.id}>{t.title}</li>
+              ))}
+            </ul>
+          </div>
+        );
+      }
+      ```
+
+## Concepts
+
+### Boxes
+
+### Mutations
+
+### Actions
+
+### Events
+
+### Selectors
+
+### Store
+
+## Tutorials
+
+### Transactions
+
+### Selector caches
+
+### Server side rendering(SSR)
+
+## API Reference
+
+### box()
+
+### mutation()
+
+### action()
+
+### event()
+
+### selector()
+
+### createStore()
+
+#### store.getState()
+
+#### store.pick()
+
+#### store.dispatch()
+
+#### store.subscribe()
+
+#### store.select()
+
+### \<Provider />
+
+### \<Consumer />
+
+### useSelector()
+
+### useDispatch()
+
+### useStore()
+
+### connect()
 
 ## License
 
