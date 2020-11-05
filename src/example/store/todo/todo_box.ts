@@ -3,7 +3,8 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { atom, box } from '../../../box';
+import { box } from '../../../box';
+import { mutation } from '../../../mutation';
 
 export type PartialRequired<T, K extends keyof T> = Partial<T> & Required<Pick<T, K>>;
 
@@ -20,12 +21,12 @@ export interface TodoStateModel {
   todos: TodoModel[];
 }
 
-export const Todo = box(
+export const Todo = box<TodoStateModel>(
   'todo',
-  (): TodoStateModel => ({
+  {
     visibleMode: 'ALL',
     todos: [],
-  }),
+  },
   (state, preloadedState) => preloadedState,
 );
 
@@ -55,7 +56,7 @@ export interface MergeTodosAction {
   todos?: PartialRequired<TodoModel, 'id'>[];
 }
 
-export const mergeTodos = atom(Todo, (state, { visibleMode, todos }: MergeTodosAction) => ({
+export const mergeTodos = mutation(Todo, (state, { visibleMode, todos }: MergeTodosAction) => ({
   visibleMode: visibleMode ?? state.visibleMode,
   todos: mergeList(state.todos, todos, 'id', {
     id: 0,
@@ -64,19 +65,19 @@ export const mergeTodos = atom(Todo, (state, { visibleMode, todos }: MergeTodosA
   }),
 }));
 
-export const addTodo = atom(Todo, (state, action: TodoModel) => ({
+export const addTodo = mutation(Todo, (state, action: TodoModel) => ({
   ...state,
   todos: [action].concat(state.todos),
 }));
 
 export type UpdateTodoAction = PartialRequired<TodoModel, 'id'>;
 
-export const updateTodo = atom(Todo, (state, action: UpdateTodoAction) => ({
+export const updateTodo = mutation(Todo, (state, action: UpdateTodoAction) => ({
   ...state,
   todos: state.todos.map((t) => (t.id === action.id ? { ...t, ...action } : t)),
 }));
 
-export const removeTodo = atom(Todo, (state, action: number) => ({
+export const removeTodo = mutation(Todo, (state, action: number) => ({
   ...state,
   todos: state.todos.filter((t) => t.id !== action),
 }));

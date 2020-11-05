@@ -5,7 +5,8 @@
 
 import { action } from './action';
 import { addGreet } from './action.spec';
-import { mergeTest, setCount, TestBox } from './box.spec';
+import { TestBox } from './box.spec';
+import { mergeTest, setCount } from './mutation.spec';
 import { createStore } from './store';
 import fn = jest.fn;
 

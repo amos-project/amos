@@ -4,73 +4,75 @@
  */
 
 import { Action } from './action';
-import { Atom, Box } from './box';
+import { Box } from './box';
+import { Event } from './event';
+import { Mutation } from './mutation';
 import { Selector } from './selector';
 import { arrayEqual, isArray } from './utils';
 
-export type Mutation<R = any> = Atom<R> | Action<any[], R>;
+export type Request<R = any> = Mutation<any, R> | Action<R> | Event<R>;
 
 export interface Dispatch {
-  <R>(mutation: Mutation<R>): R;
-  <R1>(mutations: readonly [Mutation<R1>]): [R1];
-  <R1, R2>(mutations: readonly [Mutation<R1>, Mutation<R2>]): [R1, R2];
-  <R1, R2, R3>(mutations: readonly [Mutation<R1>, Mutation<R2>, Mutation<R3>]): [R1, R2, R3];
-  <R1, R2, R3, R4>(mutations: readonly [Mutation<R1>, Mutation<R2>, Mutation<R3>, Mutation<R4>]): [
+  <R>(request: Request<R>): R;
+  <R1>(requests: readonly [Request<R1>]): [R1];
+  <R1, R2>(requests: readonly [Request<R1>, Request<R2>]): [R1, R2];
+  <R1, R2, R3>(requests: readonly [Request<R1>, Request<R2>, Request<R3>]): [R1, R2, R3];
+  <R1, R2, R3, R4>(requests: readonly [Request<R1>, Request<R2>, Request<R3>, Request<R4>]): [
     R1,
     R2,
     R3,
     R4,
   ];
   <R1, R2, R3, R4, R5>(
-    mutations: readonly [Mutation<R1>, Mutation<R2>, Mutation<R3>, Mutation<R4>, Mutation<R5>],
+    requests: readonly [Request<R1>, Request<R2>, Request<R3>, Request<R4>, Request<R5>],
   ): [R1, R2, R3, R4, R5];
   <R1, R2, R3, R4, R5, R6>(
-    mutations: readonly [
-      Mutation<R1>,
-      Mutation<R2>,
-      Mutation<R3>,
-      Mutation<R4>,
-      Mutation<R5>,
-      Mutation<R6>,
+    requests: readonly [
+      Request<R1>,
+      Request<R2>,
+      Request<R3>,
+      Request<R4>,
+      Request<R5>,
+      Request<R6>,
     ],
   ): [R1, R2, R3, R4, R5, R6];
   <R1, R2, R3, R4, R5, R6, R7>(
-    mutations: readonly [
-      Mutation<R1>,
-      Mutation<R2>,
-      Mutation<R3>,
-      Mutation<R4>,
-      Mutation<R5>,
-      Mutation<R6>,
-      Mutation<R7>,
+    requests: readonly [
+      Request<R1>,
+      Request<R2>,
+      Request<R3>,
+      Request<R4>,
+      Request<R5>,
+      Request<R6>,
+      Request<R7>,
     ],
   ): [R1, R2, R3, R4, R5, R6, R7];
   <R1, R2, R3, R4, R5, R6, R7, R8>(
-    mutations: readonly [
-      Mutation<R1>,
-      Mutation<R2>,
-      Mutation<R3>,
-      Mutation<R4>,
-      Mutation<R5>,
-      Mutation<R6>,
-      Mutation<R7>,
-      Mutation<R8>,
+    requests: readonly [
+      Request<R1>,
+      Request<R2>,
+      Request<R3>,
+      Request<R4>,
+      Request<R5>,
+      Request<R6>,
+      Request<R7>,
+      Request<R8>,
     ],
   ): [R1, R2, R3, R4, R5, R6, R7, R8];
   <R1, R2, R3, R4, R5, R6, R7, R8, R9>(
-    mutations: readonly [
-      Mutation<R1>,
-      Mutation<R2>,
-      Mutation<R3>,
-      Mutation<R4>,
-      Mutation<R5>,
-      Mutation<R6>,
-      Mutation<R7>,
-      Mutation<R8>,
-      Mutation<R9>,
+    requests: readonly [
+      Request<R1>,
+      Request<R2>,
+      Request<R3>,
+      Request<R4>,
+      Request<R5>,
+      Request<R6>,
+      Request<R7>,
+      Request<R8>,
+      Request<R9>,
     ],
   ): [R1, R2, R3, R4, R5, R6, R7, R8, R9];
-  <R>(mutations: readonly Mutation<R>[]): R[];
+  <R>(requests: readonly Request<R>[]): R[];
 }
 
 export interface Store {
@@ -86,6 +88,7 @@ export function createStore(
   ...enhancers: Array<(store: Store) => Store>
 ): Store {
   const state: Record<string, unknown> = {};
+  const boxes: Box[] = [];
   const listeners: Array<() => void> = [];
   const ensure = (box: Box) => {
     if (state.hasOwnProperty(box.key)) {
@@ -96,38 +99,47 @@ export function createStore(
       initialState = box.preload(initialState, preloadedState[box.key]);
     }
     state[box.key] = initialState;
+    boxes.push(box);
   };
 
   let dispatching = 0;
   let mutated = false;
 
-  const exec = (mutation: Mutation) => {
-    if (mutation.object === 'atom') {
+  const exec = (request: Request) => {
+    if (request.object === 'mutation') {
       const {
+        box,
+        box: { key },
         action,
-        factory: {
-          box,
-          box: { key },
-          atom,
-        },
-      } = mutation;
+        mutator,
+      } = request;
       ensure(box);
-      mutated ||= state[key] !== (state[key] = atom(state[key], action));
+      mutated ||= state[key] !== (state[key] = mutator(state[key], action));
       return action;
-    } else {
-      return mutation.factory.action(store, ...mutation.args);
+    } else if (request.object === 'action') {
+      return request(store);
+    } else if (request.object === 'event') {
+      const { data, factory } = request;
+      for (const { key, listeners } of boxes) {
+        for (const [e, fn] of listeners) {
+          if (e === factory) {
+            mutated ||= state[key] !== (state[key] = fn(state[key], data));
+          }
+        }
+      }
+      return data;
     }
   };
 
   let store: Store = {
-    dispatch: (atoms: Mutation | readonly Mutation[]) => {
+    dispatch: (requests: Request | readonly Request[]) => {
       mutated &&= dispatching !== 0;
       dispatching++;
       try {
-        if (isArray(atoms)) {
-          return atoms.map((atom) => exec(atom));
+        if (isArray(requests)) {
+          return requests.map((atom) => exec(atom));
         } else {
-          return exec(atoms);
+          return exec(requests);
         }
       } finally {
         dispatching--;

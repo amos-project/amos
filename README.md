@@ -6,6 +6,7 @@ A decentralized state manager for react, inspired by Redux, Vuex and Recoil.
 
 - **😘 Decentralized**, no `compose`, no `root`, state is registered automatically
 - **😍 Out of the box**, no `plugins`, no `middlewares`, no `toolkits`, and no `xxx-react`
+- **🥰 Fast**, `selector` is cached, only subscribed component will update
 - **🤩 Lightweight**, the package size is only `1.8kb` after gzip
 - **😲 Tiny**, `functional`, no `reducers`, every dead line could be dropped by [Tree-shaking](https://developer.mozilla.org/en-US/docs/Glossary/Tree_shaking)
 
@@ -50,103 +51,72 @@ A decentralized state manager for react, inspired by Redux, Vuex and Recoil.
 
 You can get example usage in [example](./src/example) directory.
 
-1. create `Todo` store
+1. create `Todo` box and mutations
 
-   1. create box
+```js
+import { box, mutation, action } from 'moedux';
 
-      ```typescript jsx
-      import { box } from 'moedux';
+export const Todo = box(
+  'todo',
+  { filter: 'all', todos: [] },
+  (state, preloadedState) => preloadedState,
+);
 
-      export const Todo = box(
-        'todo', // <= key
-        { visibleMode: 'ALL', todos: [] }, // <= initial state
-        (state, preloadedState) => preloadedState, // <= load preloaded state
-      );
-      ```
+export const addTodo = mutation(Todo, (state, todo) => ({
+  ...state,
+  todos: [todo].concat(state.todos),
+}));
 
-   2. create mutations
+export const createTodo = action(async ({ dispatch }, title) => {
+  const todo = await myDBCreateTodo(title);
+  return dispatch(addTodo(todo));
+});
+```
 
-      ```typescript jsx
-      import { mutation } from 'moedux';
+2. create store and context
 
-      export const addTodo = mutation(
-        Todo, // <= box
-        (state, todo) => ({ ...state, todos: [todo].concat(state.todos) }), // <= mutator
-      );
-      ```
+```jsx
+import { createStore, Provider } from 'moedux';
+import { render } from 'react-dom';
 
-   3. create actions
+const store = createStore(); // <= no box(reducer) needed
 
-      ```typescript jsx
-      import { action } from 'moedux';
+render(
+  <Provider store={store}>
+    <TodoMVC />
+  </Provider>,
+  document.querySelector('#root'),
+);
+```
 
-      export const addTodoAsync = action(
-        // executor
-        async ({ dispatch }, title: string) => {
-          const todo = await myDBCreateTodo(title);
-          return dispatch(addTodo(todo));
-        },
-      );
-      ```
+3. use state in app
 
-   4. create selectors
+```jsx
+import { useSelector, useDispatch } from 'moedux';
 
-      ```typescript jsx
-      import { selector } from 'moedux';
+export function TodoMVC() {
+  const [latestTodos] = useSelector(selectLatestTodos); // <= read state
+  const dispatch = useDispatch();
+  const handleKeyUp = (e) => {
+    if (e.keyCode === 13) {
+      dispatch(addTodoAsync(e.currentTarget.value)); // <= update state
+    }
+  };
 
-      export const selectLatestTodos = selector(
-        Todo, // <= box
-        (store, state, limit: number) => state.todos.slice(0, limit), // <= selector
-        (store, state, limit) => [state.todos, limit], // <= cache key
-      );
-      ```
-
-2. use with react
-
-   1. render component with store
-
-      ```typescript jsx
-      import { createStore, Provider } from 'moedux';
-      import { render } from 'react-dom';
-
-      const store = createStore(); // <= no box(reducer) needed
-
-      render(
-        <Provider store={store}>
-          <TodoMVC />
-        </Provider>,
-        document.querySelector('#root'),
-      );
-      ```
-
-   2. use in react components
-
-      ```typescript jsx
-      import { useSelector, useDispatch } from 'moedux';
-
-      export function TodoMVC() {
-        const [latestTodos] = useSelector(selectLatestTodos);
-        const dispatch = useDispatch();
-        const handleKeyUp = (e) => {
-          if (e.keyCode === 13) {
-            dispatch(addTodoAsync(e.currentTarget.value));
-          }
-        };
-
-        return (
-          <div>
-            <div>
-              <input onKeyUp={handleKeyUp} />
-            </div>
-            <ul>
-              {latestTodos.map((t) => (
-                <li key={t.id}>{t.title}</li>
-              ))}
-            </ul>
-          </div>
-        );
-      }
-      ```
+  return (
+    <div>
+      <div>
+        <input onKeyUp={handleKeyUp} />
+      </div>
+      <ul>
+        {latestTodos.map((t) => (
+          <li key={t.id}>{t.title}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+```
 
 ## Concepts
 

@@ -5,29 +5,24 @@
 
 import { Store } from './store';
 
-export interface Action<A extends any[] = any[], R = any> {
+export interface Action<R = any> {
   object: 'action';
-  args: A;
-  factory: ActionFactory<A, R>;
+  type: string | undefined;
+  (store: Store): R;
 }
 
 export interface ActionFactory<A extends any[] = any[], R = any[]> {
-  type: string;
-  action: (store: Store, ...args: A) => R;
-  (...action: A): Action<A, R>;
+  (...args: A): Action<R>;
 }
 
 export function action<A extends any[], R>(
-  action: (store: Store, ...args: A) => R,
-  type: string = action.name,
+  creator: (store: Store, ...args: A) => R,
+  type?: string,
 ): ActionFactory<A, R> {
-  const factory = Object.assign(
-    (...args: A): Action<A, R> => ({
+  return (...args: A): Action<R> => {
+    return Object.assign((store: Store) => creator(store, ...args), {
+      type,
       object: 'action',
-      args,
-      factory,
-    }),
-    { type, action },
-  );
-  return factory;
+    } as const);
+  };
 }

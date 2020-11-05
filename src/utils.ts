@@ -30,3 +30,5 @@ export function flatPromise<R extends any[]>(input: R): FlatPromise<R> {
     ? Promise.all(input)
     : (input as any);
 }
+
+export const identity = <T>(v: T) => v;

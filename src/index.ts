@@ -3,10 +3,12 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-export { JSONState, Box, box, Atom, AtomFactory, atom } from './box';
+export { JSONState, Box, box } from './box';
+export { Mutation, MutationFactory, mutation } from './mutation';
 export { Action, ActionFactory, action } from './action';
+export { Event, EventFactory, event } from './event';
 export { Selector, SelectorFactory, selector } from './selector';
-export { Mutation, Dispatch, Store, createStore } from './store';
+export { Request, Dispatch, Store, createStore } from './store';
 export { ProviderProps, Provider, ConsumerProps, Consumer } from './provider';
 export { ConnectedProps, connect } from './connect';
 export { useStore, useDispatch, useSelector } from './hooks';

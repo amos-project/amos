@@ -3,6 +3,8 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
+import { EventFactory } from './event';
+
 declare const __magicType: unique symbol;
 
 type JSONValue<R> = R extends { [__magicType]: infer E } ? E : R;
@@ -21,48 +23,23 @@ export type JSONState<S> = JSONValue<
 
 export interface Box<S = any> {
   key: string;
-  initialState: () => S;
+  initialState: S;
   preload: (state: S, preloadedState: JSONState<S>) => S;
+  listeners: [EventFactory<any, any>, (state: S, data: any) => S][];
+  subscribe: <T>(event: EventFactory<any, T>, fn: (state: S, data: T) => S) => void;
 }
 
 export function box<S>(
   key: string,
-  initialState: S | (() => S),
+  initialState: S,
   preload: (state: S, preloadedState: JSONState<S>) => S,
 ): Box<S> {
+  const listeners: Box<S>['listeners'] = [];
   return {
     key,
-    initialState:
-      typeof initialState === 'function' ? (initialState as () => S) : () => initialState,
+    initialState,
     preload,
+    listeners,
+    subscribe: (event, fn) => listeners.push([event, fn]),
   };
-}
-
-export interface Atom<A = any, S = any> {
-  object: 'atom';
-  action: A;
-  factory: AtomFactory<A, S>;
-}
-
-export interface AtomFactory<A = any, S = any> {
-  type: string;
-  box: Box<S>;
-  atom: (state: S, action: A) => S;
-  (action: A): Atom<A, S>;
-}
-
-export function atom<S, A>(
-  box: Box<S>,
-  atom: (state: S, action: A) => S,
-  type: string = atom.name,
-): AtomFactory<A, S> {
-  const factory = Object.assign(
-    (action: A): Atom<A, S> => ({
-      object: 'atom',
-      action,
-      factory,
-    }),
-    { box, type, atom },
-  );
-  return factory;
 }
