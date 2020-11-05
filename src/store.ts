@@ -76,11 +76,11 @@ export interface Dispatch {
 }
 
 export interface Store {
-  dispatch: Dispatch;
-  pick: <S>(box: Box<S>) => S;
-  select: <R>(selector: Selector<any[], R>) => R;
-  subscribe: (fn: () => void) => () => void;
   getState: () => unknown;
+  pick: <S>(box: Box<S>) => S;
+  dispatch: Dispatch;
+  subscribe: (fn: () => void) => () => void;
+  select: <R>(selector: Selector<any[], R>) => R;
 }
 
 export function createStore(
@@ -94,11 +94,11 @@ export function createStore(
     if (state.hasOwnProperty(box.key)) {
       return;
     }
-    let initialState = box.initialState();
+    let boxState = box.initialState;
     if (preloadedState.hasOwnProperty(box.key)) {
-      initialState = box.preload(initialState, preloadedState[box.key]);
+      boxState = box.preload(preloadedState[box.key], boxState);
     }
-    state[box.key] = initialState;
+    state[box.key] = boxState;
     boxes.push(box);
   };
 
@@ -114,7 +114,7 @@ export function createStore(
         mutator,
       } = request;
       ensure(box);
-      mutated ||= state[key] !== (state[key] = mutator(state[key], action));
+      mutated = state[key] !== (state[key] = mutator(state[key], action)) || mutated;
       return action;
     } else if (request.object === 'action') {
       return request(store);
@@ -123,7 +123,7 @@ export function createStore(
       for (const { key, listeners } of boxes) {
         for (const [e, fn] of listeners) {
           if (e === factory) {
-            mutated ||= state[key] !== (state[key] = fn(state[key], data));
+            mutated = state[key] !== (state[key] = fn(state[key], data)) || mutated;
           }
         }
       }
@@ -161,7 +161,7 @@ export function createStore(
         }
       };
     },
-    getState: () => state,
+    getState: () => ({ ...state }),
     select: ({ factory, args }) => {
       const ss = factory.deps.map(store.pick);
       const input = [store].concat(ss, args);

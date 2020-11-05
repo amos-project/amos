@@ -17,7 +17,7 @@ export default {
   output: [
     { file: packageJson.main, format: 'cjs', sourcemap: true },
     { file: packageJson.module, format: 'es', sourcemap: true },
-    { file: packageJson.umd, format: 'umd', sourcemap: true, name: 'Moedux', plugins: [terser()] },
+    { file: packageJson.umd, format: 'umd', sourcemap: true, name: 'Amos', plugins: [terser()] },
   ],
   external: Object.keys({
     ...packageJson.dependencies,

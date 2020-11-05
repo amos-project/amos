@@ -24,7 +24,7 @@ export type JSONState<S> = JSONValue<
 export interface Box<S = any> {
   key: string;
   initialState: S;
-  preload: (state: S, preloadedState: JSONState<S>) => S;
+  preload: (preloadedState: JSONState<S>, state: S) => S;
   listeners: [EventFactory<any, any>, (state: S, data: any) => S][];
   subscribe: <T>(event: EventFactory<any, T>, fn: (state: S, data: T) => S) => void;
 }
@@ -32,7 +32,7 @@ export interface Box<S = any> {
 export function box<S>(
   key: string,
   initialState: S,
-  preload: (state: S, preloadedState: JSONState<S>) => S,
+  preload: (preloadedState: JSONState<S>, state: S) => S,
 ): Box<S> {
   const listeners: Box<S>['listeners'] = [];
   return {

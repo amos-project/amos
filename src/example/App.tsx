@@ -4,7 +4,7 @@
  */
 
 import React, { memo } from 'react';
-import { Provider } from '../provider';
+import { Provider } from '../context';
 import { Store } from '../store';
 import { TodoMVC } from './TodoMVC';
 

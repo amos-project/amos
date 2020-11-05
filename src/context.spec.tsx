@@ -5,7 +5,7 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { Consumer, Provider } from './provider';
+import { Consumer, Provider } from './context';
 import { createStore, Store } from './store';
 
 describe('provider', () => {

@@ -5,6 +5,7 @@
 
 import { box } from '../../../box';
 import { mutation } from '../../../mutation';
+import { identity } from '../../../utils';
 
 export type PartialRequired<T, K extends keyof T> = Partial<T> & Required<Pick<T, K>>;
 
@@ -27,7 +28,7 @@ export const Todo = box<TodoStateModel>(
     visibleMode: 'ALL',
     todos: [],
   },
-  (state, preloadedState) => preloadedState,
+  identity,
 );
 
 function mergeList<T, K extends keyof T>(

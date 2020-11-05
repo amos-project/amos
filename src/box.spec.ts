@@ -4,25 +4,36 @@
  */
 
 import { box } from './box';
+import { logout } from './event.spec';
+import { createStore } from './store';
+import { identity } from './utils';
+import fn = jest.fn;
 
 export interface TestStateModel {
   greets: string[];
   count: number;
 }
 
-export const TestBox = box<TestStateModel>(
-  'testBox',
-  () => ({ greets: [], count: 0 }),
-  (state, preloadedState) => preloadedState,
-);
+export const Test = box<TestStateModel>('test', { greets: [], count: 0 }, identity);
+
+Test.subscribe(logout, (state, data) => ({ greets: [], count: data.count }));
 
 describe('box', () => {
   it('should create box', () => {
-    expect(TestBox.key).toBe('testBox');
-    expect(TestBox.initialState()).toEqual({ greets: [], count: 0 });
-    expect(TestBox.preload(TestBox.initialState(), { greets: ['hello world'], count: 1 })).toEqual({
+    expect(Test.key).toBe('test');
+    expect(Test.initialState).toEqual({ greets: [], count: 0 });
+    expect(Test.preload({ greets: ['hello world'], count: 1 }, Test.initialState)).toEqual({
       greets: ['hello world'],
       count: 1,
     });
+  });
+  it('should subscribe event', () => {
+    const store = createStore();
+    const Box = box('event', {}, identity);
+    store.pick(Box);
+    const spy = fn(identity);
+    Box.subscribe(logout, spy);
+    store.dispatch(logout(1));
+    expect(spy).toBeCalled();
   });
 });

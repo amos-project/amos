@@ -5,16 +5,20 @@
 
 import { event } from './event';
 
-const logout = event((id: number) => ({ id }), 'logout');
+export interface LogoutEvent {
+  count: number;
+}
+
+export const logout = event((count: number): LogoutEvent => ({ count }), 'LOGOUT');
 
 describe('event', () => {
   it('should create event', () => {
     expect(typeof logout).toBe('function');
     expect(logout(1)).toEqual({
       object: 'event',
-      type: 'logout',
+      type: 'LOGOUT',
       factory: logout,
-      data: { id: 1 },
+      data: { count: 1 },
     });
   });
 });

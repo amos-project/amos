@@ -9,6 +9,7 @@ export { Action, ActionFactory, action } from './action';
 export { Event, EventFactory, event } from './event';
 export { Selector, SelectorFactory, selector } from './selector';
 export { Request, Dispatch, Store, createStore } from './store';
-export { ProviderProps, Provider, ConsumerProps, Consumer } from './provider';
+export { ProviderProps, Provider, ConsumerProps, Consumer } from './context';
 export { ConnectedProps, connect } from './connect';
 export { useStore, useDispatch, useSelector } from './hooks';
+export { identity } from './utils';

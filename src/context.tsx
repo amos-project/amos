@@ -34,7 +34,7 @@ export const Consumer = ({ children }: ConsumerProps) => {
     <__Context.Consumer>
       {(value) => {
         if (!value) {
-          throw new Error('[Moedux] <Consumer /> should use inside <Provider />.');
+          throw new Error('[Amos] <Consumer /> should use inside <Provider />.');
         }
         return children(value.store);
       }}

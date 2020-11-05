@@ -14,7 +14,7 @@ import React, {
   RefAttributes,
 } from 'react';
 import { Box } from './box';
-import { Consumer } from './provider';
+import { Consumer } from './context';
 import { Dispatch, Store } from './store';
 
 export interface ConnectedProps {
@@ -116,7 +116,7 @@ export function connect<S1, S2, S3, S4, S5, S6, TMappedProps, TOwnedProps = {}>(
 export function connect(...args: any[]) {
   const fnIndex = args.findIndex((p) => typeof p === 'function');
   if (args.length > 0 && fnIndex === -1) {
-    throw new Error('[Moedux] props mapper is required for inject boxes');
+    throw new Error('[Amos] props mapper is required for inject boxes');
   }
   const fn = fnIndex === -1 ? () => ({}) : args[fnIndex];
   const deps: Box[] = args.slice(0, fnIndex);

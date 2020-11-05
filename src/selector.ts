@@ -39,7 +39,7 @@ export function selector<S1, S2, A extends any[], R>(
 export function selector(...args: any[]): SelectorFactory {
   const fnIndex = args.findIndex((a) => typeof a === 'function');
   if (fnIndex === -1) {
-    throw new Error(`[Moedux] selector is required`);
+    throw new Error(`[Amos] selector is required`);
   }
   const deps = args.slice(0, fnIndex);
   const selector = args[fnIndex];

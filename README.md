@@ -1,14 +1,15 @@
-# moedux
+# amos
 
-A decentralized state manager for react, inspired by Redux, Vuex and Recoil.
+Amos is a decentralized state manager for react, inspired by Redux, Vuex and Recoil.
 
 ## Highlights
 
 - **😘 Decentralized**, no `compose`, no `root`, state is registered automatically
 - **😍 Out of the box**, no `plugins`, no `middlewares`, no `toolkits`, and no `xxx-react`
 - **🥰 Fast**, `selector` is cached, only subscribed component will update
-- **🤩 Lightweight**, the package size is only `1.8kb` after gzip
+- **🤩 Lightweight**, the package size is only `2.1kb` after gzip
 - **😲 Tiny**, `functional`, no `reducers`, every dead line could be dropped by [Tree-shaking](https://developer.mozilla.org/en-US/docs/Glossary/Tree_shaking)
+- **🥳 Strong typed**, all the API has explicit params and return types with TypeScript
 
 **WARNING: THE API IS DESIGNING**
 
@@ -16,12 +17,12 @@ A decentralized state manager for react, inspired by Redux, Vuex and Recoil.
 
 - [Quick start](#Quick-start)
 - [Concepts](#Concepts)
+  - [Store](#Store)
   - [Boxes](#Boxes)
   - [Mutations](#Mutations)
   - [Actions](#Actions)
   - [Events](#Events)
   - [Selectors](#Selectors)
-  - [Store](#Store)
 - [Tutorials](#tutorials)
   - [Transactions](#transactions)
   - [Selector caches](#selector-caches)
@@ -49,76 +50,52 @@ A decentralized state manager for react, inspired by Redux, Vuex and Recoil.
 
 ## Quick start
 
-You can get example usage in [example](./src/example) directory.
+[![Edit Amos count](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/amos-count-wxdb5?fontsize=14&hidenavigation=1&theme=dark)
 
-1. create `Todo` box and mutations
+```typescript jsx
+import * as React from 'react';
+import * as ReactDOM from 'react-dom';
+import {
+  box,
+  identity,
+  mutation,
+  selector,
+  Provider,
+  createStore,
+  useDispatch,
+  useSelector,
+} from 'amos';
 
-```js
-import { box, mutation, action } from 'moedux';
+const counter = box('counter', 0, identity);
 
-export const Todo = box(
-  'todo',
-  { filter: 'all', todos: [] },
-  (state, preloadedState) => preloadedState,
-);
+const increment = mutation(counter, (state, incr: number) => state + incr);
 
-export const addTodo = mutation(Todo, (state, todo) => ({
-  ...state,
-  todos: [todo].concat(state.todos),
-}));
+const selectCount = selector(counter, (store, count) => count);
 
-export const createTodo = action(async ({ dispatch }, title) => {
-  const todo = await myDBCreateTodo(title);
-  return dispatch(addTodo(todo));
-});
-```
+function Count() {
+  const [count] = useSelector(selectCount());
+  const dispatch = useDispatch();
+  const handleAdd = () => dispatch(increment(1));
+  return (
+    <div>
+      <span>Click count: {count}</span> <button onClick={handleAdd}>Click me</button>
+    </div>
+  );
+}
 
-2. create store and context
+const store = createStore();
 
-```jsx
-import { createStore, Provider } from 'moedux';
-import { render } from 'react-dom';
-
-const store = createStore(); // <= no box(reducer) needed
-
-render(
+ReactDOM.render(
   <Provider store={store}>
-    <TodoMVC />
+    <Count />
   </Provider>,
   document.querySelector('#root'),
 );
 ```
 
-3. use state in app
-
-```jsx
-import { useSelector, useDispatch } from 'moedux';
-
-export function TodoMVC() {
-  const [latestTodos] = useSelector(selectLatestTodos); // <= read state
-  const dispatch = useDispatch();
-  const handleKeyUp = (e) => {
-    if (e.keyCode === 13) {
-      dispatch(addTodoAsync(e.currentTarget.value)); // <= update state
-    }
-  };
-
-  return (
-    <div>
-      <div>
-        <input onKeyUp={handleKeyUp} />
-      </div>
-      <ul>
-        {latestTodos.map((t) => (
-          <li key={t.id}>{t.title}</li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-```
-
 ## Concepts
+
+### Store
 
 ### Boxes
 
@@ -129,8 +106,6 @@ export function TodoMVC() {
 ### Events
 
 ### Selectors
-
-### Store
 
 ## Tutorials
 

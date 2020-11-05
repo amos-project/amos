@@ -1,17 +1,18 @@
 {
-  "name": "moedux",
+  "name": "amos",
   "version": "0.0.1",
   "description": "A decentralized state manager for react",
   "keywords": [
     "react",
     "state",
     "management",
-    "moedux"
+    "state-management",
+    "amos"
   ],
   "author": "acrazing <joking.young@gmail.com>",
-  "main": "dist/moedux.cjs.js",
-  "module": "dist/moedux.esm.js",
-  "umd": "dist/moedux.umd.js",
+  "main": "dist/amos.cjs.js",
+  "module": "dist/amos.esm.js",
+  "umd": "dist/amos.umd.js",
   "types": "dist/index.d.ts",
   "files": [
     "src/",
@@ -51,14 +52,18 @@
     "rollup-plugin-terser": "^7.0.2",
     "rollup-plugin-typescript2": "^0.29.0",
     "ts-jest": "^26.4.3",
-    "typescript": "^4.0.5"
+    "typescript": "^4.0.5",
+    "@types/react": "^16.9.55",
+    "react": "^17.0.1"
   },
   "dependencies": {
     "@types/hoist-non-react-statics": "^3.3.1",
-    "@types/react": "^16.9.55",
     "hoist-non-react-statics": "^3.3.2",
-    "react": "^17.0.1",
     "tslib": "^2.0.3"
+  },
+  "peerDependencies": {
+    "@types/react": "*",
+    "react": "*"
   },
   "husky": {
     "hooks": {

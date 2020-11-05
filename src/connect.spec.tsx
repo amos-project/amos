@@ -5,7 +5,7 @@
 
 import React, { PureComponent } from 'react';
 import { addGreet } from './action.spec';
-import { TestBox } from './box.spec';
+import { Test } from './box.spec';
 import { connect, ConnectedProps } from './connect';
 
 export interface TestClassProps extends ConnectedProps {
@@ -39,12 +39,12 @@ describe('connect', () => {
   it('should not emit types error', () => {
     const TC1 = connect()(TestClass);
     const TC2 = connect((store) => ({
-      count: store.pick(TestBox).count,
+      count: store.pick(Test).count,
     }))(TestClass);
     const TC3 = connect((store, ownedProps: { id: number }) => ({
-      count: store.pick(TestBox).count,
+      count: store.pick(Test).count,
     }))(TestClass);
-    const TC4 = connect(TestBox, (store, test, ownedProps: { now: number }) => ({
+    const TC4 = connect(Test, (store, test, ownedProps: { now: number }) => ({
       count: test.count,
     }))(TestClass);
     expect(TC1.nextId).toBeDefined();

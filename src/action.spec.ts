@@ -4,18 +4,21 @@
  */
 
 import { action } from './action';
-import { mergeTest, TestBox } from './box.spec';
+import { Test } from './box.spec';
+import { mergeTest } from './mutation.spec';
 
 export const dummyFetch = <T>(input: T) => Promise.resolve(input);
 
 export const addGreet = action(async ({ dispatch, pick }, greet: string) => {
   await dummyFetch(greet);
-  return dispatch(mergeTest({ greets: [greet], count: pick(TestBox).count + 1 }));
-}, 'addGreet');
+  return dispatch(mergeTest({ greets: [greet], count: pick(Test).count + 1 }));
+}, 'ADD_GREET');
 
 describe('action', () => {
   it('should create action', () => {
-    expect(addGreet.type).toBe('addGreet');
-    expect(typeof addGreet.action).toBe('function');
+    const action = addGreet('hello world');
+    expect(action.object).toBe('action');
+    expect(action.type).toBe('ADD_GREET');
+    expect(typeof action).toBe('function');
   });
 });

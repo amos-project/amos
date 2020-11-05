@@ -4,7 +4,7 @@
  */
 
 import { useContext, useReducer, useRef } from 'react';
-import { __Context } from './provider';
+import { __Context } from './context';
 import { Selector } from './selector';
 import { Dispatch, Store } from './store';
 import { arrayEqual } from './utils';
@@ -12,7 +12,7 @@ import { arrayEqual } from './utils';
 export function useStore(): Store {
   const state = useContext(__Context);
   if (!state) {
-    throw new Error('[Moedux] you are using hooks without <Provider />.');
+    throw new Error('[Amos] you are using hooks without <Provider />.');
   }
   return state.store;
 }
@@ -51,8 +51,8 @@ export function useSelector<Rs extends Selector[]>(...selectors: Rs): MapSelecto
           lastStore.current!.updated = true;
         } catch (e) {
           lastError.current = e
-            ? Object.assign(e, { message: '[Moedux] selector throws error: ' + e.message })
-            : new Error('[Moedux] selector throws falsy error: ' + e);
+            ? Object.assign(e, { message: '[Amos] selector throws error: ' + e.message })
+            : new Error('[Amos] selector throws falsy error: ' + e);
         }
         update();
       }),
