@@ -47,7 +47,6 @@ describe('connect', () => {
     const TC4 = connect(Test, (store, test, ownedProps: { now: number }) => ({
       count: test.count,
     }))(TestClass);
-    expect(TC1.nextId).toBeDefined();
     expect(<TC1 id={1} count={1} ref={(instance) => instance?.current()} />).toBeDefined();
     expect(<TC2 id={2} />).toBeDefined();
     expect(<TC3 id={3} />).toBeDefined();

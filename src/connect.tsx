@@ -3,7 +3,6 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import hoistNonReactStatics from 'hoist-non-react-statics';
 import React, {
   ComponentProps,
   ComponentType,
@@ -32,7 +31,7 @@ export type ConnectedComponent<
     RefAttributes<ElementRef<C>>
 > & {
   WrappedComponent: C;
-} & hoistNonReactStatics.NonReactStatics<C>;
+};
 
 export type Connector<TOwnedProps = {}, TMappedProps = {}> = <
   C extends ComponentType<Partial<ConnectedProps> & TMappedProps & ComponentProps<C>>
@@ -137,7 +136,6 @@ export function connect(...args: any[]) {
       );
     }) as ConnectedComponent<any, any, any>;
     ConnectedComponent.WrappedComponent = Component;
-    hoistNonReactStatics(ConnectedComponent, Component);
     return ConnectedComponent;
   };
 }

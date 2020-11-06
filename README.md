@@ -15,6 +15,7 @@ Amos is a decentralized state manager for react, inspired by Redux, Vuex and Rec
 
 ## Table of Contents
 
+- [Installation](#Installation)
 - [Quick start](#Quick-start)
 - [Concepts](#Concepts)
   - [Store](#Store)
@@ -47,6 +48,36 @@ Amos is a decentralized state manager for react, inspired by Redux, Vuex and Rec
   - [useDispatch()](#usedispatch)
   - [useStore()](#usestore)
   - [connect()](#connect)
+
+## Installation
+
+### NPM
+
+1. var `npm`
+
+   ```bash
+   npm i -S amos
+   ```
+
+2. var `yarn`
+
+   ```bash
+   yarn add amos
+   ```
+
+### CDN
+
+1. `umd` bundle
+
+   ```html
+   <script src="https://unpkg.com/amos@latest/dist/amos.umd.js"></script>
+   ```
+
+2. `esm` bundle
+
+   ```html
+   <script src="https://unpkg.com/amos@latest/dist/amos.es.js"></script>
+   ```
 
 ## Quick start
 

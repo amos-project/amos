@@ -9,20 +9,21 @@ import sourceMaps from 'rollup-plugin-sourcemaps';
 import { terser } from 'rollup-plugin-terser';
 import typescript from 'rollup-plugin-typescript2';
 
-const packageJson = require('../../package.json');
+const packageJson = require('./package.json');
 
-/** @type {RollupOptions} */
-export default {
+const deps = Object.keys(packageJson.dependencies).concat(Object.keys(packageJson.devDependencies));
+
+const options = (format) => ({
   input: 'src/index.ts',
-  output: [
-    { file: packageJson.main, format: 'cjs', sourcemap: true },
-    { file: packageJson.module, format: 'es', sourcemap: true },
-    { file: packageJson.umd, format: 'umd', sourcemap: true, name: 'Amos', plugins: [terser()] },
-  ],
-  external: Object.keys({
-    ...packageJson.dependencies,
-    ...packageJson.peerDependencies,
-  }),
+  output: {
+    file: `dist/amos.${format}.js`,
+    format,
+    sourcemap: true,
+    name: 'Amos',
+    globals: { react: 'React' },
+    plugins: format === 'umd' ? [terser({ format: { comments: false } })] : [],
+  },
+  external: format === 'umd' ? ['react'] : deps,
   plugins: [
     typescript({
       tsconfigOverride: {
@@ -34,4 +35,6 @@ export default {
     resolve({ preferBuiltins: true }),
     sourceMaps(),
   ],
-};
+});
+
+export default [options('cjs'), options('es'), options('umd')];
