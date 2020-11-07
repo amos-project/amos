@@ -3,8 +3,10 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { Test } from './box.spec';
+import { count, Test } from './box.spec';
 import { mutation } from './mutation';
+
+export const increment = mutation(count, (state) => state + 1);
 
 export interface MergeTestAction {
   count?: number;

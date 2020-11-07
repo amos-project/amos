@@ -12,9 +12,10 @@ import React, {
   PropsWithoutRef,
   RefAttributes,
 } from 'react';
-import { Box } from './box';
 import { Consumer } from './context';
-import { Dispatch, Store } from './store';
+import { selector } from './selector';
+import { Dispatch, Select } from './store';
+import { values } from './utils';
 
 export interface ConnectedProps {
   dispatch: Dispatch;
@@ -33,102 +34,25 @@ export type ConnectedComponent<
   WrappedComponent: C;
 };
 
-export type Connector<TOwnedProps = {}, TMappedProps = {}> = <
+export type Connector<TOwnedProps extends object = {}, TMappedProps extends object = {}> = <
   C extends ComponentType<Partial<ConnectedProps> & TMappedProps & ComponentProps<C>>
 >(
   Component: C,
 ) => ConnectedComponent<TOwnedProps, TMappedProps, C>;
 
-export function connect(): Connector;
-export function connect<TMappedProps, TOwnedProps = {}>(
-  mapProps: (store: Store, ownedProps: TOwnedProps) => TMappedProps,
-): Connector<TOwnedProps, TMappedProps>;
-export function connect<S1, TMappedProps, TOwnedProps = {}>(
-  box1: Box<S1>,
-  mapProps: (store: Store, state1: S1, ownedProps: TOwnedProps) => TMappedProps,
-): Connector<TOwnedProps, TMappedProps>;
-export function connect<S1, S2, TMappedProps, TOwnedProps = {}>(
-  box1: Box<S1>,
-  box2: Box<S2>,
-  mapProps: (store: Store, state1: S1, state2: S2, ownedProps: TOwnedProps) => TMappedProps,
-): Connector<TOwnedProps, TMappedProps>;
-export function connect<S1, S2, S3, TMappedProps, TOwnedProps = {}>(
-  box1: Box<S1>,
-  box2: Box<S2>,
-  box3: Box<S3>,
-  mapProps: (
-    store: Store,
-    state1: S1,
-    state2: S2,
-    state3: S3,
-    ownedProps: TOwnedProps,
-  ) => TMappedProps,
-): Connector<TOwnedProps, TMappedProps>;
-export function connect<S1, S2, S3, S4, TMappedProps, TOwnedProps = {}>(
-  box1: Box<S1>,
-  box2: Box<S2>,
-  box3: Box<S3>,
-  box4: Box<S4>,
-  mapProps: (
-    store: Store,
-    state1: S1,
-    state2: S2,
-    state3: S3,
-    state4: S4,
-    ownedProps: TOwnedProps,
-  ) => TMappedProps,
-): Connector<TOwnedProps, TMappedProps>;
-export function connect<S1, S2, S3, S4, S5, TMappedProps, TOwnedProps = {}>(
-  box1: Box<S1>,
-  box2: Box<S2>,
-  box3: Box<S3>,
-  box4: Box<S4>,
-  box5: Box<S5>,
-  mapProps: (
-    store: Store,
-    state1: S1,
-    state2: S2,
-    state3: S3,
-    state4: S4,
-    state5: S5,
-    ownedProps: TOwnedProps,
-  ) => TMappedProps,
-): Connector<TOwnedProps, TMappedProps>;
-export function connect<S1, S2, S3, S4, S5, S6, TMappedProps, TOwnedProps = {}>(
-  box1: Box<S1>,
-  box2: Box<S2>,
-  box3: Box<S3>,
-  box4: Box<S4>,
-  box5: Box<S5>,
-  box6: Box<S6>,
-  mapProps: (
-    store: Store,
-    state1: S1,
-    state2: S2,
-    state3: S3,
-    state4: S4,
-    state5: S5,
-    state6: S6,
-    ownedProps: TOwnedProps,
-  ) => TMappedProps,
-): Connector<TOwnedProps, TMappedProps>;
-export function connect(...args: any[]) {
-  const fnIndex = args.findIndex((p) => typeof p === 'function');
-  if (args.length > 0 && fnIndex === -1) {
-    throw new Error('[Amos] props mapper is required for inject boxes');
-  }
-  const fn = fnIndex === -1 ? () => ({}) : args[fnIndex];
-  const deps: Box[] = args.slice(0, fnIndex);
-  const mapper = (store: Store, ownedProps: any) => {
-    const mapped = fn([store].concat(deps.map(store.pick), [ownedProps])) || {};
-    Object.assign(mapped, { dispatch: store.dispatch });
-  };
+const emptyMapper = () => ({});
+
+export function connect<TMappedProps extends object = {}, TOwnedProps extends object = {}>(
+  extractor: (select: Select, ownedProps: TOwnedProps) => TMappedProps = emptyMapper as any,
+): Connector<TOwnedProps, TMappedProps> {
+  const mapper = selector(extractor, (select, args) => values(args));
   return function connector(Component: any) {
     const ConnectedComponent = forwardRef<any, any>((props, ref) => {
+      // TODO listen updates
       return (
         <Consumer>
           {(store) => (
-            <Component {...mapper(store, props)} {...props} ref={ref}>
+            <Component {...store.select(mapper(props))} {...props} ref={ref}>
               {props.children}
             </Component>
           )}
@@ -137,5 +61,5 @@ export function connect(...args: any[]) {
     }) as ConnectedComponent<any, any, any>;
     ConnectedComponent.WrappedComponent = Component;
     return ConnectedComponent;
-  };
+  } as any;
 }

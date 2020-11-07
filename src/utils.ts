@@ -17,18 +17,8 @@ export function arrayEqual<T>(a: T[], b: T[]) {
 
 export const isArray: (args: any) => args is any[] | readonly any[] = Array.isArray;
 
-export type FlatPromise<R extends any[]> = {
-  [P in keyof R]: R[P] extends PromiseLike<any> ? true : never;
-}[keyof R] extends true
-  ? {
-      [P in keyof R]: R[P] extends PromiseLike<infer U> ? U : R[P];
-    }
-  : R;
-
-export function flatPromise<R extends any[]>(input: R): FlatPromise<R> {
-  return input.some((i) => 'then' in i && typeof i.then === 'function')
-    ? Promise.all(input)
-    : (input as any);
-}
-
 export const identity = <T>(v: T) => v;
+
+export function values<T extends object>(o: T): T[keyof T][] {
+  return Object.keys(o).map((k) => o[k as keyof T]);
+}

@@ -9,10 +9,13 @@ import { mergeTest } from './mutation.spec';
 
 export const dummyFetch = <T>(input: T) => Promise.resolve(input);
 
-export const addGreet = action(async ({ dispatch, pick }, greet: string) => {
-  await dummyFetch(greet);
-  return dispatch(mergeTest({ greets: [greet], count: pick(Test).count + 1 }));
-}, 'ADD_GREET');
+export const addGreet = action(
+  (dispatch, select, greet: string) =>
+    dummyFetch(greet).then((greet) =>
+      mergeTest({ greets: [greet], count: select(Test).count + 1 }),
+    ),
+  'ADD_GREET',
+);
 
 describe('action', () => {
   it('should create action', () => {

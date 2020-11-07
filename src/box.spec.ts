@@ -9,6 +9,8 @@ import { createStore } from './store';
 import { identity } from './utils';
 import fn = jest.fn;
 
+export const count = box('count', 0, identity);
+
 export interface TestStateModel {
   greets: string[];
   count: number;
@@ -30,7 +32,7 @@ describe('box', () => {
   it('should subscribe event', () => {
     const store = createStore();
     const Box = box('event', {}, identity);
-    store.pick(Box);
+    store.select(Box);
     const spy = fn(identity);
     Box.subscribe(logout, spy);
     store.dispatch(logout(1));

@@ -6,8 +6,8 @@
 import { renderHook } from '@testing-library/react-hooks';
 import React, { FC, memo } from 'react';
 import { addGreet } from './action.spec';
-import { useDispatch, useSelector, useStore } from './hooks';
 import { Provider } from './context';
+import { useDispatch, useSelector, useStore } from './hooks';
 import { selectCount, selectCount2 } from './selector.spec';
 import { createStore } from './store';
 

@@ -8,122 +8,195 @@ import { Box } from './box';
 import { Event } from './event';
 import { Mutation } from './mutation';
 import { Selector } from './selector';
-import { arrayEqual, isArray } from './utils';
+import { isArray } from './utils';
 
-export type Request<R = any> = Mutation<any, R> | Action<R> | Event<R>;
+/**
+ * the state snapshot in store
+ *
+ * @stable
+ */
+export type Snapshot = Record<string, unknown>;
 
+/**
+ * dispatchable things
+ *
+ * @stable
+ */
+export type Dispatchable<R = any> = Mutation<any, [R, ...any[]]> | Action<R> | Event<R>;
+
+/**
+ * dispatch
+ *
+ * @stable
+ */
 export interface Dispatch {
-  <R>(request: Request<R>): R;
-  <R1>(requests: readonly [Request<R1>]): [R1];
-  <R1, R2>(requests: readonly [Request<R1>, Request<R2>]): [R1, R2];
-  <R1, R2, R3>(requests: readonly [Request<R1>, Request<R2>, Request<R3>]): [R1, R2, R3];
-  <R1, R2, R3, R4>(requests: readonly [Request<R1>, Request<R2>, Request<R3>, Request<R4>]): [
+  <R>(task: Dispatchable<R>): R;
+  <R1>(tasks: readonly [Dispatchable<R1>]): [R1];
+  <R1, R2>(tasks: readonly [Dispatchable<R1>, Dispatchable<R2>]): [R1, R2];
+  <R1, R2, R3>(tasks: readonly [Dispatchable<R1>, Dispatchable<R2>, Dispatchable<R3>]): [
     R1,
     R2,
     R3,
-    R4,
   ];
+  <R1, R2, R3, R4>(
+    tasks: readonly [Dispatchable<R1>, Dispatchable<R2>, Dispatchable<R3>, Dispatchable<R4>],
+  ): [R1, R2, R3, R4];
   <R1, R2, R3, R4, R5>(
-    requests: readonly [Request<R1>, Request<R2>, Request<R3>, Request<R4>, Request<R5>],
+    tasks: readonly [
+      Dispatchable<R1>,
+      Dispatchable<R2>,
+      Dispatchable<R3>,
+      Dispatchable<R4>,
+      Dispatchable<R5>,
+    ],
   ): [R1, R2, R3, R4, R5];
   <R1, R2, R3, R4, R5, R6>(
-    requests: readonly [
-      Request<R1>,
-      Request<R2>,
-      Request<R3>,
-      Request<R4>,
-      Request<R5>,
-      Request<R6>,
+    tasks: readonly [
+      Dispatchable<R1>,
+      Dispatchable<R2>,
+      Dispatchable<R3>,
+      Dispatchable<R4>,
+      Dispatchable<R5>,
+      Dispatchable<R6>,
     ],
   ): [R1, R2, R3, R4, R5, R6];
   <R1, R2, R3, R4, R5, R6, R7>(
-    requests: readonly [
-      Request<R1>,
-      Request<R2>,
-      Request<R3>,
-      Request<R4>,
-      Request<R5>,
-      Request<R6>,
-      Request<R7>,
+    tasks: readonly [
+      Dispatchable<R1>,
+      Dispatchable<R2>,
+      Dispatchable<R3>,
+      Dispatchable<R4>,
+      Dispatchable<R5>,
+      Dispatchable<R6>,
+      Dispatchable<R7>,
     ],
   ): [R1, R2, R3, R4, R5, R6, R7];
   <R1, R2, R3, R4, R5, R6, R7, R8>(
-    requests: readonly [
-      Request<R1>,
-      Request<R2>,
-      Request<R3>,
-      Request<R4>,
-      Request<R5>,
-      Request<R6>,
-      Request<R7>,
-      Request<R8>,
+    tasks: readonly [
+      Dispatchable<R1>,
+      Dispatchable<R2>,
+      Dispatchable<R3>,
+      Dispatchable<R4>,
+      Dispatchable<R5>,
+      Dispatchable<R6>,
+      Dispatchable<R7>,
+      Dispatchable<R8>,
     ],
   ): [R1, R2, R3, R4, R5, R6, R7, R8];
   <R1, R2, R3, R4, R5, R6, R7, R8, R9>(
-    requests: readonly [
-      Request<R1>,
-      Request<R2>,
-      Request<R3>,
-      Request<R4>,
-      Request<R5>,
-      Request<R6>,
-      Request<R7>,
-      Request<R8>,
-      Request<R9>,
+    tasks: readonly [
+      Dispatchable<R1>,
+      Dispatchable<R2>,
+      Dispatchable<R3>,
+      Dispatchable<R4>,
+      Dispatchable<R5>,
+      Dispatchable<R6>,
+      Dispatchable<R7>,
+      Dispatchable<R8>,
+      Dispatchable<R9>,
     ],
   ): [R1, R2, R3, R4, R5, R6, R7, R8, R9];
-  <R>(requests: readonly Request<R>[]): R[];
+  <R>(tasks: readonly Dispatchable<R>[]): R[];
 }
 
+/**
+ * selectable things
+ *
+ * @stable
+ */
+export type Selectable<R = any> = Box<R> | Selector<R>;
+
+/**
+ * select
+ *
+ * @stable
+ */
+export type Select = <R>(selectable: Selectable<R>, snapshot?: Snapshot) => R;
+
+/**
+ * Store
+ *
+ * @stable
+ */
 export interface Store {
-  getState: () => unknown;
-  pick: <S>(box: Box<S>) => S;
+  /**
+   * get the state snapshot of the store.
+   *
+   * Please note that any mutation of the snapshot is silent.
+   */
+  snapshot: () => Snapshot;
+  /**
+   * dispatch one or more dispatchable things.
+   */
   dispatch: Dispatch;
-  subscribe: (fn: () => void) => () => void;
-  select: <R>(selector: Selector<any[], R>) => R;
+  /**
+   * subscribe the mutations
+   * @param fn
+   */
+  subscribe: (fn: (updatedState: Snapshot) => void) => () => void;
+  /**
+   * select a selectable thing
+   */
+  select: Select;
 }
 
-export function createStore(
-  preloadedState: Record<string, unknown> = {},
-  ...enhancers: Array<(store: Store) => Store>
-): Store {
-  const state: Record<string, unknown> = {};
+export type StoreEnhancer = (store: Store) => Store;
+
+/**
+ * create a store
+ * @param preloadedState
+ * @param enhancers
+ *
+ * @stable
+ */
+export function createStore(preloadedState?: Snapshot, ...enhancers: StoreEnhancer[]): Store {
+  const state: Snapshot = {};
   const boxes: Box[] = [];
-  const listeners: Array<() => void> = [];
+  const listeners: Array<(updatedSnapshot: Snapshot) => void> = [];
   const ensure = (box: Box) => {
     if (state.hasOwnProperty(box.key)) {
       return;
     }
     let boxState = box.initialState;
-    if (preloadedState.hasOwnProperty(box.key)) {
+    if (preloadedState?.hasOwnProperty(box.key)) {
       boxState = box.preload(preloadedState[box.key], boxState);
     }
     state[box.key] = boxState;
     boxes.push(box);
   };
 
-  let dispatching = 0;
-  let mutated = false;
+  let dispatchDepth = 0;
+  let dispatchingSnapshot: Snapshot = {};
 
-  const exec = (request: Request) => {
-    if (request.object === 'mutation') {
+  const record = (key: string, newState: unknown) => {
+    if (newState !== state[key] || dispatchingSnapshot.hasOwnProperty(key)) {
+      dispatchingSnapshot[key] = newState;
+      state[key] = newState;
+    }
+  };
+
+  const exec = (dispatchable: Dispatchable) => {
+    if (typeof dispatchable === 'function') {
+      // it is action
+      return dispatchable(store.dispatch, store.select);
+    }
+    if (dispatchable.object === 'mutation') {
       const {
         box,
         box: { key },
         action,
         mutator,
-      } = request;
+      } = dispatchable;
       ensure(box);
-      mutated = state[key] !== (state[key] = mutator(state[key], action)) || mutated;
+      record(key, mutator(state[key], action));
       return action;
-    } else if (request.object === 'action') {
-      return request(store);
-    } else if (request.object === 'event') {
-      const { data, factory } = request;
+    }
+    if (dispatchable.object === 'event') {
+      const { data, factory } = dispatchable;
       for (const { key, listeners } of boxes) {
         for (const [e, fn] of listeners) {
           if (e === factory) {
-            mutated = state[key] !== (state[key] = fn(state[key], data)) || mutated;
+            record(key, fn(state[key], data));
           }
         }
       }
@@ -131,26 +204,27 @@ export function createStore(
     }
   };
 
+  let selectingSnapshot: Snapshot | undefined;
+
   let store: Store = {
-    dispatch: (requests: Request | readonly Request[]) => {
-      mutated &&= dispatching !== 0;
-      dispatching++;
+    snapshot: () => state,
+    dispatch: (tasks: Dispatchable | readonly Dispatchable[]) => {
+      if (++dispatchDepth === 1) {
+        dispatchingSnapshot = {};
+      }
       try {
-        if (isArray(requests)) {
-          return requests.map((atom) => exec(atom));
+        if (isArray(tasks)) {
+          return tasks.map(exec);
         } else {
-          return exec(requests);
+          return exec(tasks);
         }
       } finally {
-        dispatching--;
-        if (dispatching === 0 && mutated) {
-          listeners.forEach((fn) => fn());
+        if (--dispatchDepth === 0) {
+          if (Object.keys(dispatchingSnapshot).length > 0) {
+            listeners.forEach((fn) => fn(dispatchingSnapshot));
+          }
         }
       }
-    },
-    pick: <S>(box: Box<S>): S => {
-      ensure(box);
-      return state[box.key] as S;
     },
     subscribe: (fn) => {
       listeners.push(fn);
@@ -161,20 +235,21 @@ export function createStore(
         }
       };
     },
-    getState: () => ({ ...state }),
-    select: ({ factory, args }) => {
-      const ss = factory.deps.map(store.pick);
-      const input = [store].concat(ss, args);
-      if (factory.cacheKey) {
-        const key = factory.cacheKey(...input);
-        if (factory.lastKey && arrayEqual(factory.lastKey, key)) {
-          return factory.lastValue!;
+    select: (selectable, snapshot) => {
+      if (typeof selectable === 'function') {
+        if (snapshot) {
+          if (selectingSnapshot) {
+            throw new Error(`[Amos] recursive snapshot collection is not supported currently.`);
+          }
+          selectingSnapshot = snapshot;
         }
-        factory.lastValue = factory.selector(...input);
-        factory.lastKey = key;
-        return factory.lastValue;
+        return selectable(store.select) as any;
+      } else {
+        if (selectingSnapshot) {
+          selectingSnapshot[selectable.key] = state[selectable.key];
+        }
+        return state[selectable.key];
       }
-      return factory.selector(...input);
     },
   };
   store = enhancers.reduce((previousValue, currentValue) => currentValue(previousValue), store);
