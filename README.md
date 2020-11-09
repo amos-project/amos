@@ -7,7 +7,7 @@ Amos is a decentralized state manager for react, inspired by Redux, Vuex and Rec
 - **😘 Decentralized**, no `compose`, no `root`, state is registered automatically
 - **😍 Out of the box**, no `plugins`, no `middlewares`, no `toolkits`, and no `xxx-react`
 - **🥰 Fast**, `selector` is cached, only subscribed component will update
-- **🤩 Lightweight**, the package size is only `2.1kb` after gzip
+- **🤩 Lightweight**, the package size is only `2.7kb` after gzip
 - **😲 Tiny**, `functional`, no `reducers`, every dead line could be dropped by [Tree-shaking](https://developer.mozilla.org/en-US/docs/Glossary/Tree_shaking)
 - **🥳 Strong typed**, all the API has explicit params and return types with TypeScript
 

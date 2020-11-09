@@ -28,7 +28,7 @@ const options = (format) => ({
     typescript({
       tsconfigOverride: {
         compilerOptions: { module: 'esnext' },
-        exclude: ['src/example', 'src/build', 'src/**/*.spec.ts'],
+        exclude: ['src/**/*.spec.ts', 'src/**/*.spec.tsx'],
       },
     }),
     commonjs(),

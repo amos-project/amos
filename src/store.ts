@@ -235,16 +235,23 @@ export function createStore(preloadedState?: Snapshot, ...enhancers: StoreEnhanc
         }
       };
     },
-    select: (selectable, snapshot) => {
+    select: (selectable, snapshot): any => {
       if (typeof selectable === 'function') {
         if (snapshot) {
           if (selectingSnapshot) {
-            throw new Error(`[Amos] recursive snapshot collection is not supported currently.`);
+            throw new Error(`[Amos] recursive snapshot collection is not supported.`);
           }
           selectingSnapshot = snapshot;
+          try {
+            return selectable(store.select);
+          } finally {
+            selectingSnapshot = void 0;
+          }
+        } else {
+          return selectable(store.select);
         }
-        return selectable(store.select) as any;
       } else {
+        ensure(selectable);
         if (selectingSnapshot) {
           selectingSnapshot[selectable.key] = state[selectable.key];
         }
