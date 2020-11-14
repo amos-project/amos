@@ -3,7 +3,7 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { useContext, useDebugValue, useReducer, useRef } from 'react';
+import { useContext, useDebugValue, useEffect, useReducer, useRef } from 'react';
 import { __Context } from './context';
 import { Selector } from './selector';
 import { Dispatch, Selectable, Snapshot, Store } from './store';
@@ -200,6 +200,7 @@ export function useSelector<Rs extends Selectable[]>(...selectors: Rs): MapSelec
       }),
     };
   }
+  useEffect(() => () => lastStore.current?.disposer(), []);
   if (lastStore.current.error) {
     const error = lastStore.current.error;
     lastStore.current.error = void 0;
