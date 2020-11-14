@@ -23,78 +23,14 @@ And more:
 
 **WARNING: THE API IS DESIGNING**
 
-## Table of Contents
-
-- [Installation](#installation)
-- [Quick start](#quick-start)
-- [Examples](#examples)
-  - [TodoMVC](#todomvc)
-- [Concepts](#concepts)
-  - [Store](#store)
-  - [Boxes](#boxes)
-  - [Mutations](#mutations)
-  - [Actions](#actions)
-  - [Signals](#signals)
-  - [Selectors](#selectors)
-- [React integration](#react-integration)
-  - [With react hooks](#with-react-hooks)
-  - [With class components](#with-class-components)
-- [Receipts](#receipts)
-  - [Transactions](#transactions)
-  - [Selector caches](#selector-caches)
-  - [Server side rendering(SSR)](#server-side-renderingssr)
-  - [Hybrid with `Redux`](#hybrid-with-redux)
-  - [Devtools](#devtools)
-- [API Reference](#api-reference)
-  - Core
-  - [box()](#box)
-    - [box.subscribe()](#boxsubscribe)
-    - [box.mutation()](#boxmutation)
-  - [action()](#action)
-  - [signal()](#signal)
-  - [selector()](#selector)
-  - [createStore()](#createstore)
-    - [store.dispatch()](#storedispatch)
-    - [store.select()](#storeselect)
-    - [store.snapshot()](#storesnapshot)
-    - [store.subscribe()](#storesubscribe)
-  - React integration
-  - [\<Provider />](#provider-)
-  - [\<Consumer />](#consumer-)
-  - [useSelector()](#useselector)
-  - [useDispatch()](#usedispatch)
-  - [useStore()](#usestore)
-  - [connect()](#connect)
-
 ## Installation
 
-### NPM
+```bash
+yarn add amos
 
-1. var `npm`
-
-   ```bash
-   npm i -S amos
-   ```
-
-2. var `yarn`
-
-   ```bash
-   yarn add amos
-   ```
-
-### CDN
-
-1. `umd` bundle
-
-   ```html
-   <script src="https://unpkg.com/amos@latest/dist/amos.umd.js"></script>
-   ```
-
-2. `esm` bundle
-
-   ```html
-   <script src="https://unpkg.com/amos@latest/dist/amos.es.js"></script>
-   ```
+# or var npm
+npm i -S amos
+```
 
 ## Quick start
 
@@ -134,6 +70,45 @@ ReactDOM.render(
 ### TodoMVC
 
 [![Edit Amos - TodoMVC](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/new-bush-40rzm?fontsize=14&hidenavigation=1&theme=dark)
+
+## Table of Contents
+
+- [Concepts](#concepts)
+  - [Store](#store)
+  - [Boxes](#boxes)
+  - [Mutations](#mutations)
+  - [Actions](#actions)
+  - [Signals](#signals)
+  - [Selectors](#selectors)
+- [React integration](#react-integration)
+  - [With react hooks](#with-react-hooks)
+  - [With class components](#with-class-components)
+- [Receipts](#receipts)
+  - [Transactions](#transactions)
+  - [Selector caches](#selector-caches)
+  - [Server side rendering(SSR)](#server-side-renderingssr)
+  - [Hybrid with `Redux`](#hybrid-with-redux)
+  - [Devtools](#devtools)
+- [API Reference](#api-reference)
+  - Core
+  - [box()](#box)
+    - [box.subscribe()](#boxsubscribe)
+    - [box.mutation()](#boxmutation)
+  - [action()](#action)
+  - [signal()](#signal)
+  - [selector()](#selector)
+  - [createStore()](#createstore)
+    - [store.dispatch()](#storedispatch)
+    - [store.select()](#storeselect)
+    - [store.snapshot()](#storesnapshot)
+    - [store.subscribe()](#storesubscribe)
+  - React integration
+  - [\<Provider />](#provider-)
+  - [\<Consumer />](#consumer-)
+  - [useSelector()](#useselector)
+  - [useDispatch()](#usedispatch)
+  - [useStore()](#usestore)
+  - [connect()](#connect)
 
 ## Concepts
 
