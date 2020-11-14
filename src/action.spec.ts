@@ -4,24 +4,23 @@
  */
 
 import { action } from './action';
-import { Test } from './box.spec';
-import { mergeTest } from './mutation.spec';
+import { mergeTest } from './box.spec';
+import { selectCount } from './selector.spec';
 
 export const dummyFetch = <T>(input: T) => Promise.resolve(input);
 
 export const addGreet = action(
   (dispatch, select, greet: string) =>
     dummyFetch(greet).then((greet) =>
-      mergeTest({ greets: [greet], count: select(Test).count + 1 }),
+      dispatch(mergeTest({ greets: [greet], count: selectCount(select) + 1 })),
     ),
   'ADD_GREET',
 );
 
 describe('action', () => {
   it('should create action', () => {
-    const action = addGreet('hello world');
-    expect(action.object).toBe('action');
-    expect(action.type).toBe('ADD_GREET');
-    expect(typeof action).toBe('function');
+    const { actor, ...other } = addGreet('hello world');
+    expect(other).toEqual({ type: 'ADD_GREET', args: ['hello world'], object: 'action' });
+    expect(typeof actor).toBe('function');
   });
 });

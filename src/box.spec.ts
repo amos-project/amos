@@ -3,39 +3,77 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { box } from './box';
-import { logout } from './event.spec';
+import { Box } from './box';
+import { logout } from './signal.spec';
 import { createStore } from './store';
 import { identity } from './utils';
 import fn = jest.fn;
 
-export const count = box('count', 0, identity);
+export const countBox = new Box('count', 0, identity);
 
 export interface TestStateModel {
   greets: string[];
   count: number;
 }
 
-export const Test = box<TestStateModel>('test', { greets: [], count: 0 }, identity);
+export const testBox = new Box<TestStateModel>('test', { greets: [], count: 0 }, identity);
 
-Test.subscribe(logout, (state, data) => ({ greets: [], count: data.count }));
+testBox.subscribe(logout, (state, data) => ({ greets: [], count: data.count }));
 
 describe('box', () => {
   it('should create box', () => {
-    expect(Test.key).toBe('test');
-    expect(Test.initialState).toEqual({ greets: [], count: 0 });
-    expect(Test.preload({ greets: ['hello world'], count: 1 }, Test.initialState)).toEqual({
+    expect(testBox.key).toBe('test');
+    expect(testBox.initialState).toEqual({ greets: [], count: 0 });
+    expect(testBox.preload({ greets: ['hello world'], count: 1 }, testBox.initialState)).toEqual({
       greets: ['hello world'],
       count: 1,
     });
   });
   it('should subscribe event', () => {
     const store = createStore();
-    const Box = box('event', {}, identity);
-    store.select(Box);
+    const eventBox = new Box('event', {}, identity);
+    store.select(eventBox);
     const spy = fn(identity);
-    Box.subscribe(logout, spy);
+    eventBox.subscribe(logout, spy);
     store.dispatch(logout(1));
     expect(spy).toBeCalled();
+  });
+});
+
+export const increment = countBox.mutation((state) => state + 1);
+export const addCount = countBox.mutation((state, action: number = 1) => state + action);
+
+export interface MergeTestAction {
+  count?: number;
+  greets?: string[];
+}
+
+export const mergeTest = testBox.mutation((state, { count, greets }: MergeTestAction) => {
+  return {
+    ...state,
+    count: count ?? state.count,
+    greets: greets?.length ? state.greets.concat(greets) : state.greets,
+  };
+}, 'mergeTest');
+
+export const setCount = testBox.mutation(
+  (state, action: number) => ({
+    ...state,
+    count: action,
+  }),
+  'setCount',
+);
+
+describe('mutation', () => {
+  it('should create mutation', () => {
+    const mutation = mergeTest({});
+    expect(mutation.box).toBe(testBox);
+    expect(mutation.type).toBe('mergeTest');
+    expect(
+      mutation.mutator({ count: 1, greets: ['hello'] }, { count: 2, greets: ['world'] }),
+    ).toEqual({
+      count: 2,
+      greets: ['hello', 'world'],
+    });
   });
 });

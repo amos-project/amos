@@ -4,11 +4,10 @@
  */
 
 import { Action } from './action';
-import { Box } from './box';
-import { Event } from './event';
-import { Mutation } from './mutation';
+import { Box, Mutation } from './box';
 import { Selector } from './selector';
-import { isArray } from './utils';
+import { Signal } from './signal';
+import { defineObject, isArray } from './utils';
 
 /**
  * the state snapshot in store
@@ -22,7 +21,7 @@ export type Snapshot = Record<string, unknown>;
  *
  * @stable
  */
-export type Dispatchable<R = any> = Mutation<any, [R, ...any[]]> | Action<R> | Event<R>;
+export type Dispatchable<R = any> = Mutation<R> | Action<R> | Signal<R>;
 
 /**
  * dispatch
@@ -30,6 +29,7 @@ export type Dispatchable<R = any> = Mutation<any, [R, ...any[]]> | Action<R> | E
  * @stable
  */
 export interface Dispatch {
+  object: 'store.dispatch';
   <R>(task: Dispatchable<R>): R;
   <R1>(tasks: readonly [Dispatchable<R1>]): [R1];
   <R1, R2>(tasks: readonly [Dispatchable<R1>, Dispatchable<R2>]): [R1, R2];
@@ -111,7 +111,10 @@ export type Selectable<R = any> = Box<R> | Selector<R>;
  *
  * @stable
  */
-export type Select = <R>(selectable: Selectable<R>, snapshot?: Snapshot) => R;
+export interface Select {
+  <R>(selectable: Selectable<R>, snapshot?: Snapshot): R;
+  object: 'store.select';
+}
 
 /**
  * Store
@@ -176,31 +179,22 @@ export function createStore(preloadedState?: Snapshot, ...enhancers: StoreEnhanc
   };
 
   const exec = (dispatchable: Dispatchable) => {
-    if (typeof dispatchable === 'function') {
-      // it is action
-      return dispatchable(store.dispatch, store.select);
-    }
-    if (dispatchable.object === 'mutation') {
-      const {
-        box,
-        box: { key },
-        action,
-        mutator,
-      } = dispatchable;
-      ensure(box);
-      record(key, mutator(state[key], action));
-      return action;
-    }
-    if (dispatchable.object === 'event') {
-      const { data, factory } = dispatchable;
-      for (const { key, listeners } of boxes) {
-        for (const [e, fn] of listeners) {
-          if (e === factory) {
-            record(key, fn(state[key], data));
-          }
+    switch (dispatchable.object) {
+      case 'action':
+        return dispatchable.actor(store.dispatch, store.select, ...dispatchable.args);
+      case 'mutation':
+        ensure(dispatchable.box);
+        record(
+          dispatchable.box.key,
+          dispatchable.mutator(state[dispatchable.box.key], ...dispatchable.args),
+        );
+        return dispatchable.result;
+      case 'signal':
+        for (const box of boxes) {
+          const fn = box.listeners[dispatchable.type];
+          fn && record(box.key, fn(state[box.key], dispatchable.data));
         }
-      }
-      return data;
+        return dispatchable.data;
     }
   };
 
@@ -208,7 +202,16 @@ export function createStore(preloadedState?: Snapshot, ...enhancers: StoreEnhanc
 
   let store: Store = {
     snapshot: () => state,
-    dispatch: (tasks: Dispatchable | readonly Dispatchable[]) => {
+    subscribe: (fn) => {
+      listeners.push(fn);
+      return () => {
+        const index = listeners.indexOf(fn);
+        if (index > -1) {
+          listeners.splice(index, 1);
+        }
+      };
+    },
+    dispatch: defineObject('store.dispatch', (tasks: Dispatchable | readonly Dispatchable[]) => {
       if (++dispatchDepth === 1) {
         dispatchingSnapshot = {};
       }
@@ -225,17 +228,8 @@ export function createStore(preloadedState?: Snapshot, ...enhancers: StoreEnhanc
           }
         }
       }
-    },
-    subscribe: (fn) => {
-      listeners.push(fn);
-      return () => {
-        const index = listeners.indexOf(fn);
-        if (index > -1) {
-          listeners.splice(index, 1);
-        }
-      };
-    },
-    select: (selectable, snapshot): any => {
+    }),
+    select: defineObject('store.select', (selectable: Selectable, snapshot?: Snapshot): any => {
       if (typeof selectable === 'function') {
         if (snapshot) {
           if (selectingSnapshot) {
@@ -257,8 +251,13 @@ export function createStore(preloadedState?: Snapshot, ...enhancers: StoreEnhanc
         }
         return state[selectable.key];
       }
-    },
+    }),
   };
   store = enhancers.reduce((previousValue, currentValue) => currentValue(previousValue), store);
+  store.dispatch = defineObject('store.dispatch', store.dispatch);
+  store.select = defineObject('store.select', store.select);
+  if (typeof process === 'object' && process.env.NODE_ENV === 'development') {
+    Object.freeze(store);
+  }
   return store;
 }

@@ -8,11 +8,11 @@ import React, { FC, memo } from 'react';
 import { addGreet } from './action.spec';
 import { Provider } from './context';
 import { useDispatch, useSelector, useStore } from './hooks';
-import { selectCount, selectCount2 } from './selector.spec';
+import { selectCount, selectDoubleCount } from './selector.spec';
 import { createStore } from './store';
 
 export const TestCount = memo(() => {
-  const [count, count2] = useSelector(selectCount(), selectCount2());
+  const [count, count2] = useSelector(selectCount, selectDoubleCount());
   return <div>{count + '-' + count2}</div>;
 });
 
@@ -33,10 +33,10 @@ describe('useSelector', () => {
   const store = createStore();
   const wrapper: FC = (props) => <Provider store={store}>{props.children}</Provider>;
   it('select state', async () => {
-    const result = renderHook(() => useSelector(selectCount(), selectCount2()), { wrapper });
+    const result = renderHook(() => useSelector(selectCount, selectDoubleCount()), { wrapper });
     expect(result.result.current).toEqual([0, 0]);
     store.dispatch(addGreet('hello'));
     await result.waitForNextUpdate();
-    expect(result.result.current).toEqual([1, 1]);
+    expect(result.result.current).toEqual([1, 2]);
   });
 });

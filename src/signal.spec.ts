@@ -3,21 +3,21 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { event } from './event';
+import { signal } from './signal';
 
 export interface LogoutEvent {
   count: number;
 }
 
-export const logout = event((count: number): LogoutEvent => ({ count }), 'LOGOUT');
+export const logout = signal('LOGOUT', (count: number): LogoutEvent => ({ count }));
 
 describe('event', () => {
   it('should create event', () => {
     expect(typeof logout).toBe('function');
+    expect(logout.type).toBe('LOGOUT');
     expect(logout(1)).toEqual({
-      object: 'event',
+      object: 'signal',
       type: 'LOGOUT',
-      factory: logout,
       data: { count: 1 },
     });
   });

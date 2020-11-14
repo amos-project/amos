@@ -7,7 +7,7 @@ import { useContext, useReducer, useRef } from 'react';
 import { __Context } from './context';
 import { Selector } from './selector';
 import { Dispatch, Selectable, Snapshot, Store } from './store';
-import { arrayEqual } from './utils';
+import { arrayEqual, strictEqual } from './utils';
 
 /**
  * use context's store
@@ -62,17 +62,17 @@ function shouldSelectorRecompute(
   deps: (unknown[] | undefined)[],
   index: number,
 ) {
-  if (!selector.deps || !deps[index]) {
+  if (!selector.factory?.deps || !deps[index]) {
     return true;
   }
-  const newDeps = selector.deps(store.select, ...selector.args);
+  const newDeps = selector.factory.deps(store.select, ...selector.args);
   const isEqual = arrayEqual(deps[index] || [], newDeps);
   deps[index] = newDeps;
   return !isEqual;
 }
 
 function compare(selector: Selector, a: unknown, b: unknown) {
-  return selector.compare ? selector.compare(a, b) : a === b;
+  return selector.factory ? selector.factory.compare(a, b) : strictEqual(a, b);
 }
 
 function selectorChanged(
@@ -88,13 +88,13 @@ function selectorChanged(
   if (!(old === newly || (newly.factory && newly.factory === old.factory))) {
     return true;
   }
-  if (newly.deps === false) {
-    return true;
-  }
-  if (!newly.deps) {
+  if (newly.factory?.deps === void 0) {
     return arrayEqual(old.args, newly.args);
   }
-  const newDeps = newly.deps(store.select, ...newly.args);
+  if (newly.factory.deps === false) {
+    return true;
+  }
+  const newDeps = newly.factory.deps(store.select, ...newly.args);
   const isEqual = arrayEqual(deps || [], newDeps);
   return isEqual ? false : newDeps;
 }
@@ -124,7 +124,7 @@ export function useSelector<Rs extends Selectable[]>(...selectors: Rs): MapSelec
                 if (shouldSelectorRecompute(selector, store, deps, i)) {
                   const newSnapshot: Snapshot = {};
                   const newResult = store.select(selector, newSnapshot);
-                  lastStore.current!.updated ||= compare(selector, results[i], newResult);
+                  lastStore.current!.updated ||= !compare(selector, results[i], newResult);
                   snapshots[i] = newSnapshot;
                   results[i] = newResult;
                 }
@@ -133,14 +133,15 @@ export function useSelector<Rs extends Selectable[]>(...selectors: Rs): MapSelec
               results[i] = store.select(selector);
             }
           }
+          lastStore.current!.updated && update();
         } catch (e) {
           snapshots.length = results.length = i - 1;
           lastStore.current!.error =
             typeof e === 'object' && e
               ? Object.assign(e, { message: '[Amos] selector throws error: ' + e.message })
               : new Error('[Amos] selector throws falsy error: ' + e);
+          update();
         }
-        lastStore.current!.updated && update();
       }),
     };
   }

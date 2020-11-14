@@ -5,8 +5,9 @@
 
 import React, { PureComponent } from 'react';
 import { addGreet } from './action.spec';
-import { Test } from './box.spec';
+import { testBox } from './box.spec';
 import { connect, ConnectedProps } from './connect';
+import { selectMultipleCount } from './selector.spec';
 
 export interface TestClassProps extends ConnectedProps {
   id: number;
@@ -38,18 +39,14 @@ export class TestClass extends PureComponent<TestClassProps> {
 describe('connect', () => {
   it('should not emit types error', () => {
     const TC1 = connect()(TestClass);
-    const TC2 = connect((store) => ({
-      count: store.pick(Test).count,
+    const TC2 = connect((select) => ({
+      count: select(testBox).count,
     }))(TestClass);
-    const TC3 = connect((store, ownedProps: { id: number }) => ({
-      count: store.pick(Test).count,
-    }))(TestClass);
-    const TC4 = connect(Test, (store, test, ownedProps: { now: number }) => ({
-      count: test.count,
+    const TC3 = connect((select, ownedProps: { multiply: number }) => ({
+      count: selectMultipleCount(select, ownedProps.multiply),
     }))(TestClass);
     expect(<TC1 id={1} count={1} ref={(instance) => instance?.current()} />).toBeDefined();
     expect(<TC2 id={2} />).toBeDefined();
-    expect(<TC3 id={3} />).toBeDefined();
-    expect(<TC4 id={4} now={Date.now()} />).toBeDefined();
+    expect(<TC3 multiply={3} id={3} />).toBeDefined();
   });
 });

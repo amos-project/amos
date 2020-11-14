@@ -4,17 +4,15 @@
  */
 
 import { addGreet } from './action.spec';
-import { Test } from './box.spec';
-import { logout } from './event.spec';
-import { mergeTest, setCount } from './mutation.spec';
+import { mergeTest, setCount, testBox } from './box.spec';
+import { logout } from './signal.spec';
 import { createStore } from './store';
 import fn = jest.fn;
 
 describe('store', () => {
   it('should create store', () => {
     const store = createStore();
-    expect(store.getState).toBeDefined();
-    expect(store.pick).toBeDefined();
+    expect(store.snapshot).toBeDefined();
     expect(store.dispatch).toBeDefined();
     expect(store.subscribe).toBeDefined();
     expect(store.select).toBeDefined();
@@ -22,48 +20,48 @@ describe('store', () => {
 
   it('should pick state', () => {
     const store = createStore();
-    expect(store.getState()).toEqual({});
-    expect(store.pick(Test)).toEqual({ greets: [], count: 0 });
-    expect(store.getState()).toEqual({ test: { greets: [], count: 0 } });
+    expect(store.snapshot()).toEqual({});
+    expect(store.select(testBox)).toEqual({ greets: [], count: 0 });
+    expect(store.snapshot()).toEqual({ test: { greets: [], count: 0 } });
   });
 
   it('should preload state', () => {
     const store = createStore({ test: { greets: ['PRELOAD'], count: 1 } });
-    expect(store.pick(Test)).toEqual({ greets: ['PRELOAD'], count: 1 });
+    expect(store.select(testBox)).toEqual({ greets: ['PRELOAD'], count: 1 });
   });
 
   it('should dispatch mutations', () => {
     const store = createStore({ test: { greets: ['MUTATION_PRELOAD'], count: 1 } });
     const r1 = store.dispatch(mergeTest({ greets: ['MUTATION'] }));
     expect(r1).toEqual({ greets: ['MUTATION'] });
-    expect(store.pick(Test).greets).toEqual(['MUTATION_PRELOAD', 'MUTATION']);
+    expect(store.select(testBox).greets).toEqual(['MUTATION_PRELOAD', 'MUTATION']);
   });
 
   it('should dispatch action', async () => {
     const store = createStore({ test: { greets: ['ACTION_PRELOAD'], count: 1 } });
     const r1 = await store.dispatch(addGreet('ACTION'));
     expect(r1).toEqual({ greets: ['ACTION'], count: 2 });
-    expect(store.pick(Test).greets).toEqual(['ACTION_PRELOAD', 'ACTION']);
+    expect(store.select(testBox).greets).toEqual(['ACTION_PRELOAD', 'ACTION']);
   });
 
   it('should dispatch event', () => {
     const store = createStore({ test: { greets: ['EVENT_PRELOAD'], count: 1 } });
-    store.pick(Test);
+    store.select(testBox);
     const r1 = store.dispatch(logout(2));
     expect(r1.count).toEqual(2);
-    expect(store.pick(Test)).toEqual({ greets: [], count: 2 });
+    expect(store.select(testBox)).toEqual({ greets: [], count: 2 });
   });
 
   it('should batch dispatch', async () => {
     const store = createStore({ test: { greets: ['PRELOAD'], count: 1 } });
-    store.pick(Test);
+    store.select(testBox);
     const [r1, r2, r3] = await Promise.all(
       store.dispatch([logout(2), mergeTest({ greets: ['M1', 'M2'] }), addGreet('ADD')]),
     );
     expect(r1.count).toBe(2);
     expect(r2.greets).toEqual(['M1', 'M2']);
     expect(r3).toEqual({ greets: ['ADD'], count: 3 });
-    expect(store.pick(Test).greets).toEqual(['M1', 'M2', 'ADD']);
+    expect(store.select(testBox).greets).toEqual(['M1', 'M2', 'ADD']);
   });
 
   it('should notify listeners', async () => {

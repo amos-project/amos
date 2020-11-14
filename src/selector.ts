@@ -4,6 +4,7 @@
  */
 
 import { Select } from './store';
+import { is, strictEqual } from './utils';
 
 /**
  * A `Selector` is a selectable function, the result of select it is the reutrn
@@ -16,14 +17,8 @@ import { Select } from './store';
  */
 export interface Selector<R = any, A extends any[] = any[]> {
   (select: Select): R;
-  /** @internal */
-  deps?: false | ((select: Select, ...args: A) => unknown[]);
-  /** @internal */
-  compare?: (oldResult: R, newResult: R) => boolean;
-  /** @internal */
-  factory?: SelectorFactory<A, R>;
-  /** @internal */
   args?: A;
+  factory?: SelectorFactory<A, R>;
 }
 
 /**
@@ -31,6 +26,9 @@ export interface Selector<R = any, A extends any[] = any[]> {
  */
 export interface SelectorFactory<A extends any[], R> {
   (...args: A): Selector<R, A>;
+  (select: Select, ...args: A): R;
+  deps: undefined | false | ((select: Select, ...args: A) => unknown[]);
+  compare: (oldResult: R, newResult: R) => boolean;
 }
 
 /**
@@ -60,15 +58,20 @@ export interface SelectorFactory<A extends any[], R> {
 export function selector<A extends any[], R>(
   fn: (select: Select, ...args: A) => R,
   deps?: false | ((select: Select, ...args: A) => unknown[]),
-  compare?: (oldResult: R, newResult: R) => boolean,
+  compare: (oldResult: R, newResult: R) => boolean = strictEqual,
 ): SelectorFactory<A, R> {
-  const factory: SelectorFactory<A, R> = (...args) => {
-    const selector: Selector<R, A> = (select) => fn(select, ...args);
-    selector.deps = deps;
-    selector.compare = compare;
-    selector.factory = factory;
-    selector.args = args;
-    return selector;
-  };
+  const factory: SelectorFactory<A, R> = Object.assign(
+    (...args: any[]): any => {
+      const a0 = args[0];
+      if (is<Select>('store.select', a0)) {
+        return fn(...(args as [Select, ...A]));
+      }
+      const selector: Selector<R, A> = (select) => fn(select, ...(args as A));
+      selector.factory = factory;
+      selector.args = args as A;
+      return selector;
+    },
+    { deps, compare },
+  );
   return factory;
 }

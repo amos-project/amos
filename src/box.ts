@@ -3,7 +3,7 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { EventFactory } from './event';
+import { SignalFactory } from './signal';
 
 declare const __magicType: unique symbol;
 
@@ -46,6 +46,26 @@ export type JSONState<S> = JSONValue<
 >;
 
 /**
+ * A `Mutation` is a dispatchable object, which will update the
+ * target box's state **synchronously** when you dispatch it.
+ * The only way to create a `Mutation` is call the `MutationFactory`
+ * which is created by calling `mutation()` method. You don't need
+ * to pay attention to any properties of the `Mutation`.
+ *
+ * The return value of dispatch it is the action.
+ *
+ * @stable
+ */
+export interface Mutation<R = any, A extends any[] = any[], S = any> {
+  object: 'mutation';
+  type: string | undefined;
+  box: Box<S>;
+  args: A;
+  result: R;
+  mutator: (state: S, ...args: A) => S;
+}
+
+/**
  * A `Box` is an object to keep the information of a state node, includes
  * the `key`, `initialState`, and the state transformer.
  *
@@ -56,15 +76,36 @@ export type JSONState<S> = JSONValue<
  *
  * @stable
  */
-export interface Box<S = any> {
-  /** @internal */
+export class Box<S = any> {
   readonly key: string;
-  /** @internal */
   readonly initialState: S;
-  /** @internal */
-  readonly listeners: [EventFactory<any, any>, (state: S, data: any) => S][];
-  /** @internal */
+  readonly listeners: Record<string, (state: S, data: any) => S>;
   readonly preload: (preloadedState: JSONState<S>, state: S) => S;
+
+  /**
+   * Create a box.
+   *
+   * @param key the key of the box, it is used for keeping the relation of the box
+   *            and its state in a store, it **SHOULD** be unique in your project.
+   * @param initialState the initial state of the box, the state of a box **SHOULD**
+   *                     be immutable, which means the mutators (include the mutations
+   *                     and event subscribers) should return a new state if the updates
+   *                     the state.
+   * @param preload a function to transform the preloaded state to the state of the box
+   *
+   * @stable
+   */
+  constructor(
+    key: string,
+    initialState: S,
+    preload: (preloadedState: JSONState<S>, state: S) => S,
+  ) {
+    this.key = key;
+    this.initialState = initialState;
+    this.preload = preload;
+    this.listeners = {};
+  }
+
   /**
    * subscribe an `event`, the `fn` will be called when you call
    * `store.dispatch(event(data))`, the first parameter of `fn` is
@@ -75,33 +116,14 @@ export interface Box<S = any> {
    * @param event the event factory
    * @param fn the callback
    */
-  readonly subscribe: <T>(event: EventFactory<any, T>, fn: (state: S, data: T) => S) => void;
-}
+  subscribe<T>(event: string | SignalFactory<any, T>, fn: (state: S, data: T) => S) {
+    this.listeners[typeof event === 'string' ? event : event.type] = fn;
+  }
 
-/**
- * Create a box.
- *
- * @param key the key of the box, it is used for keeping the relation of the box
- *            and its state in a store, it **SHOULD** be unique in your project.
- * @param initialState the initial state of the box, the state of a box **SHOULD**
- *                     be immutable, which means the mutators (include the mutations
- *                     and event subscribers) should return a new state if the updates
- *                     the state.
- * @param preload a function to transform the preloaded state to the state of the box
- *
- * @stable
- */
-export function box<S>(
-  key: string,
-  initialState: S,
-  preload: (preloadedState: JSONState<S>, state: S) => S,
-): Box<S> {
-  const listeners: Box<S>['listeners'] = [];
-  return {
-    key,
-    initialState,
-    preload,
-    listeners,
-    subscribe: (event, fn) => listeners.push([event, fn]),
-  };
+  mutation<A extends any[]>(
+    mutator: (state: S, ...args: A) => S,
+    type?: string,
+  ): (...args: A) => Mutation<A[0], A, S> {
+    return (...args) => ({ object: 'mutation', type, box: this, args, result: args[0], mutator });
+  }
 }

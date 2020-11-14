@@ -16,9 +16,11 @@ import { Dispatch, Select } from './store';
  *
  * @stable
  */
-export interface Action<R> {
-  type?: string;
-  (dispatch: Dispatch, select: Select): R;
+export interface Action<R = any, A extends any[] = any> {
+  object: 'action';
+  type: string | undefined;
+  args: A[];
+  actor: (dispatch: Dispatch, select: Select, ...args: A) => R;
 }
 
 /**
@@ -28,7 +30,8 @@ export interface Action<R> {
  * @stable
  */
 export interface ActionFactory<A extends any[], R> {
-  (...args: A): Action<R>;
+  type: string | undefined;
+  (...args: A): Action<R, A>;
 }
 
 /**
@@ -45,10 +48,8 @@ export interface ActionFactory<A extends any[], R> {
 export function action<A extends any[], R>(
   actor: (dispatch: Dispatch, select: Select, ...args: A) => R,
   type?: string,
-) {
-  return (...args: A) => {
-    const action: Action<R> = (dispatch, select) => actor(dispatch, select, ...args);
-    action.type = type;
-    return action;
-  };
+): ActionFactory<A, R> {
+  return Object.assign((...args: A): Action<R, A> => ({ object: 'action', type, args, actor }), {
+    type,
+  });
 }

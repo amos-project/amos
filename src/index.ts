@@ -3,10 +3,9 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-export { JSONState, Box, box } from './box';
-export { Mutation, MutationFactory, mutation } from './mutation';
+export { JSONState, Mutation, Box } from './box';
 export { Action, ActionFactory, action } from './action';
-export { Event, EventFactory, event } from './event';
+export { Signal, SignalFactory, signal } from './signal';
 export { Selector, SelectorFactory, selector } from './selector';
 export { Dispatchable, Dispatch, Store, createStore } from './store';
 export { ProviderProps, Provider, ConsumerProps, Consumer } from './context';
