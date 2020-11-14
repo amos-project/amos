@@ -67,6 +67,13 @@ describe('useSelector', () => {
     expect(result.current).toEqual([4, 8]);
   });
 
+  it('should update - box', () => {
+    const { result, dispatch } = renderUseSelector(() => [countBox] as const);
+    expect(result.current).toEqual([0]);
+    dispatch(increment());
+    expect(result.current).toEqual([1]);
+  });
+
   it('should respect deps', async () => {
     const defaultFn = fn((select: Select, times: number) => select(testBox).count * times);
     const strictFn = fn((select: Select, times: number) => select(testBox).count * times);

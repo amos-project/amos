@@ -17,6 +17,7 @@ import { is, strictEqual } from './utils';
  */
 export interface Selector<R = any, A extends any[] = any[]> {
   (select: Select): R;
+  type?: string | undefined;
   args?: A;
   factory?: SelectorFactory<A, R>;
 }
@@ -27,6 +28,7 @@ export interface Selector<R = any, A extends any[] = any[]> {
 export interface SelectorFactory<A extends any[], R> {
   (...args: A): Selector<R, A>;
   (select: Select, ...args: A): R;
+  type: string | undefined;
   deps: undefined | ((select: Select, ...args: A) => unknown[]);
   compare: (oldResult: R, newResult: R) => boolean;
 }
@@ -52,6 +54,7 @@ export interface SelectorFactory<A extends any[], R> {
  * @param compare the compare function, determines the selected result is
  *                updated or not, if it returns true, the component will
  *                rerender. The default compare function is strict equal (`===`).
+ * @param type the optional type for display in react devtools
  *
  * @stable
  */
@@ -59,6 +62,7 @@ export function selector<A extends any[], R>(
   fn: (select: Select, ...args: A) => R,
   deps?: (select: Select, ...args: A) => unknown[],
   compare: (oldResult: R, newResult: R) => boolean = strictEqual,
+  type?: string,
 ): SelectorFactory<A, R> {
   const factory: SelectorFactory<A, R> = Object.assign(
     (...args: any[]): any => {
@@ -71,7 +75,7 @@ export function selector<A extends any[], R>(
       selector.args = args as A;
       return selector;
     },
-    { deps, compare },
+    { deps, compare, type },
   );
   return factory;
 }

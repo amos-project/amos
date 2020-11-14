@@ -3,7 +3,7 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { useContext, useReducer, useRef } from 'react';
+import { useContext, useDebugValue, useReducer, useRef } from 'react';
 import { __Context } from './context';
 import { Selector } from './selector';
 import { Dispatch, Selectable, Snapshot, Store } from './store';
@@ -183,8 +183,9 @@ export function useSelector<Rs extends Selectable[]>(...selectors: Rs): MapSelec
                   results[i] = newResult;
                 }
               }
-            } else {
-              results[i] = store.select(selector);
+            } else if (updatedState.hasOwnProperty(selector.key)) {
+              results[i] = updatedState[selector.key];
+              lastStore.current!.updated = true;
             }
           }
           lastStore.current!.updated && update();
@@ -204,33 +205,48 @@ export function useSelector<Rs extends Selectable[]>(...selectors: Rs): MapSelec
     lastStore.current.error = void 0;
     throw error;
   }
+  let selectedState: any;
   if (lastStore.current.updated) {
     lastStore.current.updated = false;
-    return lastSelector.current.results as any;
-  }
-  if (lastSelector.current === defaultSelectorRef) {
-    lastSelector.current = { selectors: [], deps: [], snapshots: [], results: [] };
-  }
-  // updates from outside
-  const { selectors: oldSelectors, deps, snapshots, results } = lastSelector.current;
-  for (let i = 0; i < selectors.length; i++) {
-    const old = oldSelectors[i];
-    const newly = selectors[i];
-    if (typeof newly === 'object') {
-      results[i] = store.select(newly);
-      oldSelectors[i] = newly;
-    } else {
-      const newDeps = selectorChanged(old, newly, snapshots[i], store, deps[i]);
-      if (newDeps) {
-        snapshots[i] = void 0;
-        const newSnapshot: Snapshot = {};
-        results[i] = store.select(newly, newSnapshot);
-        deps[i] = newDeps === true ? void 0 : newDeps;
-        snapshots[i] = newSnapshot;
+    selectedState = lastSelector.current.results;
+  } else {
+    if (lastSelector.current === defaultSelectorRef) {
+      lastSelector.current = { selectors: [], deps: [], snapshots: [], results: [] };
+    }
+    // updates from outside
+    const { selectors: oldSelectors, deps, snapshots, results } = lastSelector.current;
+    for (let i = 0; i < selectors.length; i++) {
+      const old = oldSelectors[i];
+      const newly = selectors[i];
+      if (typeof newly === 'object') {
+        results[i] = store.select(newly);
         oldSelectors[i] = newly;
+      } else {
+        const newDeps = selectorChanged(old, newly, snapshots[i], store, deps[i]);
+        if (newDeps) {
+          snapshots[i] = void 0;
+          const newSnapshot: Snapshot = {};
+          results[i] = store.select(newly, newSnapshot);
+          deps[i] = newDeps === true ? void 0 : newDeps;
+          snapshots[i] = newSnapshot;
+          oldSelectors[i] = newly;
+        }
       }
     }
+    results.length = selectors.length;
+    selectedState = results;
   }
-  results.length = selectors.length;
-  return results as any;
+  // TODO: print friendly with selector names
+  useDebugValue(selectedState, (value: any[]) => {
+    return value.reduce((map, value, index) => {
+      const s = selectors[index];
+      let type = typeof s === 'function' ? s.type ?? s.factory?.type ?? s.name : s.key;
+      if (map.hasOwnProperty(type)) {
+        type = type + '_' + index;
+      }
+      map[type] = value;
+      return map;
+    }, {} as any);
+  });
+  return selectedState;
 }
