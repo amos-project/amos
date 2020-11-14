@@ -7,8 +7,16 @@ export { JSONState, Mutation, Box } from './box';
 export { Action, ActionFactory, action } from './action';
 export { Signal, SignalFactory, signal } from './signal';
 export { Selector, SelectorFactory, selector } from './selector';
-export { Dispatchable, Dispatch, Store, createStore } from './store';
+export {
+  Dispatchable,
+  Dispatch,
+  Selectable,
+  Select,
+  Snapshot,
+  StoreEnhancer,
+  Store,
+  createStore,
+} from './store';
 export { ProviderProps, Provider, ConsumerProps, Consumer } from './context';
-export { ConnectedProps, connect } from './connect';
-export { useStore, useDispatch, useSelector } from './hooks';
+export { useStore, useDispatch, MapSelector, useSelector } from './hooks';
 export { identity } from './utils';

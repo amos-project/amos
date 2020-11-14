@@ -1,6 +1,6 @@
 {
   "name": "amos",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "A decentralized state manager for react",
   "keywords": [
     "react",

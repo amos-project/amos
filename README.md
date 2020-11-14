@@ -1,15 +1,25 @@
 # amos
 
-Amos is a decentralized state manager for react, inspired by Redux, Vuex and Recoil.
+Amos is a decentralized state manager for `React`, inspired by `Redux`, `Vuex` and `Recoil`.
 
 ## Highlights
 
-- **😘 Decentralized**, no `compose`, no `root`, state is registered automatically
-- **😍 Out of the box**, no `plugins`, no `middlewares`, no `toolkits`, and no `xxx-react`
-- **🥰 Fast**, `selector` is cached, only subscribed component will update
-- **🤩 Lightweight**, the package size is only `2.7kb` after gzip
-- **😲 Tiny**, `functional`, no `reducers`, every dead line could be dropped by [Tree-shaking](https://developer.mozilla.org/en-US/docs/Glossary/Tree_shaking)
-- **🥳 Strong typed**, all the API has explicit params and return types with TypeScript
+- **😘 Decentralized**, no `rootReducer` or `combineReducers`, state is registered automatically
+- **🥰 High performance**, many outstanding performance optimizations, especially with
+  [cached selectors](#selector-caches) and [transactions](#transactions)
+- **🥳 Out of the box**, no `plugins`, no `middlewares`, no `toolkits`, and no `xxx-react`
+
+And more:
+
+- **Strong typed**, all the API has explicit params and return types with TypeScript
+- **Lightweight**, the package size is less than `3kb` after gzip, and
+  [Tree-shaking](https://developer.mozilla.org/en-US/docs/Glossary/Tree_shaking) friendly
+- **Complete**, supports [server-side rendering(SSR)](#server-side-renderingssr),
+  [hooks](#with-hooks) and [class components](#with-class-components)
+- **Easy to use**
+  - The core concepts and API is similar to `Redux`
+  - Easy to hybrid with redux: [`amos-redux`](https://github.com/acrazing/amos-redux)
+  - Works with `redux-devtools` for development: [`amos-redux-devtools`](https://github.com/acrazing/amos-redux-devtools)
 
 **WARNING: THE API IS DESIGNING**
 
@@ -17,34 +27,38 @@ Amos is a decentralized state manager for react, inspired by Redux, Vuex and Rec
 
 - [Installation](#installation)
 - [Quick start](#quick-start)
+- [Examples](#examples)
+  - [TodoMVC](#todomvc)
 - [Concepts](#concepts)
   - [Store](#store)
   - [Boxes](#boxes)
   - [Mutations](#mutations)
   - [Actions](#actions)
-  - [Events](#events)
+  - [Signals](#signals)
   - [Selectors](#selectors)
 - [React integration](#react-integration)
-  - [With hooks](#with-hooks)
+  - [With react hooks](#with-react-hooks)
   - [With class components](#with-class-components)
 - [Receipts](#receipts)
   - [Transactions](#transactions)
   - [Selector caches](#selector-caches)
   - [Server side rendering(SSR)](#server-side-renderingssr)
+  - [Hybrid with `Redux`](#hybrid-with-redux)
+  - [Devtools](#devtools)
 - [API Reference](#api-reference)
   - Core
   - [box()](#box)
     - [box.subscribe()](#boxsubscribe)
-  - [mutation()](#mutation)
+    - [box.mutation()](#boxmutation)
   - [action()](#action)
-  - [event()](#event)
+  - [signal()](#signal)
   - [selector()](#selector)
   - [createStore()](#createstore)
-    - [store.snapshot()](#storesnapshot)
     - [store.dispatch()](#storedispatch)
-    - [store.subscribe()](#storesubscribe)
     - [store.select()](#storeselect)
-  - React binding
+    - [store.snapshot()](#storesnapshot)
+    - [store.subscribe()](#storesubscribe)
+  - React integration
   - [\<Provider />](#provider-)
   - [\<Consumer />](#consumer-)
   - [useSelector()](#useselector)
@@ -89,10 +103,10 @@ Amos is a decentralized state manager for react, inspired by Redux, Vuex and Rec
 ```typescript jsx
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { box, mutation, createStore, Provider, useDispatch, useSelector } from 'amos';
+import { Box, createStore, Provider, useDispatch, useSelector, identity } from 'amos';
 
-const countBox = box('count', 0, (p) => p);
-const increment = mutation(countBox, (state) => state++);
+const countBox = new Box('count', 0, identity);
+const increment = countBox.mutation((state) => state + 1);
 
 function Count() {
   const dispatch = useDispatch();
@@ -114,6 +128,12 @@ ReactDOM.render(
   document.querySelector('#root'),
 );
 ```
+
+## Examples
+
+### TodoMVC
+
+[![Edit Amos - TodoMVC](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/new-bush-40rzm?fontsize=14&hidenavigation=1&theme=dark)
 
 ## Concepts
 
@@ -189,7 +209,7 @@ So, the result of the above code will print `[0, 1]` in console.
 
 A `box` is a container to keep some metadata of a state node, such as the
 key in store, and initial state of the box, etc. The `box` is the key object
-to associate `store` and `mutations`, `selectors` and `events`. You can use
+to associate `store` and `mutations`, `selectors` and `signals`. You can use
 [`box()`](#box) to create a `box`:
 
 ```typescript
@@ -233,7 +253,7 @@ need transform, you can use `identity` to use `preloadedState` directly, which i
 provided by `amos` as the `countBox` created above.
 
 In most cases, you only need to use the box itself, without paying attention to the
-methods or properties it provides, except when you need to subscribe to [events](#events).
+methods or properties it provides, except when you need to subscribe to [signals](#signals).
 
 ### Mutations
 
@@ -271,7 +291,7 @@ to `1`. The value of `result` should be `1`.
 ### Actions
 
 An `action` is an object which will do something asynchronous or synchronous, and
-dispatch some `Mutations`, `Events`, other `Actions` when it is dispatched.
+dispatch some `Mutations`, `Signals`, other `Actions` when it is dispatched.
 
 You can create an `ActionFactory` by calling [`action()`](#action):
 
@@ -299,19 +319,19 @@ when the `ActionFactory` is called. The `dispatch` and `select` are the
 allow you to dispatch some dispatchable things and select states. The return
 value of `store.dispatch(action)` is the return value of `actor`.
 
-### Events
+### Signals
 
-An `EventFactory` is a function to create an `Event`, and could be subscribed by
-a `box`. An `Event` is an object, which while trigger the subscribed `boxes`
+An `SignalFactory` is a function to create an `Signal`, and could be subscribed by
+a `box`. An `Signal` is an object, which while trigger the subscribed `boxes`
 to mutate these states when you dispatch it.
 
-You can create an `EventFactory` by calling [`event()`](#event), and subscribe its
-`Events` by calling [`box.subscribe()`](#boxsubscribe):
+You can create an `SignalFactory` by calling [`signal()`](#signal), and subscribe its
+`Signals` by calling [`box.subscribe()`](#boxsubscribe):
 
 ```typescript
-import { event } from 'amos';
+import { signal } from 'amos';
 
-export const reset = event((count: number) => ({ count }));
+export const reset = signal((count: number) => ({ count }));
 
 countBox.subscribe(reset, (state, data) => data.count);
 
@@ -320,13 +340,13 @@ store.select(countBox);
 store.dispatch(reset(1));
 ```
 
-The function [`event()`](#event) accepts one optional parameter called `creator` and
-returns a `EventFactory`. The `creator` is an optional function, which is called when
-you call `EventFactory`, its return value will be used as the second parameter of the
+The function [`signal()`](#signal) accepts one optional parameter called `creator` and
+returns a `SignalFactory`. The `creator` is an optional function, which is called when
+you call `SignalFactory`, its return value will be used as the second parameter of the
 subscribers and the return value of [`store.dispatch()`](#storedispatch) when you
 dispatch it.
 
-**Please note that an event will only be dispatched to the boxes which is invoked
+**Please note that an signal will only be dispatched to the boxes which is invoked
 already(`select(box)` and `dispatch(mutation)` will invoke the relative `box`
 automatically).**
 
@@ -411,7 +431,7 @@ ReactDOM.render(
 );
 ```
 
-### With hooks
+### With react hooks
 
 With react hooks, you can use [`useSelector()`](#useselector)
 to select states and use `useDispatch()` to get the
@@ -556,16 +576,16 @@ in the `1th` form in your asynchronous actions.** For example:
 const exampleAction = action(async (dispatch) => {
   dispatch(actionA());
   dispatch(mutationB());
-  dispatch(eventC());
+  dispatch(signalC());
   // the upon three dispatches are in one transaction
 
   await doSomething();
   dispatch(actionD());
   dispatch(mutationE());
-  dispatch(eventF());
+  dispatch(signalF());
   // the upon three dispatches are three separate transaction
 
-  dispatch([actionG(), mutationH(), eventI()]);
+  dispatch([actionG(), mutationH(), signalI()]);
   // the upon dispatch will dispatch the three dispatchable in a transaction
 });
 ```
@@ -643,6 +663,10 @@ In client side, you can read it as the preloaded state to create the store:
 const store = createStore(__INITIAL_STATE__);
 ```
 
+### Hybrid with redux
+
+### Devtools
+
 ## API Reference
 
 ### box()
@@ -657,7 +681,7 @@ function box<S>(
 ): Box<S>;
 
 interface Box<S> {
-  subscribe<D>(event: EventFactory<any[], D>, fn: (state: S, data: D) => S): void;
+  subscribe<D>(signal: SignalFactory<any[], D>, fn: (state: S, data: D) => S): void;
 }
 ```
 
@@ -665,11 +689,11 @@ interface Box<S> {
 
 #### box.subscribe()
 
-`box.subscribe(event, fn)` let the box mutate its state when the `event` is dispatched.
+`box.subscribe(signal, fn)` let the box mutate its state when the `signal` is dispatched.
 
-### mutation()
+#### box.mutation()
 
-`mutation()` is the **ONLY** way to create a `MutationFactory`:
+`box.mutation()` is the **ONLY** way to create a `MutationFactory`:
 
 ```typescript jsx
 function mutation<S, A>(
@@ -699,21 +723,21 @@ export interface Action<R> {
 
 **Action** is `dispatchable`.
 
-### event()
+### signal()
 
-`event()` is **ONLY** way to create an `EventFactory`:
+`signal()` is **ONLY** way to create an `SignalFactory`:
 
 ```typescript jsx
-function event(): () => Event<void>;
+function signal(): () => Signal<void>;
 
-function event<D>(): (data: D) => Event<D>;
+function signal<D>(): (data: D) => Signal<D>;
 
-function event<A extends any[], D>(creator: (...args: A) => D): (...args: A) => Event<D>;
+function signal<A extends any[], D>(creator: (...args: A) => D): (...args: A) => Signal<D>;
 
-export interface Event<D> {}
+export interface Signal<D> {}
 ```
 
-**Event** is `dispatchable**.`
+**Signal** is `dispatchable**.`
 
 ### selector()
 
@@ -750,10 +774,6 @@ interface Store {
 }
 ```
 
-#### store.snapshot()
-
-`store.snapshot()` returns the state's snapshot.
-
 #### store.dispatch()
 
 `store.dispatch()` dispatch one or more `dispatchable` to mutate the state and
@@ -766,10 +786,6 @@ interface Dispatch {
 }
 ```
 
-#### store.subscribe()
-
-`store.subscripbe(fn)` subscribes the updates.
-
 #### store.select()
 
 `store.select()` select a `selectable`:
@@ -779,6 +795,14 @@ interface Select {
   <R>(selectable: Selectable<R>, allocator?: [Record<string, unknown>?]): R;
 }
 ```
+
+#### store.snapshot()
+
+`store.snapshot()` returns the state's snapshot.
+
+#### store.subscribe()
+
+`store.subscripbe(fn)` subscribes the updates.
 
 ### \<Provider />
 

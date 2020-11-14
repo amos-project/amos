@@ -27,7 +27,7 @@ export interface Selector<R = any, A extends any[] = any[]> {
 export interface SelectorFactory<A extends any[], R> {
   (...args: A): Selector<R, A>;
   (select: Select, ...args: A): R;
-  deps: undefined | false | ((select: Select, ...args: A) => unknown[]);
+  deps: undefined | ((select: Select, ...args: A) => unknown[]);
   compare: (oldResult: R, newResult: R) => boolean;
 }
 
@@ -57,7 +57,7 @@ export interface SelectorFactory<A extends any[], R> {
  */
 export function selector<A extends any[], R>(
   fn: (select: Select, ...args: A) => R,
-  deps?: false | ((select: Select, ...args: A) => unknown[]),
+  deps?: (select: Select, ...args: A) => unknown[],
   compare: (oldResult: R, newResult: R) => boolean = strictEqual,
 ): SelectorFactory<A, R> {
   const factory: SelectorFactory<A, R> = Object.assign(
