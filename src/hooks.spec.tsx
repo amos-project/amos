@@ -3,7 +3,7 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { renderHook, RenderHookResult } from '@testing-library/react-hooks';
+import { act, renderHook, RenderHookResult } from '@testing-library/react-hooks';
 import React, { FC, memo } from 'react';
 import { addGreet } from './action.spec';
 import { countBox, increment, testBox } from './box.spec';
@@ -67,10 +67,10 @@ describe('useSelector', () => {
     expect(result.current).toEqual([4, 8]);
   });
 
-  it('should update - box', () => {
+  it('should update - box', async () => {
     const { result, dispatch } = renderUseSelector(() => [countBox] as const);
     expect(result.current).toEqual([0]);
-    dispatch(increment());
+    act(() => dispatch(increment()));
     expect(result.current).toEqual([1]);
   });
 
@@ -108,7 +108,7 @@ describe('useSelector', () => {
     rerender({ multiply: 2 });
     expectCalled(true, true, true);
     expect(result.current).toEqual([4, 4, 2, 1]);
-    dispatch(increment());
+    act(() => dispatch(increment()));
     expectCalled(false, false, false);
     expect(result.current).toEqual([4, 4, 2, 2]);
   });
