@@ -184,8 +184,9 @@ export function useSelector<Rs extends Selectable[]>(...selectors: Rs): MapSelec
                 }
               }
             } else if (updatedState.hasOwnProperty(selector.key)) {
-              results[i] = updatedState[selector.key];
-              lastStore.current!.updated = true;
+              const newState = store.select(selector);
+              lastStore.current!.updated = newState !== results[i];
+              results[i] = newState;
             }
           }
           lastStore.current!.updated && update();
