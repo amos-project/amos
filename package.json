@@ -1,6 +1,6 @@
 {
   "name": "amos",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "A decentralized state manager for react",
   "keywords": [
     "react",
@@ -28,7 +28,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:acrazing/dpdm.git"
+    "url": "git@github.com:acrazing/amos.git"
   },
   "license": "MIT",
   "devDependencies": {
