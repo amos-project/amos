@@ -7,7 +7,7 @@ import { Action } from './action';
 import { Box, Mutation } from './box';
 import { Selector } from './selector';
 import { Signal } from './signal';
-import { defineObject, isArray } from './utils';
+import { AmosObject, defineAmosObject, isArray } from './utils';
 
 /**
  * the state snapshot in store
@@ -24,12 +24,11 @@ export type Snapshot = Record<string, unknown>;
 export type Dispatchable<R = any> = Mutation<R> | Action<R> | Signal<R>;
 
 /**
- * dispatch
+ * base amos signature, this is used for someone want to change the signature of useDispatch()
  *
  * @stable
  */
-export interface Dispatch {
-  object: 'store.dispatch';
+export interface AmosDispatch extends AmosObject<'store.dispatch'> {
   <R>(task: Dispatchable<R>): R;
   <R1>(tasks: readonly [Dispatchable<R1>]): [R1];
   <R1, R2>(tasks: readonly [Dispatchable<R1>, Dispatchable<R2>]): [R1, R2];
@@ -99,6 +98,8 @@ export interface Dispatch {
   <R>(tasks: readonly Dispatchable<R>[]): R[];
 }
 
+export interface Dispatch extends AmosDispatch {}
+
 /**
  * selectable things
  *
@@ -111,9 +112,8 @@ export type Selectable<R = any> = Box<R> | Selector<R>;
  *
  * @stable
  */
-export interface Select {
+export interface Select extends AmosObject<'store.select'> {
   <R>(selectable: Selectable<R>, snapshot?: Snapshot): R;
-  object: 'store.select';
 }
 
 /**
@@ -211,25 +211,28 @@ export function createStore(preloadedState?: Snapshot, ...enhancers: StoreEnhanc
         }
       };
     },
-    dispatch: defineObject('store.dispatch', (tasks: Dispatchable | readonly Dispatchable[]) => {
-      if (++dispatchDepth === 1) {
-        dispatchingSnapshot = {};
-      }
-      try {
-        if (isArray(tasks)) {
-          return tasks.map(exec);
-        } else {
-          return exec(tasks);
+    dispatch: defineAmosObject(
+      'store.dispatch',
+      (tasks: Dispatchable | readonly Dispatchable[]) => {
+        if (++dispatchDepth === 1) {
+          dispatchingSnapshot = {};
         }
-      } finally {
-        if (--dispatchDepth === 0) {
-          if (Object.keys(dispatchingSnapshot).length > 0) {
-            listeners.forEach((fn) => fn(dispatchingSnapshot));
+        try {
+          if (isArray(tasks)) {
+            return tasks.map(exec);
+          } else {
+            return exec(tasks);
+          }
+        } finally {
+          if (--dispatchDepth === 0) {
+            if (Object.keys(dispatchingSnapshot).length > 0) {
+              listeners.forEach((fn) => fn(dispatchingSnapshot));
+            }
           }
         }
-      }
-    }),
-    select: defineObject('store.select', (selectable: Selectable, snapshot?: Snapshot): any => {
+      },
+    ),
+    select: defineAmosObject('store.select', (selectable: Selectable, snapshot?: Snapshot): any => {
       if (typeof selectable === 'function') {
         if (snapshot) {
           if (selectingSnapshot) {
@@ -254,8 +257,6 @@ export function createStore(preloadedState?: Snapshot, ...enhancers: StoreEnhanc
     }),
   };
   store = enhancers.reduce((previousValue, currentValue) => currentValue(previousValue), store);
-  store.dispatch = defineObject('store.dispatch', store.dispatch);
-  store.select = defineObject('store.select', store.select);
   if (typeof process === 'object' && process.env.NODE_ENV === 'development') {
     Object.freeze(store);
   }

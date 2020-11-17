@@ -19,4 +19,6 @@ export {
 } from './store';
 export { ProviderProps, Provider, ConsumerProps, Consumer } from './context';
 export { useStore, useDispatch, MapSelector, useSelector } from './hooks';
-export { identity } from './utils';
+export { identity, shallowEqual, isAmosObject, hoistMethod } from './utils';
+
+export const VERSION = '__VERSION__';

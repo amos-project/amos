@@ -4,7 +4,7 @@
  */
 
 import { Select } from './store';
-import { is, strictEqual } from './utils';
+import { isAmosObject, strictEqual } from './utils';
 
 /**
  * A `Selector` is a selectable function, the result of select it is the reutrn
@@ -67,7 +67,7 @@ export function selector<A extends any[], R>(
   const factory: SelectorFactory<A, R> = Object.assign(
     (...args: any[]): any => {
       const a0 = args[0];
-      if (is<Select>('store.select', a0)) {
+      if (isAmosObject<Select>('store.select', a0)) {
         return fn(...(args as [Select, ...A]));
       }
       const selector: Selector<R, A> = (select) => fn(select, ...(args as A));
