@@ -3,13 +3,32 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { Box } from './box';
+import { Box, JSONState } from './box';
 import { logout } from './signal.spec';
 import { createStore } from './store';
 import { identity } from './utils';
 import fn = jest.fn;
 
 export const countBox = new Box('count', 0, identity);
+
+export function testTs() {
+  interface Foo {
+    id: number;
+  }
+
+  interface Bar {
+    name: string;
+  }
+
+  interface Zoo {
+    toJSON(): [Foo, Bar];
+  }
+
+  const zoo: JSONState<Zoo> = void 0 as any;
+
+  zoo[0].id;
+  zoo[1].name;
+}
 
 export interface TestStateModel {
   greets: string[];

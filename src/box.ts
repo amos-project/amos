@@ -36,8 +36,6 @@ type JSONValue<R> = R extends { [__magicType]: infer E } ? E : R;
 export type JSONState<S> = JSONValue<
   S extends { toJSON(): infer R }
     ? { [__magicType]: JSONState<R> }
-    : S extends (infer E)[]
-    ? { [__magicType]: JSONState<E>[] }
     : S extends object
     ? {
         [P in keyof S]: JSONState<S[P]>;
