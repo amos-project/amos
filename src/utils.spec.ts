@@ -64,6 +64,12 @@ describe('utils', () => {
     expect(arrayEqual([1, 2, 3], [1, 2, 3])).toBe(true);
     expect(arrayEqual([1, 2, 3, 4], [1, 2, 3])).toBe(false);
     expect(arrayEqual([1, 2, {}], [1, 2, {}])).toBe(false);
+
+    function testArgs() {
+      expect(arrayEqual(arguments, arguments)).toBe(true);
+    }
+
+    testArgs();
   });
 
   it('should get values', () => {

@@ -6,6 +6,7 @@
 import * as amos from './index';
 import {
   action,
+  arrayEqual,
   Box,
   Consumer,
   createStore,
@@ -41,6 +42,7 @@ describe('amos', () => {
       shallowEqual,
       hoistMethod,
       isAmosObject,
+      arrayEqual,
       VERSION,
     });
   });
