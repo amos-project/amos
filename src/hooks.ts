@@ -191,7 +191,7 @@ export function useSelector<Rs extends Selectable[]>(...selectors: Rs): MapSelec
           }
           lastStore.current!.updated && update();
         } catch (e) {
-          snapshots.length = results.length = i - 1;
+          snapshots.length = results.length = i;
           lastStore.current!.error =
             typeof e === 'object' && e
               ? Object.assign(e, { message: '[Amos] selector throws error: ' + e.message })
@@ -243,6 +243,9 @@ export function useSelector<Rs extends Selectable[]>(...selectors: Rs): MapSelec
     return value.reduce((map, value, index) => {
       const s = selectors[index];
       let type = typeof s === 'function' ? s.type ?? s.factory?.type ?? s.name : s.key;
+      if (!type) {
+        type = `anonymous`;
+      }
       if (map.hasOwnProperty(type)) {
         type = type + '_' + index;
       }
