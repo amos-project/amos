@@ -15,7 +15,6 @@
   "umd": "dist/amos.umd.js",
   "types": "dist/index.d.ts",
   "files": [
-    "src/",
     "dist/"
   ],
   "scripts": {

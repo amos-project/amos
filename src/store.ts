@@ -5,7 +5,7 @@
 
 import { Action } from './action';
 import { Box, Mutation } from './box';
-import { Selector } from './selector';
+import { FunctionSelector, Selector, SelectorFactory } from './selector';
 import { Signal } from './signal';
 import { AmosObject, defineAmosObject, isArray } from './utils';
 
@@ -105,7 +105,11 @@ export interface Dispatch extends AmosDispatch {}
  *
  * @stable
  */
-export type Selectable<R = any> = Box<R> | Selector<R>;
+export type Selectable<R = any> =
+  | Box<R>
+  | FunctionSelector<R>
+  | Selector<any[], R>
+  | SelectorFactory<[], R>;
 
 /**
  * select
@@ -113,7 +117,7 @@ export type Selectable<R = any> = Box<R> | Selector<R>;
  * @stable
  */
 export interface Select extends AmosObject<'store.select'> {
-  <R>(selectable: Selectable<R>, snapshot?: Snapshot): R;
+  <R>(selectable: Selectable<R>, discard?: Selectable): R;
 }
 
 /**
@@ -136,11 +140,13 @@ export interface Store {
    * subscribe the mutations
    * @param fn
    */
-  subscribe: (fn: (updatedState: Snapshot) => void) => () => void;
+  subscribe: (fn: () => void) => () => void;
   /**
    * select a selectable thing
    */
   select: Select;
+
+  clearBoxes: (reloadState: boolean) => void;
 }
 
 export type StoreEnhancer = (store: Store) => Store;
@@ -153,10 +159,13 @@ export type StoreEnhancer = (store: Store) => Store;
  * @stable
  */
 export function createStore(preloadedState?: Snapshot, ...enhancers: StoreEnhancer[]): Store {
-  const state: Snapshot = {};
-  const boxes: Box[] = [];
-  const listeners: Array<(updatedSnapshot: Snapshot) => void> = [];
+  let state: Snapshot = {};
+  let boxes: Record<string, Box> = {};
+  const listeners: Array<() => void> = [];
   const ensure = (box: Box) => {
+    if (!boxes.hasOwnProperty(box.key)) {
+      boxes[box.key] = box;
+    }
     if (state.hasOwnProperty(box.key)) {
       return;
     }
@@ -165,18 +174,9 @@ export function createStore(preloadedState?: Snapshot, ...enhancers: StoreEnhanc
       boxState = box.preload(preloadedState[box.key], boxState);
     }
     state[box.key] = boxState;
-    boxes.push(box);
   };
 
   let dispatchDepth = 0;
-  let dispatchingSnapshot: Snapshot = {};
-
-  const record = (key: string, newState: unknown) => {
-    if (newState !== state[key] || dispatchingSnapshot.hasOwnProperty(key)) {
-      dispatchingSnapshot[key] = newState;
-      state[key] = newState;
-    }
-  };
 
   const exec = (dispatchable: Dispatchable) => {
     switch (dispatchable.object) {
@@ -184,21 +184,23 @@ export function createStore(preloadedState?: Snapshot, ...enhancers: StoreEnhanc
         return dispatchable.actor(store.dispatch, store.select, ...dispatchable.args);
       case 'mutation':
         ensure(dispatchable.box);
-        record(
-          dispatchable.box.key,
-          dispatchable.mutator(state[dispatchable.box.key], ...dispatchable.args),
-        );
+        const key = dispatchable.box.key;
+        state[key] = dispatchable.mutator(state[key], ...dispatchable.args);
         return dispatchable.result;
       case 'signal':
-        for (const box of boxes) {
+        for (const key in boxes) {
+          if (!boxes.hasOwnProperty(key)) {
+            continue;
+          }
+          const box = boxes[key];
           const fn = box.listeners[dispatchable.type];
-          fn && record(box.key, fn(state[box.key], dispatchable.data));
+          if (fn) {
+            state[box.key] = fn(state[box.key], dispatchable.data);
+          }
         }
         return dispatchable.data;
     }
   };
-
-  let selectingSnapshot: Snapshot | undefined;
 
   let store: Store = {
     snapshot: () => state,
@@ -214,9 +216,7 @@ export function createStore(preloadedState?: Snapshot, ...enhancers: StoreEnhanc
     dispatch: defineAmosObject(
       'store.dispatch',
       (tasks: Dispatchable | readonly Dispatchable[]) => {
-        if (++dispatchDepth === 1) {
-          dispatchingSnapshot = {};
-        }
+        ++dispatchDepth;
         try {
           if (isArray(tasks)) {
             return tasks.map(exec);
@@ -225,36 +225,35 @@ export function createStore(preloadedState?: Snapshot, ...enhancers: StoreEnhanc
           }
         } finally {
           if (--dispatchDepth === 0) {
-            if (Object.keys(dispatchingSnapshot).length > 0) {
-              listeners.forEach((fn) => fn(dispatchingSnapshot));
-            }
+            listeners.forEach((fn) => fn());
           }
         }
       },
     ),
-    select: defineAmosObject('store.select', (selectable: Selectable, snapshot?: Snapshot): any => {
-      if (typeof selectable === 'function') {
-        if (snapshot) {
-          if (selectingSnapshot) {
-            throw new Error(`[Amos] recursive snapshot collection is not supported.`);
-          }
-          selectingSnapshot = snapshot;
-          try {
-            return selectable(store.select);
-          } finally {
-            selectingSnapshot = void 0;
-          }
-        } else {
+    // TODO(acrazing): add select cache feature
+    select: defineAmosObject(
+      'store.select',
+      (selectable: Selectable, discard?: Selectable): any => {
+        if (selectable instanceof Box) {
+          ensure(selectable);
+          return state[selectable.key];
+        } else if (!('object' in selectable)) {
           return selectable(store.select);
+        } else if (selectable.object === 'selector') {
+          return selectable.factory.fn(store.select, ...selectable.args);
+        } else {
+          return selectable.fn(store.select);
         }
-      } else {
-        ensure(selectable);
-        if (selectingSnapshot) {
-          selectingSnapshot[selectable.key] = state[selectable.key];
-        }
-        return state[selectable.key];
+      },
+    ),
+    clearBoxes: (reloadState: boolean) => {
+      if (reloadState) {
+        preloadedState = Object.assign(preloadedState || {}, JSON.parse(JSON.stringify(state)));
+        state = {};
       }
-    }),
+      boxes = {};
+      listeners.forEach((fn) => fn());
+    },
   };
   store = enhancers.reduce((previousValue, currentValue) => currentValue(previousValue), store);
   if (typeof process === 'object' && process.env.NODE_ENV === 'development') {

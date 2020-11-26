@@ -4,10 +4,9 @@
  */
 
 import { useContext, useDebugValue, useEffect, useReducer, useRef } from 'react';
+import { Box } from './box';
 import { __Context } from './context';
-import { Selector } from './selector';
-import { Dispatch, Selectable, Snapshot, Store } from './store';
-import { arrayEqual, strictEqual } from './utils';
+import { Dispatch, Selectable, Store } from './store';
 
 /**
  * use context's store
@@ -31,69 +30,21 @@ export type MapSelector<Rs extends readonly Selectable[]> = {
   [P in keyof Rs]: Rs[P] extends Selectable<infer R> ? R : never;
 };
 
-interface SelectorRef {
-  selectors: Selectable[];
-  deps: (unknown[] | undefined)[];
-  snapshots: (Snapshot | undefined)[];
-  results: unknown[];
-}
-
-const defaultSelectorRef: SelectorRef = { selectors: [], deps: [], snapshots: [], results: [] };
-
 interface StoreRef {
   store: Store;
   disposer: () => void;
-  updated: boolean;
   error: any;
 }
 
-function hasSame(master: Snapshot, slave: Snapshot) {
-  for (const k in master) {
-    if (master.hasOwnProperty(k) && slave.hasOwnProperty(k)) {
-      return true;
-    }
+function isEqual(selector: Selectable, results: unknown[], index: number, current: unknown) {
+  if (results.length <= index) {
+    return false;
   }
-  return false;
-}
-
-function shouldSelectorRecompute(
-  selector: Selector,
-  store: Store,
-  deps: (unknown[] | undefined)[],
-  index: number,
-) {
-  if (!selector.factory?.deps || !deps[index]) {
-    return true;
-  }
-  const newDeps = selector.factory.deps(store.select, ...selector.args);
-  const isEqual = arrayEqual(deps[index] || [], newDeps);
-  deps[index] = newDeps;
-  return !isEqual;
-}
-
-function compare(selector: Selector, a: unknown, b: unknown) {
-  return selector.factory ? selector.factory.compare(a, b) : strictEqual(a, b);
-}
-
-function selectorChanged(
-  old: Selectable | undefined,
-  newly: Selector,
-  snapshot: Snapshot | undefined,
-  store: Store,
-  deps: unknown[] | undefined,
-) {
-  if (!old || typeof old !== 'function' || !snapshot || !old.args || !newly.args) {
-    return true;
-  }
-  if (!(old === newly || (newly.factory && newly.factory === old.factory))) {
-    return true;
-  }
-  if (newly.factory?.deps === void 0) {
-    return !arrayEqual(old.args, newly.args);
-  }
-  const newDeps = newly.factory.deps(store.select, ...newly.args);
-  const isEqual = arrayEqual(deps || [], newDeps);
-  return isEqual ? false : newDeps;
+  return 'object' in selector
+    ? selector.object === 'selector'
+      ? selector.factory.equalFn(results[index], current)
+      : selector.equalFn(results[index], current)
+    : results[index] === current;
 }
 
 /**
@@ -156,43 +107,25 @@ function selectorChanged(
 export function useSelector<Rs extends Selectable[]>(...selectors: Rs): MapSelector<Rs> {
   const [, update] = useReducer((s) => s + 1, 0);
   const store = useStore();
-  const lastSelector = useRef<SelectorRef>(defaultSelectorRef);
-  const lastStore = useRef<StoreRef>();
+  const lastSelectors = useRef(selectors);
+  const lastResults = useRef<MapSelector<Rs>>([] as any);
+  const lastStore = useRef<StoreRef>(void 0 as any);
   if (lastStore.current?.store !== store) {
-    lastSelector.current = defaultSelectorRef;
     lastStore.current?.disposer();
     lastStore.current = {
       store,
-      updated: false,
       error: void 0,
-      disposer: store.subscribe((updatedState) => {
-        let i = 0;
-        const { selectors, snapshots, results, deps } = lastSelector.current;
-        const max = selectors.length;
+      disposer: store.subscribe(() => {
         try {
-          for (; i < max; i++) {
-            const selector = selectors[i];
-            const snapshot = snapshots[i];
-            if (typeof selector === 'function') {
-              if (!snapshot || hasSame(snapshot, updatedState)) {
-                if (shouldSelectorRecompute(selector, store, deps, i)) {
-                  const newSnapshot: Snapshot = {};
-                  const newResult = store.select(selector, newSnapshot);
-                  lastStore.current!.updated ||= !compare(selector, results[i], newResult);
-                  snapshots[i] = newSnapshot;
-                  results[i] = newResult;
-                }
-              }
-            } else if (updatedState.hasOwnProperty(selector.key)) {
-              const newState = store.select(selector);
-              lastStore.current!.updated = newState !== results[i];
-              results[i] = newState;
+          for (let i = 0; i < lastSelectors.current.length; i++) {
+            const selector = lastSelectors.current[i];
+            if (!isEqual(selector, lastResults.current, i, store.select(selector))) {
+              update();
+              return;
             }
           }
-          lastStore.current!.updated && update();
         } catch (e) {
-          snapshots.length = results.length = i;
-          lastStore.current!.error =
+          lastStore.current.error =
             typeof e === 'object' && e
               ? Object.assign(e, { message: '[Amos] selector throws error: ' + e.message })
               : new Error('[Amos] selector throws falsy error: ' + e);
@@ -207,51 +140,37 @@ export function useSelector<Rs extends Selectable[]>(...selectors: Rs): MapSelec
     lastStore.current.error = void 0;
     throw error;
   }
-  let selectedState: any;
-  if (lastStore.current.updated) {
-    lastStore.current.updated = false;
-    selectedState = lastSelector.current.results;
-  } else {
-    if (lastSelector.current === defaultSelectorRef) {
-      lastSelector.current = { selectors: [], deps: [], snapshots: [], results: [] };
-    }
-    // updates from outside
-    const { selectors: oldSelectors, deps, snapshots, results } = lastSelector.current;
-    for (let i = 0; i < selectors.length; i++) {
-      const old = oldSelectors[i];
-      const newly = selectors[i];
-      if (typeof newly === 'object') {
-        results[i] = store.select(newly);
-        oldSelectors[i] = newly;
-      } else {
-        const newDeps = selectorChanged(old, newly, snapshots[i], store, deps[i]);
-        if (newDeps) {
-          snapshots[i] = void 0;
-          const newSnapshot: Snapshot = {};
-          results[i] = store.select(newly, newSnapshot);
-          deps[i] = newDeps === true ? void 0 : newDeps;
-          snapshots[i] = newSnapshot;
-          oldSelectors[i] = newly;
-        }
-      }
-    }
-    results.length = selectors.length;
-    selectedState = results;
+  try {
+    const ps = lastSelectors.current;
+    lastSelectors.current = selectors;
+    lastResults.current = selectors.map((s, i) => store.select(s, ps[i])) as any;
+  } catch (e) {
+    lastResults.current = [] as any;
+    throw e;
   }
   // TODO: print friendly with selector names
-  useDebugValue(selectedState, (value: any[]) => {
-    return value.reduce((map, value, index) => {
-      const s = selectors[index];
-      let type = typeof s === 'function' ? s.type ?? s.factory?.type ?? s.name : s.key;
-      if (!type) {
-        type = `anonymous`;
-      }
-      if (map.hasOwnProperty(type)) {
-        type = type + '_' + index;
-      }
-      map[type] = value;
-      return map;
-    }, {} as any);
+  useDebugValue(lastResults.current, (value: any[]) => {
+    if (typeof process === 'object' && process.env.NODE_ENV === 'development') {
+      return value.reduce((map, value, index) => {
+        const s = selectors[index];
+        let type =
+          s instanceof Box
+            ? s.key
+            : 'object' in s
+            ? s.object === 'selector'
+              ? s.factory.type
+              : s.type
+            : s.type || s.name;
+        if (!type) {
+          type = `anonymous`;
+        }
+        if (map.hasOwnProperty(type)) {
+          type = type + '_' + index;
+        }
+        map[type] = value;
+        return map;
+      }, {} as any);
+    }
   });
-  return selectedState;
+  return lastResults.current;
 }

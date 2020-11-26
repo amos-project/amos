@@ -4,7 +4,12 @@
  */
 
 import { Select } from './store';
-import { isAmosObject, strictEqual } from './utils';
+import { strictEqual } from './utils';
+
+export interface FunctionSelector<R> {
+  (select: Select): R;
+  type?: string;
+}
 
 /**
  * A `Selector` is a selectable function, the result of select it is the reutrn
@@ -15,22 +20,22 @@ import { isAmosObject, strictEqual } from './utils';
  *
  * @stable
  */
-export interface Selector<R = any, A extends any[] = any[]> {
-  (select: Select): R;
-  type?: string | undefined;
-  args?: A;
-  factory?: SelectorFactory<A, R>;
+export interface Selector<A extends any[] = any[], R = any> {
+  object: 'selector';
+  args: A;
+  factory: SelectorFactory<A, R>;
 }
 
 /**
  * A `SelectorFactory` is a function to create a `Selector`.
  */
 export interface SelectorFactory<A extends any[], R> {
-  (...args: A): Selector<R, A>;
-  (select: Select, ...args: A): R;
+  (...args: A): Selector<A, R>;
+  object: 'selector_factory';
   type: string | undefined;
-  deps: undefined | ((select: Select, ...args: A) => unknown[]);
-  compare: (oldResult: R, newResult: R) => boolean;
+  fn: (select: Select, ...args: A) => R;
+  deps: boolean | ((select: Select, ...args: A) => unknown[]);
+  equalFn: (oldResult: R, newResult: R) => boolean;
 }
 
 /**
@@ -51,7 +56,7 @@ export interface SelectorFactory<A extends any[], R> {
  *             specify the deps function. In addition, if you set deps function
  *             as `false`, the selector will always be recomputed, ignores the
  *             args and dependents states.
- * @param compare the compare function, determines the selected result is
+ * @param equalFn the compare function, determines the selected result is
  *                updated or not, if it returns true, the component will
  *                rerender. The default compare function is strict equal (`===`).
  * @param type the optional type for display in react devtools
@@ -60,22 +65,13 @@ export interface SelectorFactory<A extends any[], R> {
  */
 export function selector<A extends any[], R>(
   fn: (select: Select, ...args: A) => R,
-  deps?: (select: Select, ...args: A) => unknown[],
-  compare: (oldResult: R, newResult: R) => boolean = strictEqual,
+  deps: ((select: Select, ...args: A) => unknown[]) | boolean = true,
+  equalFn: (oldResult: R, newResult: R) => boolean = strictEqual,
   type?: string,
 ): SelectorFactory<A, R> {
   const factory: SelectorFactory<A, R> = Object.assign(
-    (...args: any[]): any => {
-      const a0 = args[0];
-      if (isAmosObject<Select>('store.select', a0)) {
-        return fn(...(args as [Select, ...A]));
-      }
-      const selector: Selector<R, A> = (select) => fn(select, ...(args as A));
-      selector.factory = factory;
-      selector.args = args as A;
-      return selector;
-    },
-    { deps, compare, type },
+    (...args: A): Selector<A, R> => ({ object: 'selector', args, factory }),
+    { deps, equalFn, type, fn, object: 'selector_factory' } as const,
   );
   return factory;
 }

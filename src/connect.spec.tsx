@@ -43,7 +43,7 @@ describe('connect', () => {
       count: select(testBox).count,
     }))(TestClass);
     const TC3 = connect((select, ownedProps: { multiply: number }) => ({
-      count: selectMultipleCount(select, ownedProps.multiply),
+      count: select(selectMultipleCount(ownedProps.multiply)),
     }))(TestClass);
     expect(<TC1 id={1} count={1} ref={(instance) => instance?.current()} />).toBeDefined();
     expect(<TC2 id={2} />).toBeDefined();

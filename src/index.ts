@@ -9,6 +9,7 @@ export { Signal, SignalFactory, signal } from './signal';
 export { Selector, SelectorFactory, selector } from './selector';
 export {
   Dispatchable,
+  AmosDispatch,
   Dispatch,
   Selectable,
   Select,
