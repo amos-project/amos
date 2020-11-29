@@ -15,6 +15,12 @@ import {
   strictEqual,
   values,
 } from './utils';
+import Mock = jest.Mock;
+
+export function expectCalled(fn: Mock) {
+  expect(fn).toBeCalledTimes(1);
+  fn.mockClear();
+}
 
 describe('utils', () => {
   it('should compare array shallow', () => {

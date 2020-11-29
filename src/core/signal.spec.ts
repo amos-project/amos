@@ -5,19 +5,19 @@
 
 import { signal } from './signal';
 
-export interface LogoutEvent {
+export interface ResetEvent {
   count: number;
 }
 
-export const logout = signal('LOGOUT', (count: number): LogoutEvent => ({ count }));
+export const reset = signal('RESET', (count: number): ResetEvent => ({ count }));
 
 describe('event', () => {
   it('should create event', () => {
-    expect(typeof logout).toBe('function');
-    expect(logout.type).toBe('LOGOUT');
-    expect(logout(1)).toEqual({
+    expect(typeof reset).toBe('function');
+    expect(reset.type).toBe('RESET');
+    expect(reset(1)).toEqual({
       object: 'signal',
-      type: 'LOGOUT',
+      type: 'RESET',
       data: { count: 1 },
     });
   });

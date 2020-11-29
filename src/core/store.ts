@@ -5,6 +5,7 @@
 
 import { Action } from './action';
 import { Box, Mutation } from './box';
+import { Cache } from './cache';
 import { FunctionSelector, Selector, SelectorFactory } from './selector';
 import { Signal } from './signal';
 import { AmosObject, defineAmosObject, isArray } from './utils';
@@ -111,13 +112,30 @@ export type Selectable<R = any> =
   | Selector<any[], R>
   | SelectorFactory<[], R>;
 
-/**
- * select
- *
- * @stable
- */
 export interface Select extends AmosObject<'store.select'> {
-  <R>(selectable: Selectable<R>, discard?: Selectable): R;
+  /**
+   * select cache strategy
+   *
+   * 1. cache key: factory + args
+   * 2. should recompute: snapshot or deps return value
+   * 3. cache mode: if without discard, means it will take/update the latest one,
+   *    else it will drop the discard reference, and cache the new one in the tree.
+   * 4. who while be cached: selector/factory
+   *    if it is called with discard, will put into tree, and drop the discard if
+   *    it is free, else it will update the latest.
+   *
+   * @param selectable
+   * @param discard
+   */
+  <A extends Selectable>(selectable: A, discard?: Selectable): A extends Box<infer S>
+    ? S
+    : A extends SelectorFactory<[], infer R>
+    ? R
+    : A extends Selector<any[], infer R>
+    ? R
+    : A extends FunctionSelector<infer R>
+    ? R
+    : never;
 }
 
 /**
@@ -126,26 +144,10 @@ export interface Select extends AmosObject<'store.select'> {
  * @stable
  */
 export interface Store {
-  /**
-   * get the state snapshot of the store.
-   *
-   * Please note that any mutation of the snapshot is silent.
-   */
   snapshot: () => Snapshot;
-  /**
-   * dispatch one or more dispatchable things.
-   */
   dispatch: Dispatch;
-  /**
-   * subscribe the mutations
-   * @param fn
-   */
   subscribe: (fn: () => void) => () => void;
-  /**
-   * select a selectable thing
-   */
   select: Select;
-
   clearBoxes: (reloadState: boolean) => void;
 }
 
@@ -159,6 +161,7 @@ export type StoreEnhancer = (store: Store) => Store;
  * @stable
  */
 export function createStore(preloadedState?: Snapshot, ...enhancers: StoreEnhancer[]): Store {
+  const cache = new Cache();
   let state: Snapshot = {};
   let boxes: Record<string, Box> = {};
   const listeners: Array<() => void> = [];
@@ -239,10 +242,9 @@ export function createStore(preloadedState?: Snapshot, ...enhancers: StoreEnhanc
           return state[selectable.key];
         } else if (!('object' in selectable)) {
           return selectable(store.select);
-        } else if (selectable.object === 'selector') {
-          return selectable.factory.fn(store.select, ...selectable.args);
         } else {
-          return selectable.fn(store.select);
+          const factory = selectable.object === 'selector' ? selectable.factory : selectable;
+          const args = selectable.object === 'selector' ? selectable.args : [];
         }
       },
     ),

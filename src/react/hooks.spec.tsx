@@ -5,13 +5,13 @@
 
 import { act, renderHook, RenderHookResult } from '@testing-library/react-hooks';
 import React, { FC, memo } from 'react';
-import { addGreet } from './action.spec';
-import { countBox, increment, testBox } from './box.spec';
+import { addGreet } from '../core/action.spec';
+import { countBox, incrCount, testBox } from '../core/box.spec';
 import { Provider } from './context';
 import { MapSelector, useDispatch, useSelector, useStore } from './hooks';
-import { selector } from './selector';
-import { selectCount, selectDoubleCount, selectMultipleCount } from './selector.spec';
-import { createStore, Select, Selectable, Snapshot, Store } from './store';
+import { selector } from '../core/selector';
+import { selectCount, selectDoubleCount, selectMultipleCount } from '../core/selector.spec';
+import { createStore, Select, Selectable, Snapshot, Store } from '../core/store';
 import fn = jest.fn;
 
 export const TestCount = memo(() => {
@@ -70,7 +70,7 @@ describe('useSelector', () => {
   it('should update - box', async () => {
     const { result, dispatch } = renderUseSelector(() => [countBox] as const);
     expect(result.current).toEqual([0]);
-    act(() => dispatch(increment()));
+    act(() => dispatch(incrCount()));
     expect(result.current).toEqual([1]);
   });
 
@@ -108,7 +108,7 @@ describe('useSelector', () => {
     rerender({ multiply: 2 });
     expectCalled(true, true, true);
     expect(result.current).toEqual([4, 4, 2, 1]);
-    act(() => dispatch(increment()));
+    act(() => dispatch(incrCount()));
     expectCalled(false, false, false);
     expect(result.current).toEqual([4, 4, 2, 2]);
   });

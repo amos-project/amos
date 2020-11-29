@@ -4,10 +4,10 @@
  */
 
 import React, { PureComponent } from 'react';
-import { addGreet } from './action.spec';
-import { testBox } from './box.spec';
+import { addGreet } from '../core/action.spec';
+import { testBox } from '../core/box.spec';
 import { connect, ConnectedProps } from './connect';
-import { selectMultipleCount } from './selector.spec';
+import { selectMultipleCount } from '../core/selector.spec';
 
 export interface TestClassProps extends ConnectedProps {
   id: number;

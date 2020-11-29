@@ -3,10 +3,10 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-export { JSONState, Mutation, Box } from './box';
-export { Action, ActionFactory, action } from './action';
-export { Signal, SignalFactory, signal } from './signal';
-export { Selector, SelectorFactory, selector } from './selector';
+export { JSONState, Mutation, Box } from './core/box';
+export { Action, ActionFactory, action } from './core/action';
+export { Signal, SignalFactory, signal } from './core/signal';
+export { Selector, SelectorFactory, selector } from './core/selector';
 export {
   Dispatchable,
   AmosDispatch,
@@ -17,9 +17,9 @@ export {
   StoreEnhancer,
   Store,
   createStore,
-} from './store';
-export { ProviderProps, Provider, ConsumerProps, Consumer } from './context';
-export { useStore, useDispatch, MapSelector, useSelector } from './hooks';
-export { identity, shallowEqual, isAmosObject, hoistMethod, arrayEqual } from './utils';
+} from './core/store';
+export { ProviderProps, Provider, ConsumerProps, Consumer } from './react/context';
+export { useStore, useDispatch, MapSelector, useSelector } from './react/hooks';
+export { identity, shallowEqual, isAmosObject, hoistMethod, arrayEqual } from './core/utils';
 
 export const VERSION: string = '__VERSION__';

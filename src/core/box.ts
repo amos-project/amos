@@ -4,44 +4,7 @@
  */
 
 import { SignalFactory } from './signal';
-
-declare const __magicType: unique symbol;
-
-/**
- * A magic type alias for avoiding TypeScript circle reference
- */
-type JSONValue<R> = R extends { [__magicType]: infer E } ? E : R;
-
-/**
- * Convert a type to the jsonify type of it, which means
- * it will drop the function fields and convert it to the
- * return type of its `toJSON()` if it exists.
- *
- * @example
- * ```typescript
- * interface Foo {
- *   toJSON(): number;
- * }
- *
- * interface Root {
- *   id: number;
- *   foo: Foo[];
- * }
- *
- * declare const data: JSONState<Root> // <= { id: number, foo: number[] }
- * ```
- *
- * @expermential
- */
-export type JSONState<S> = JSONValue<
-  S extends { toJSON(): infer R }
-    ? { [__magicType]: JSONState<R> }
-    : S extends object
-    ? {
-        [P in keyof S]: JSONState<S[P]>;
-      }
-    : S
->;
+import { fromJSON, JSONState } from './types';
 
 /**
  * A `Mutation` is a dispatchable object, which will update the
@@ -96,7 +59,7 @@ export class Box<S = any> {
   constructor(
     key: string,
     initialState: S,
-    preload: (preloadedState: JSONState<S>, state: S) => S,
+    preload: (preloadedState: JSONState<S>, state: S) => S = fromJSON,
   ) {
     this.key = key;
     this.initialState = initialState;
@@ -111,11 +74,12 @@ export class Box<S = any> {
    * event, and its return value will be set as the new state of
    * the box.
    *
-   * @param event the event factory
+   * @param signal the event factory
    * @param fn the callback
    */
-  subscribe<T>(event: string | SignalFactory<any, T>, fn: (state: S, data: T) => S) {
-    this.listeners[typeof event === 'string' ? event : event.type] = fn;
+  listen<T>(signal: string | SignalFactory<any, T>, fn: (state: S, data: T) => S) {
+    const type = typeof signal === 'string' ? signal : signal.type;
+    this.listeners[type] = fn;
   }
 
   mutation<A extends any[]>(
@@ -123,5 +87,17 @@ export class Box<S = any> {
     type?: string,
   ): (...args: A) => Mutation<A[0], A, S> {
     return (...args) => ({ object: 'mutation', type, box: this, args, result: args[0], mutator });
+  }
+
+  setState(newState: S | ((prevState: S) => S)): Mutation<void, [], S> {
+    return {
+      object: 'mutation',
+      type: `${this.key}/setState`,
+      box: this,
+      args: [],
+      result: void 0,
+      mutator: (state) =>
+        typeof newState === 'function' ? (newState as (prevState: S) => S)(state) : state,
+    };
   }
 }

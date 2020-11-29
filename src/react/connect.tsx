@@ -13,9 +13,9 @@ import React, {
   RefAttributes,
 } from 'react';
 import { Consumer } from './context';
-import { selector } from './selector';
-import { Dispatch, Select } from './store';
-import { values } from './utils';
+import { selector } from '../core/selector';
+import { Dispatch, Select } from '../core/store';
+import { values } from '../core/utils';
 
 export interface ConnectedProps {
   dispatch: Dispatch;
