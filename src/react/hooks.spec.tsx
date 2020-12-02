@@ -5,17 +5,15 @@
 
 import { act, renderHook, RenderHookResult } from '@testing-library/react-hooks';
 import React, { FC, memo } from 'react';
-import { addGreet } from '../core/action.spec';
-import { countBox, incrCount, testBox } from '../core/box.spec';
+import { createStore, Select, Selectable, selector, Snapshot, Store } from '..';
+import { countBox, incrCount, mergeUser } from '../core/box.spec';
+import { selectCount, selectDoubleCount, selectMultipleCount } from '../core/selector.spec';
 import { Provider } from './context';
 import { MapSelector, useDispatch, useSelector, useStore } from './hooks';
-import { selector } from '../core/selector';
-import { selectCount, selectDoubleCount, selectMultipleCount } from '../core/selector.spec';
-import { createStore, Select, Selectable, Snapshot, Store } from '../core/store';
 import fn = jest.fn;
 
 export const TestCount = memo(() => {
-  const [count, count2] = useSelector(selectCount, selectDoubleCount());
+  const [count, count2] = useSelector(selectCount, selectDoubleCount);
   return <div>{count + '-' + count2}</div>;
 });
 
@@ -60,7 +58,7 @@ describe('useSelector', () => {
       { multiply: 3 },
     );
     expect(result.current).toEqual([2, 3]);
-    dispatch(addGreet('hello'));
+    dispatch(mergeUser({ firstName: 'TEST UPDATE' }));
     await waitForNextUpdate();
     expect(result.current).toEqual([4, 6]);
     rerender({ multiply: 4 });
@@ -75,11 +73,11 @@ describe('useSelector', () => {
   });
 
   it('should respect deps', async () => {
-    const defaultFn = fn((select: Select, times: number) => select(testBox).count * times);
-    const strictFn = fn((select: Select, times: number) => select(testBox).count * times);
+    const defaultFn = fn((select: Select, times: number) => select(countBox) * times);
+    const strictFn = fn((select: Select, times: number) => select(countBox) * times);
     const defaultSelector = selector(defaultFn);
-    const strictSelector = selector(strictFn, (select, times) => [select(testBox).count, times]);
-    const inlineFn = fn((select: Select) => select(testBox).count);
+    const strictSelector = selector(strictFn, (select, times) => [select(countBox), times]);
+    const inlineFn = fn((select: Select) => select(countBox));
     const expectCalled = (isDefault: boolean, isStrict: boolean, isInline: boolean) => {
       expect(defaultFn).toBeCalledTimes(isDefault ? 1 : 0);
       defaultFn.mockClear();
@@ -101,7 +99,7 @@ describe('useSelector', () => {
     );
     expectCalled(true, true, true);
     expect(result.current).toEqual([1, 1, 1, 1]);
-    dispatch(addGreet('HELLO'));
+    dispatch(mergeUser({ id: 2 }));
     await waitForNextUpdate();
     expectCalled(true, true, true);
     expect(result.current).toEqual([2, 2, 2, 1]);

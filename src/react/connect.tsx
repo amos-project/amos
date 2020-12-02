@@ -12,10 +12,9 @@ import React, {
   PropsWithoutRef,
   RefAttributes,
 } from 'react';
-import { Consumer } from './context';
-import { selector } from '../core/selector';
-import { Dispatch, Select } from '../core/store';
+import { Dispatch, Select, selector } from '..';
 import { values } from '../core/utils';
+import { Consumer } from './context';
 
 export interface ConnectedProps {
   dispatch: Dispatch;

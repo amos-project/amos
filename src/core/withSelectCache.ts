@@ -20,9 +20,9 @@ export interface TreeNode {
   readonly parent: TreeNode | undefined;
 }
 
-export class Cache {
-  private readonly tree: Map<SelectorFactory, TreeNode>;
-  private readonly latest: Map<SelectorFactory, TreeNode>;
+export class WithSelectCache {
+  readonly tree: Map<SelectorFactory, TreeNode>;
+  readonly latest: Map<SelectorFactory, TreeNode>;
 
   constructor() {
     this.tree = new Map();

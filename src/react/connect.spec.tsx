@@ -4,10 +4,9 @@
  */
 
 import React, { PureComponent } from 'react';
-import { addGreet } from '../core/action.spec';
-import { testBox } from '../core/box.spec';
-import { connect, ConnectedProps } from './connect';
+import { countBox } from '../core/box.spec';
 import { selectMultipleCount } from '../core/selector.spec';
+import { connect, ConnectedProps } from './connect';
 
 export interface TestClassProps extends ConnectedProps {
   id: number;
@@ -16,7 +15,7 @@ export interface TestClassProps extends ConnectedProps {
 
 export class TestClass extends PureComponent<TestClassProps> {
   static nextId() {
-    return new Date().toISOString();
+    return Date.now();
   }
 
   current() {
@@ -24,7 +23,7 @@ export class TestClass extends PureComponent<TestClassProps> {
   }
 
   private handleClick = async () => {
-    await this.props.dispatch(addGreet('Hello connected class ' + TestClass.nextId()));
+    await this.props.dispatch(countBox.setState(TestClass.nextId()));
   };
 
   render() {
@@ -40,7 +39,7 @@ describe('connect', () => {
   it('should not emit types error', () => {
     const TC1 = connect()(TestClass);
     const TC2 = connect((select) => ({
-      count: select(testBox).count,
+      count: select(countBox),
     }))(TestClass);
     const TC3 = connect((select, ownedProps: { multiply: number }) => ({
       count: select(selectMultipleCount(ownedProps.multiply)),

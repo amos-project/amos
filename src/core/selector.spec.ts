@@ -3,16 +3,16 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { countBox } from './box.spec';
-import { currentUserBox } from '../state/createBoxFactory.spec';
+import { countBox, userBox } from './box.spec';
 import { FunctionSelector, selector } from './selector';
 import { strictEqual } from './utils';
 
 export const selectCount: FunctionSelector<number> = (select) => select(countBox);
+export const selectDoubleCount = selector((select) => select(countBox) * 2);
 export const selectMultipleCount = selector((select, times: number) => select(countBox) * times);
 
 export const selectCurrentUser = selector(
-  (select) => select(currentUserBox),
+  (select) => select(userBox),
   void 0,
   void 0,
   'currentUser',

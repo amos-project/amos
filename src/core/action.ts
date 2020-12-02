@@ -5,6 +5,11 @@
 
 import { Dispatch, Select } from './store';
 
+export interface FunctionAction<R> {
+  (): R;
+  type?: string;
+}
+
 /**
  * An `Action` is a dispatchable function. It could do anything synchronously or
  * asynchronously, such as fetch some data from server, or dispatch some
