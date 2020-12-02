@@ -3,23 +3,40 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-export { JSONState, Mutation, Box } from './core/box';
-export { Action, ActionFactory, action } from './core/action';
+export { FunctionAction, Action, ActionFactory, action } from './core/action';
+export { Mutation, Box } from './core/box';
+export { FunctionSelector, Selector, SelectorFactory, selector } from './core/selector';
 export { Signal, SignalFactory, signal } from './core/signal';
-export { Selector, SelectorFactory, selector } from './core/selector';
 export {
+  Snapshot,
   Dispatchable,
   AmosDispatch,
   Dispatch,
   Selectable,
   Select,
-  Snapshot,
-  StoreEnhancer,
   Store,
+  StoreEnhancer,
   createStore,
 } from './core/store';
+export { JSONState, JSONSerializable, isJSONSerializable, fromJSON } from './core/types';
+export {
+  identity,
+  shallowEqual,
+  hoistMethod,
+  AmosObject,
+  isAmosObject,
+  arrayEqual,
+  clone,
+} from './core/utils';
+
+export { ConnectedProps, ConnectedComponent, Connector, connect } from './react/connect';
 export { ProviderProps, Provider, ConsumerProps, Consumer } from './react/context';
 export { useStore, useDispatch, MapSelector, useSelector } from './react/hooks';
-export { identity, shallowEqual, isAmosObject, hoistMethod, arrayEqual } from './core/utils';
+
+export { DictKey, AmosDict, createDictBox } from './state/AmosDict';
+export { AmosList, createListBox } from './state/AmosList';
+export { AmosRecordDict, createRecordDictBox } from './state/AmosRecordDict';
+export { createBoxFactory } from './state/createBoxFactory';
+export { forkable, fork } from './state/utils';
 
 export const VERSION: string = '__VERSION__';

@@ -3,7 +3,7 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { Box, Mutation } from '..';
+import { Box, Mutation } from '../core/box';
 import { FunctionSelector } from '../core/selector';
 import { JSONState } from '../core/types';
 

@@ -12,7 +12,8 @@ import React, {
   PropsWithoutRef,
   RefAttributes,
 } from 'react';
-import { Dispatch, Select, selector } from '..';
+import { selector } from '../core/selector';
+import { Dispatch, Select } from '../core/store';
 import { values } from '../core/utils';
 import { Consumer } from './context';
 

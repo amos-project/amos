@@ -4,7 +4,8 @@
  */
 
 import { useContext, useDebugValue, useEffect, useReducer, useRef } from 'react';
-import { Box, Dispatch, Selectable, Store } from '..';
+import { Box } from '../core/box';
+import { Dispatch, Selectable, Store } from '../core/store';
 import { __Context } from './context';
 
 /**

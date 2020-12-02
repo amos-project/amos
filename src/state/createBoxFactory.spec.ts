@@ -3,7 +3,7 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { Box } from '..';
+import { Box } from '../core/box';
 import { UserModel } from '../core/box.spec';
 import { createBoxFactory } from './createBoxFactory';
 

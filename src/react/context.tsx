@@ -4,7 +4,7 @@
  */
 
 import React, { createContext, ReactNode, useEffect, useState } from 'react';
-import { Store } from '..';
+import { Store } from '../core/store';
 
 /** @internal */
 export interface ContextState {

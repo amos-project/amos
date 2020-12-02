@@ -3,7 +3,7 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { identity } from '..';
+import { identity } from '../core/utils';
 import { AmosList, createListBox } from './AmosList';
 
 describe('AmosList', () => {

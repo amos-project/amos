@@ -5,9 +5,10 @@
 
 import { act, renderHook, RenderHookResult } from '@testing-library/react-hooks';
 import React, { FC, memo } from 'react';
-import { createStore, Select, Selectable, selector, Snapshot, Store } from '..';
 import { countBox, incrCount, mergeUser } from '../core/box.spec';
+import { selector } from '../core/selector';
 import { selectCount, selectDoubleCount, selectMultipleCount } from '../core/selector.spec';
+import { createStore, Select, Selectable, Snapshot, Store } from '../core/store';
 import { Provider } from './context';
 import { MapSelector, useDispatch, useSelector, useStore } from './hooks';
 import fn = jest.fn;

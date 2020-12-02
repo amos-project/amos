@@ -3,7 +3,7 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { identity } from '..';
+import { identity } from '../core/utils';
 import { UserModel } from '../core/box.spec';
 import { clone } from '../core/utils';
 import { AmosDict, createDictBox } from './AmosDict';
