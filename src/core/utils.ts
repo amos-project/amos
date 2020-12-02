@@ -114,3 +114,7 @@ export function values<T extends object>(o: T): T[keyof T][] {
 
 /** @internal */
 export const isArray: (args: any) => args is any[] | readonly any[] = Array.isArray;
+
+export function clone<T>(obj: T, props: Partial<T>): T {
+  return Object.assign(Object.create(Object.getPrototypeOf(obj)), obj, props);
+}

@@ -3,7 +3,7 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { Box, Mutation } from '../core/box';
+import { Box, Mutation } from '..';
 import { FunctionSelector } from '../core/selector';
 import { JSONState } from '../core/types';
 
@@ -34,7 +34,8 @@ export function createBoxFactory<PS, KS extends keyof PS, KG extends keyof PS>(
       },
     });
   }
-  return function createBox<S>(
+
+  function createBox<S>(
     key: string,
     initialState: S,
     preload?: (preloadedState: JSONState<S>, state: S) => S,
@@ -53,5 +54,19 @@ export function createBoxFactory<PS, KS extends keyof PS, KG extends keyof PS>(
     const box = new Box(key, initialState, preload);
     Object.setPrototypeOf(box, boxProto);
     return box as any;
+  }
+
+  createBox.extend = function <NPS extends PS, NKS extends keyof NPS, NKG extends keyof NPS>(
+    nextProto: NPS | (new (...args: any[]) => NPS),
+    nextSetters: readonly NKS[],
+    nextGetters: readonly NKG[],
+  ) {
+    return createBoxFactory<NPS, NKS | KS, NKG | KG>(
+      nextProto,
+      [...setters, ...nextSetters],
+      [...getters, ...nextGetters],
+    );
   };
+
+  return createBox;
 }

@@ -39,7 +39,3 @@ export function fork<T>(obj: T): T {
   Object.setPrototypeOf(obj, (obj as any)[FORKABLE_PROTO_KEY]);
   return newObj;
 }
-
-export function clone<T>(obj: T, props: Partial<T>): T {
-  return Object.assign(Object.create(Object.getPrototypeOf(obj)), obj, props);
-}

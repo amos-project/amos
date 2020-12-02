@@ -5,6 +5,7 @@
 
 import { SignalFactory } from './signal';
 import { fromJSON, JSONState } from './types';
+import { clone } from './utils';
 
 /**
  * A `Mutation` is a dispatchable object, which will update the
@@ -98,6 +99,17 @@ export class Box<S = any> {
       result: void 0,
       mutator: (state) =>
         typeof newState === 'function' ? (newState as (prevState: S) => S)(state) : state,
+    };
+  }
+
+  mergeState(props: Partial<S>): Mutation<void, [], S> {
+    return {
+      object: 'mutation',
+      type: `${this.key}/mergeState`,
+      box: this,
+      args: [],
+      result: void 0,
+      mutator: (state) => clone(state, props),
     };
   }
 }

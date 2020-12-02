@@ -3,44 +3,44 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { fork, forkable } from './immutable_utils';
+import { JSONSerializable, JSONState } from '../core/types';
+import { clone } from '../core/utils';
+import { createBoxFactory } from './createBoxFactory';
+import { fork, forkable } from './utils';
 
 @forkable
-export class AmosList<T> {
-  private data: T[];
+export class AmosList<T> implements JSONSerializable<T[]> {
+  readonly data: T[];
 
-  get size() {
+  constructor() {
+    this.data = [];
+  }
+
+  fromJSON(state: JSONState<T[]>): this {
+    return clone(this, { data: state as T[] } as Partial<this>);
+  }
+
+  toJSON(): T[] {
+    return this.data;
+  }
+
+  size() {
     return this.data.length;
   }
 
-  constructor(initialList?: T[]) {
-    this.data = initialList || [];
-  }
-
-  concat(...items: Array<readonly T[]>) {
-    this.data = this.data.concat(...items);
-    return fork(this);
+  concat(other: readonly T[]): this {
+    return clone(this, { data: this.data.concat(other) } as Partial<this>);
   }
 
   every(predicate: (value: T, index: number, array: T[]) => unknown): boolean {
     return this.data.every(predicate);
   }
 
-  fill(value: T, start?: number, end?: number): this {
-    this.data.fill(value, start, end);
-    return fork(this);
+  filter(predicate: (value: T, index: number, array: T[]) => unknown): this {
+    return clone(this, { data: this.data.filter(predicate) } as Partial<this>);
   }
 
-  filter(predicate: (value: T, index: number, array: T[]) => boolean): this {
-    this.data = this.data.filter(predicate);
-    return fork(this);
-  }
-
-  find<S extends T>(
-    predicate: (this: void, value: T, index: number, obj: T[]) => value is S,
-  ): S | undefined;
-  find(predicate: (value: T, index: number, obj: T[]) => unknown): T | undefined;
-  find(predicate: (value: T, index: number, obj: T[]) => unknown): any {
+  find(predicate: (value: T, index: number, obj: T[]) => unknown): T | undefined {
     return this.data.find(predicate);
   }
 
@@ -73,7 +73,11 @@ export class AmosList<T> {
   }
 
   mapThis(callbackFn: (value: T, index: number, array: T[]) => T): this {
-    this.data = this.data.map(callbackFn);
+    return clone(this, { data: this.data.map(callbackFn) } as Partial<this>);
+  }
+
+  pop(): this {
+    this.data.pop();
     return fork(this);
   }
 
@@ -101,12 +105,16 @@ export class AmosList<T> {
     return fork(this);
   }
 
-  slice(start?: number, end?: number): this {
-    this.data = this.data.slice(start, end);
+  shift(): this {
+    this.data.shift();
     return fork(this);
   }
 
-  some(predicate: (value: T, index: number, array: T[]) => boolean): boolean {
+  slice(start?: number, end?: number): this {
+    return clone(this, { data: this.data.slice(start, end) } as Partial<this>);
+  }
+
+  some(predicate: (value: T, index: number, array: T[]) => unknown): boolean {
     return this.data.some(predicate);
   }
 
@@ -115,10 +123,8 @@ export class AmosList<T> {
     return fork(this);
   }
 
-  splice(start: number, deleteCount?: number): this;
-  splice(start: number, deleteCount: number, ...items: T[]): this;
-  splice(start: number, deleteCount?: number, ...items: T[]): this {
-    this.data.splice(start, deleteCount!, ...items);
+  splice(start: number, deleteCount = 0, ...items: T[]): this {
+    this.data.splice(start, deleteCount, ...items);
     return fork(this);
   }
 
@@ -126,4 +132,47 @@ export class AmosList<T> {
     this.data.unshift(...items);
     return fork(this);
   }
+
+  set(index: number, value: T): this {
+    this.data[index] = value;
+    return fork(this);
+  }
+
+  delete(value: T): this {
+    const index = this.data.indexOf(value);
+    return index === -1 ? this : this.splice(index, 1);
+  }
 }
+
+export const createListBox = createBoxFactory(
+  AmosList,
+  [
+    'delete',
+    'set',
+    'unshift',
+    'splice',
+    'sort',
+    'slice',
+    'shift',
+    'reverse',
+    'push',
+    'pop',
+    'mapThis',
+    'concat',
+  ] as const,
+  [
+    'some',
+    'reduceRight',
+    'reduce',
+    'map',
+    'lastIndexOf',
+    'join',
+    'indexOf',
+    'includes',
+    'findIndex',
+    'find',
+    'filter',
+    'every',
+    'size',
+  ] as const,
+);
