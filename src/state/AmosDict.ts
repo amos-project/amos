@@ -11,25 +11,25 @@ import { fork, forkable } from './utils';
 export type DictKey = number | string;
 
 @forkable
-export class AmosDict<K, V> implements JSONSerializable<Record<K & DictKey, V>> {
-  protected readonly data: Record<K & DictKey, V>;
+export class AmosDict<K extends DictKey, V> implements JSONSerializable<Record<K, V>> {
+  protected readonly data: Record<K, V>;
 
   constructor(inferKey: K, protected readonly defaultValue: V) {
-    this.data = {} as Record<K & DictKey, V>;
+    this.data = {} as Record<K, V>;
   }
 
-  toJSON(): Record<K & DictKey, V> {
+  toJSON(): Record<K, V> {
     return this.data;
   }
 
-  fromJSON(state: JSONState<Record<K & DictKey, V>> & {}): this {
+  fromJSON(state: JSONState<Record<K, V>> & {}): this {
     const that = clone(this, ({ data: {} } as unknown) as Partial<this>);
     for (const key in state) {
       if (state.hasOwnProperty(key)) {
         if (isJSONSerializable(that.defaultValue)) {
-          that.data[(key as unknown) as K & DictKey] = that.defaultValue.fromJSON(state[key]);
+          that.data[(key as unknown) as K] = that.defaultValue.fromJSON(state[key]);
         } else {
-          that.data[(key as unknown) as K & DictKey] = clone(that.defaultValue, state[key]);
+          that.data[(key as unknown) as K] = clone(that.defaultValue, state[key]);
         }
       }
     }
@@ -40,36 +40,36 @@ export class AmosDict<K, V> implements JSONSerializable<Record<K & DictKey, V>> 
     return Object.keys(this.data).length;
   }
 
-  setItem(key: K & DictKey, item: V): this {
+  setItem(key: K, item: V): this {
     this.data[key] = item;
     return fork(this);
   }
 
-  mergeItem(key: K & DictKey, props: Partial<V>): this {
+  mergeItem(key: K, props: Partial<V>): this {
     this.data[key] = clone(this.data[key] ?? this.defaultValue, props);
     return fork(this);
   }
 
-  setItems(items: readonly (readonly [K & DictKey, V])[]): this {
+  setItems(items: readonly (readonly [K, V])[]): this {
     items.forEach(([key, item]) => {
       this.data[key] = item;
     });
     return fork(this);
   }
 
-  mergeItems(items: readonly (readonly [K & DictKey, Partial<V>])[]): this {
+  mergeItems(items: readonly (readonly [K, Partial<V>])[]): this {
     items.forEach(([key, item]) => {
       this.data[key] = clone(this.data[key] ?? this.defaultValue, item);
     });
     return fork(this);
   }
 
-  update(key: K & DictKey, updater: (v: V) => V): this {
+  update(key: K, updater: (v: V) => V): this {
     this.data[key] = updater(this.data[key] ?? this.defaultValue);
     return fork(this);
   }
 
-  delete(key: K & DictKey): this {
+  delete(key: K): this {
     if (!this.data.hasOwnProperty(key)) {
       return this;
     }
@@ -77,15 +77,15 @@ export class AmosDict<K, V> implements JSONSerializable<Record<K & DictKey, V>> 
     return fork(this);
   }
 
-  get(key: K & DictKey): V | undefined {
+  get(key: K): V | undefined {
     return this.data[key];
   }
 
-  take(key: K & DictKey): V {
+  take(key: K): V {
     return this.data[key] ?? this.defaultValue;
   }
 
-  has(key: K & DictKey): boolean {
+  has(key: K): boolean {
     return this.data.hasOwnProperty(key);
   }
 
@@ -98,7 +98,7 @@ export class AmosDict<K, V> implements JSONSerializable<Record<K & DictKey, V>> 
   }
 
   entities(): [string, V][] {
-    return this.keys().map((k) => [k, this.data[k as K & DictKey]]);
+    return this.keys().map((k) => [k, this.data[k as K]]);
   }
 
   map<U>(callbackFn: (value: V, key: string, index: number) => U): U[] {
@@ -106,7 +106,7 @@ export class AmosDict<K, V> implements JSONSerializable<Record<K & DictKey, V>> 
     let index = 0;
     for (const key in this.data) {
       if (this.data.hasOwnProperty(key)) {
-        result.push(callbackFn(this.data[key as K & DictKey], key, index));
+        result.push(callbackFn(this.data[key as K], key, index));
       }
     }
     return result;

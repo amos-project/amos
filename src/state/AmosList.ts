@@ -10,11 +10,7 @@ import { fork, forkable } from './utils';
 
 @forkable
 export class AmosList<T> implements JSONSerializable<T[]> {
-  readonly data: T[];
-
-  constructor() {
-    this.data = [];
-  }
+  constructor(readonly data: T[] = []) {}
 
   fromJSON(state: JSONState<T[]>): this {
     return clone(this, { data: state as T[] } as Partial<this>);

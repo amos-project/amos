@@ -13,20 +13,20 @@ export class AmosRecordDict<
   V extends { readonly [P in KF]: DictKey }
 > extends AmosDict<V[KF], V> {
   constructor(protected readonly defaultValue: V, protected readonly keyField: KF) {
-    super(defaultValue[keyField] as V[KF] & DictKey, defaultValue);
+    super(defaultValue[keyField] as V[KF], defaultValue);
   }
 
   setRecords(items: readonly V[]) {
     items.forEach((item) => {
-      this.data[item[this.keyField] as V[KF] & DictKey] = item;
+      this.data[item[this.keyField] as V[KF]] = item;
     });
     return fork(this);
   }
 
   mergeRecords(items: readonly (Partial<Omit<V, KF>> & Pick<V, KF>)[]) {
     items.forEach((item) => {
-      this.data[item[this.keyField] as V[KF] & DictKey] = clone(
-        this.data[item[this.keyField] as V[KF] & DictKey] ?? this.defaultValue,
+      this.data[item[this.keyField] as V[KF]] = clone(
+        this.data[item[this.keyField] as V[KF]] ?? this.defaultValue,
         item as Partial<V>,
       );
     });

@@ -481,10 +481,10 @@
     "@types/yargs" "^15.0.0"
     chalk "^4.0.0"
 
-"@rollup/plugin-commonjs@^16.0.0":
-  version "16.0.0"
-  resolved "https://registry.npm.taobao.org/@rollup/plugin-commonjs/download/@rollup/plugin-commonjs-16.0.0.tgz#169004d56cd0f0a1d0f35915d31a036b0efe281f"
-  integrity sha1-FpAE1WzQ8KHQ81kV0xoDaw7+KB8=
+"@rollup/plugin-commonjs@^17.0.0":
+  version "17.0.0"
+  resolved "https://registry.npm.taobao.org/@rollup/plugin-commonjs/download/@rollup/plugin-commonjs-17.0.0.tgz?cache=0&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2F%40rollup%2Fplugin-commonjs%2Fdownload%2F%40rollup%2Fplugin-commonjs-17.0.0.tgz#2ae2228354cf0fbba6cf9f06f30b2c66a974324c"
+  integrity sha1-KuIig1TPD7umz58G8wssZql0Mkw=
   dependencies:
     "@rollup/pluginutils" "^3.1.0"
     commondir "^1.0.1"
@@ -663,10 +663,18 @@
   dependencies:
     "@types/istanbul-lib-report" "*"
 
-"@types/jest@26.x", "@types/jest@^26.0.15":
+"@types/jest@26.x":
   version "26.0.15"
   resolved "https://registry.npm.taobao.org/@types/jest/download/@types/jest-26.0.15.tgz#12e02c0372ad0548e07b9f4e19132b834cb1effe"
   integrity sha1-EuAsA3KtBUjge59OGRMrg0yx7/4=
+  dependencies:
+    jest-diff "^26.0.0"
+    pretty-format "^26.0.0"
+
+"@types/jest@^26.0.16":
+  version "26.0.16"
+  resolved "https://registry.npm.taobao.org/@types/jest/download/@types/jest-26.0.16.tgz?cache=0&sync_timestamp=1606856881985&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2F%40types%2Fjest%2Fdownload%2F%40types%2Fjest-26.0.16.tgz#b47abd50f6ed0503f589db8e126fc8eb470cf87c"
+  integrity sha1-tHq9UPbtBQP1iduOEm/I60cM+Hw=
   dependencies:
     jest-diff "^26.0.0"
     pretty-format "^26.0.0"
@@ -4006,10 +4014,10 @@ rollup-pluginutils@^2.8.1:
   dependencies:
     estree-walker "^0.6.1"
 
-rollup@^2.33.3:
-  version "2.33.3"
-  resolved "https://registry.npm.taobao.org/rollup/download/rollup-2.33.3.tgz?cache=0&sync_timestamp=1605677399014&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Frollup%2Fdownload%2Frollup-2.33.3.tgz#ae72ce31f992b09a580072951bfea76e9df17342"
-  integrity sha1-rnLOMfmSsJpYAHKVG/6nbp3xc0I=
+rollup@^2.34.1:
+  version "2.34.1"
+  resolved "https://registry.npm.taobao.org/rollup/download/rollup-2.34.1.tgz?cache=0&sync_timestamp=1606973847556&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Frollup%2Fdownload%2Frollup-2.34.1.tgz#a387230df02c58b242794a213dfb68b42de2c8fb"
+  integrity sha1-o4cjDfAsWLJCeUohPftotC3iyPs=
   optionalDependencies:
     fsevents "~2.1.2"
 

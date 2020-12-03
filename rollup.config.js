@@ -31,7 +31,7 @@ const options = (format) => ({
   plugins: [
     typescript({
       tsconfigOverride: {
-        compilerOptions: { module: 'esnext' },
+        compilerOptions: { module: 'esnext', declaration: format === 'es' },
         exclude: ['src/**/*.spec.ts', 'src/**/*.spec.tsx'],
       },
     }),

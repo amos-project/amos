@@ -8,7 +8,7 @@ import { AmosList, createListBox } from './AmosList';
 
 describe('AmosList', () => {
   it('should create list', () => {
-    const list = new AmosList<number>();
+    const list = new AmosList([0]);
     list.toJSON();
     list.fromJSON([1]);
     list.size();
@@ -40,7 +40,7 @@ describe('AmosList', () => {
   });
 
   it('should create list box', () => {
-    const box = createListBox('test/list', new AmosList<number>());
+    const box = createListBox('test/list', new AmosList([0]));
 
     box.size();
     box.concat([1]);
