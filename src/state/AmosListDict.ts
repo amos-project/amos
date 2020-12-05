@@ -7,8 +7,8 @@ import { AmosDict, createDictBox, DictKey } from './AmosDict';
 import { AmosList } from './AmosList';
 
 export class AmosListDict<K extends DictKey, T> extends AmosDict<K, AmosList<T>> {
-  constructor() {
-    super((undefined as unknown) as K, new AmosList<T>());
+  constructor(items?: T[], inferKey?: K) {
+    super(new AmosList<T>(items), inferKey);
   }
 
   setList(key: K, items: T[]): this {
@@ -22,6 +22,6 @@ export class AmosListDict<K extends DictKey, T> extends AmosDict<K, AmosList<T>>
 
 export const createListDictBox = createDictBox.extend(
   AmosListDict,
-  ['setList', 'setLists'] as const,
-  [] as const,
+  { setList: true, setLists: true },
+  {},
 );

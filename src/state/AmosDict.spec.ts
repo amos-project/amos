@@ -3,14 +3,13 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { identity } from '../core/utils';
 import { UserModel } from '../core/box.spec';
-import { clone } from '../core/utils';
+import { clone, identity } from '../core/utils';
 import { AmosDict, createDictBox } from './AmosDict';
 
 describe('AmosDict', () => {
   it('should create dict', () => {
-    const dict = new AmosDict(0 as number, new UserModel());
+    const dict = new AmosDict(new UserModel(), 0 as number);
     dict.toJSON();
     dict.fromJSON({ 1: { id: 1 } as UserModel });
     dict.size();
@@ -30,7 +29,7 @@ describe('AmosDict', () => {
   });
 
   it('should create dict box factory', () => {
-    const box = createDictBox('test/dict', new AmosDict(0 as number, new UserModel()));
+    const box = createDictBox('test/dict', new AmosDict(new UserModel(), 0 as number));
     box.delete(1);
     box.update(2, (v) => clone(v, { id: 3 }));
     box.mergeItems([[4, { id: 5 }]]);

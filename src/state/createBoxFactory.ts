@@ -7,90 +7,97 @@ import { Box, Mutation } from '../core/box';
 import { FunctionSelector } from '../core/selector';
 import { JSONState } from '../core/types';
 
-export interface BoxFactory<PS, KS extends keyof PS, KG extends keyof PS> {
+export type BoxWithStateMethods<S, KM extends keyof S, KS extends keyof S> = Box<S> &
+  {
+    [P in keyof S & (KM | KS)]: P extends KM
+      ? S[P] extends (...args: infer A) => S
+        ? (...args: A) => Mutation<A[0], A, S>
+        : never
+      : P extends KS
+      ? S[P] extends (...args: infer A) => infer R
+        ? (...args: A) => FunctionSelector<A>
+        : never
+      : never;
+  };
+
+export interface BoxFactory<PS, KM extends keyof PS, KS extends keyof PS> {
   <S>(
     key: string,
     initialState: S,
     preload?: (preloadedState: JSONState<S>, state: S) => S,
-  ): Box<S> &
-    {
-      [P in keyof S & (KS | KG)]: P extends KS
-        ? S[P] extends (...args: infer A) => S
-          ? (...args: A) => Mutation<A[0], A, S>
-          : never
-        : P extends KG
-        ? S[P] extends (...args: infer A) => infer R
-          ? (...args: A) => FunctionSelector<A>
-          : never
-        : never;
-    };
-  extend<NPS extends PS, NKS extends keyof NPS, NKG extends keyof NPS>(
+  ): BoxWithStateMethods<S, KM & keyof S, KS & keyof S>;
+  extend<
+    NPS,
+    NRM extends { [P in keyof NPS]?: true /* always true */ },
+    NRS extends { [P in keyof NPS]?: boolean /* cache type */ }
+  >(
     nextProto: NPS | (new (...args: any[]) => NPS),
-    nextSetters: readonly NKS[],
-    nextGetters: readonly NKG[],
-  ): BoxFactory<NPS, NKS | KS, NKG | KG>;
+    nextMutations: NRM,
+    nextSelectors: NRS,
+  ): BoxFactory<NPS, (keyof NRM | KM) & keyof NPS, (keyof NRS | KS) & keyof NPS>;
 }
 
-export function createBoxFactory<PS, KS extends keyof PS, KG extends keyof PS>(
+export function createBoxFactory<
+  PS,
+  RM extends { [P in keyof PS]?: true /* always true */ },
+  RS extends { [P in keyof PS]?: boolean /* cache type */ }
+>(
   proto: PS | (new (...args: any[]) => PS),
-  setters: readonly KS[],
-  getters: readonly KG[],
-): BoxFactory<PS, KS, KG> {
+  mutations: RM,
+  selectors: RS,
+): BoxFactory<PS, keyof RM & keyof PS, keyof RS & keyof PS> {
   const boxProto = Object.create(Box.prototype);
-  for (const ks of setters) {
-    Object.defineProperty(boxProto, ks, {
-      value: function (this: Box<PS>, ...args: any[]): Mutation {
-        return {
-          object: 'mutation',
-          box: this,
-          type: `${this.key}/${ks}`,
-          result: args[0],
-          args: [],
-          mutator: (state) => state[ks](...args),
-        };
-      },
-    });
+  for (const km in mutations) {
+    if (mutations.hasOwnProperty(km)) {
+      Object.defineProperty(boxProto, km, {
+        value: function (this: Box<PS>, ...args: any[]): Mutation {
+          return {
+            object: 'mutation',
+            box: this,
+            type: `${this.key}/${km}`,
+            result: args[0],
+            args: [],
+            mutator: (state) => state[km](...args),
+          };
+        },
+      });
+    }
   }
-  for (const kg of getters) {
-    Object.defineProperty(boxProto, kg, {
-      value: function (this: Box<PS>, ...args: any[]): FunctionSelector<any> {
-        return (select) => (select(this) as any)[kg](...args);
-      },
-    });
+  for (const ks in selectors) {
+    if (selectors.hasOwnProperty(ks)) {
+      Object.defineProperty(boxProto, ks, {
+        value: function (this: Box<PS>, ...args: any[]): FunctionSelector<any> {
+          return (select) => (select(this) as any)[ks](...args);
+        },
+      });
+    }
   }
 
   function createBox<S>(
     key: string,
     initialState: S,
     preload?: (preloadedState: JSONState<S>, state: S) => S,
-  ): Box<S> &
-    {
-      [P in keyof S & (KS | KG)]: P extends KS
-        ? S[P] extends (...args: infer A) => S
-          ? (...args: A) => Mutation<A[0], A, S>
-          : never
-        : P extends KG
-        ? S[P] extends (...args: infer A) => infer R
-          ? (...args: A) => FunctionSelector<A>
-          : never
-        : never;
-    } {
+  ): Box<S> & BoxWithStateMethods<S, keyof RM & keyof S, keyof RS & keyof S> {
     const box = new Box(key, initialState, preload);
     Object.setPrototypeOf(box, boxProto);
     return box as any;
   }
 
-  createBox.extend = function <NPS extends PS, NKS extends keyof NPS, NKG extends keyof NPS>(
+  createBox.extend = function <
+    NPS,
+    NRM extends { [P in keyof NPS]?: true /* always true */ },
+    NRS extends { [P in keyof NPS]?: boolean /* cache type */ }
+  >(
     nextProto: NPS | (new (...args: any[]) => NPS),
-    nextSetters: readonly NKS[],
-    nextGetters: readonly NKG[],
-  ) {
-    return createBoxFactory<NPS, NKS | KS, NKG | KG>(
+    nextMutations: NRM,
+    nextSelectors: NRS,
+  ): BoxFactory<NPS, (keyof NRM | keyof RM) & keyof NPS, (keyof NRS | keyof RS) & keyof NPS> {
+    return createBoxFactory<NPS, RM & NRM, RS & NRS>(
       nextProto,
-      [...setters, ...nextSetters],
-      [...getters, ...nextGetters],
+      { ...mutations, ...nextMutations },
+      { ...selectors, ...nextSelectors },
     );
   };
 
-  return createBox;
+  return createBox as any;
 }

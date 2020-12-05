@@ -12,9 +12,9 @@ export type DictKey = number | string;
 
 @forkable
 export class AmosDict<K extends DictKey, V> implements JSONSerializable<Record<K, V>> {
-  protected readonly data: Record<K, V>;
+  readonly data: Record<K, V>;
 
-  constructor(inferKey: K, protected readonly defaultValue: V) {
+  constructor(readonly defaultValue: V, readonly inferKey?: K) {
     this.data = {} as Record<K, V>;
   }
 
@@ -115,6 +115,22 @@ export class AmosDict<K extends DictKey, V> implements JSONSerializable<Record<K
 
 export const createDictBox = createBoxFactory(
   AmosDict,
-  ['delete', 'update', 'mergeItems', 'setItems', 'mergeItem', 'setItem'] as const,
-  ['map', 'entities', 'values', 'keys', 'has', 'take', 'get', 'size'] as const,
+  {
+    delete: true,
+    update: true,
+    mergeItems: true,
+    setItems: true,
+    mergeItem: true,
+    setItem: true,
+  },
+  {
+    map: true,
+    entities: true,
+    values: true,
+    keys: true,
+    has: false,
+    take: false,
+    get: false,
+    size: true,
+  },
 );

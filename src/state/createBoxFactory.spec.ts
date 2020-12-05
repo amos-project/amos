@@ -7,7 +7,7 @@ import { Box } from '../core/box';
 import { UserModel } from '../core/box.spec';
 import { createBoxFactory } from './createBoxFactory';
 
-export const createUserBox = createBoxFactory(UserModel, ['merge'] as const, ['fullName'] as const);
+export const createUserBox = createBoxFactory(UserModel, { merge: true }, { fullName: true });
 export const userFactoryBox = createUserBox('users/factory', new UserModel());
 
 describe('createBoxFactory', () => {

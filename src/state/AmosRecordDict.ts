@@ -12,8 +12,8 @@ export class AmosRecordDict<
   KF extends DictKey,
   V extends { readonly [P in KF]: DictKey }
 > extends AmosDict<V[KF], V> {
-  constructor(protected readonly defaultValue: V, protected readonly keyField: KF) {
-    super(defaultValue[keyField] as V[KF], defaultValue);
+  constructor(readonly defaultValue: V, readonly keyField: KF) {
+    super(defaultValue, defaultValue[keyField] as V[KF]);
   }
 
   setRecords(items: readonly V[]) {
@@ -36,6 +36,9 @@ export class AmosRecordDict<
 
 export const createRecordDictBox = createDictBox.extend(
   AmosRecordDict,
-  ['setRecords', 'mergeRecords'] as const,
-  [] as const,
+  {
+    setRecords: true,
+    mergeRecords: true,
+  },
+  {},
 );
