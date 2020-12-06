@@ -3,8 +3,9 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { Action } from './action';
+import { Action, FunctionAction } from './action';
 import { Box, Mutation } from './box';
+import { Cache } from './cache';
 import { FunctionSelector, Selector, SelectorFactory } from './selector';
 import { Signal } from './signal';
 import { AmosObject, defineAmosObject, isArray } from './utils';
@@ -21,7 +22,7 @@ export type Snapshot = Record<string, unknown>;
  *
  * @stable
  */
-export type Dispatchable<R = any> = Mutation<R> | Action<R> | Signal<R>;
+export type Dispatchable<R = any> = Mutation<R> | Action<R> | Signal<R> | FunctionAction<R>;
 
 /**
  * base amos signature, this is used for someone want to change the signature of useDispatch()
@@ -126,7 +127,8 @@ export type Selectable<R = any> =
  * @param discard
  */
 export interface Select extends AmosObject<'store.select'> {
-  <A extends Selectable>(selectable: A, discard?: Selectable): A extends Box<infer S>
+  (selectable: null, discard: Selectable): void;
+  <A extends Selectable>(selectable: A, discard?: Selectable | null): A extends Box<infer S>
     ? S
     : A extends SelectorFactory<[], infer R>
     ? R
@@ -162,6 +164,7 @@ export type StoreEnhancer = (store: Store) => Store;
 export function createStore(preloadedState?: Snapshot, ...enhancers: StoreEnhancer[]): Store {
   let state: Snapshot = {};
   let boxes: Record<string, Box> = {};
+  const cache = new Cache();
   const listeners: Array<() => void> = [];
   const ensure = (box: Box) => {
     if (!boxes.hasOwnProperty(box.key)) {
@@ -177,9 +180,12 @@ export function createStore(preloadedState?: Snapshot, ...enhancers: StoreEnhanc
     state[box.key] = boxState;
   };
 
-  let dispatchDepth = 0;
+  let dispatching: Dispatchable | readonly Dispatchable[] | undefined;
 
   const exec = (dispatchable: Dispatchable) => {
+    if (typeof dispatchable === 'function') {
+      return dispatchable();
+    }
     switch (dispatchable.object) {
       case 'action':
         return dispatchable.actor(store.dispatch, store.select, ...dispatchable.args);
@@ -217,7 +223,7 @@ export function createStore(preloadedState?: Snapshot, ...enhancers: StoreEnhanc
     dispatch: defineAmosObject(
       'store.dispatch',
       (tasks: Dispatchable | readonly Dispatchable[]) => {
-        ++dispatchDepth;
+        dispatching ||= tasks;
         try {
           if (isArray(tasks)) {
             return tasks.map(exec);
@@ -225,25 +231,20 @@ export function createStore(preloadedState?: Snapshot, ...enhancers: StoreEnhanc
             return exec(tasks);
           }
         } finally {
-          if (--dispatchDepth === 0) {
+          if (dispatching === tasks) {
+            dispatching = void 0;
             listeners.forEach((fn) => fn());
           }
         }
       },
     ),
     // TODO(acrazing): add select cache feature
-    select: defineAmosObject('store.select', (selectable: Selectable): any => {
-      if (selectable instanceof Box) {
-        ensure(selectable);
-        return state[selectable.key];
-      } else if (!('object' in selectable)) {
-        return selectable(store.select);
-      } else if (selectable.object === 'selector') {
-        return selectable.factory.calc(store.select, ...selectable.args);
-      } else {
-        return selectable.calc(store.select);
-      }
-    }),
+    select: defineAmosObject(
+      'store.select',
+      (selectable: Selectable | null, discard?: Selectable | null): any => {
+        return cache.get(selectable, discard, store.select, state);
+      },
+    ),
     clearBoxes: (reloadState: boolean) => {
       if (reloadState) {
         preloadedState = Object.assign(preloadedState || {}, JSON.parse(JSON.stringify(state)));
