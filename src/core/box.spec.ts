@@ -40,13 +40,16 @@ describe('box', () => {
 });
 
 export const incrCount = countBox.mutation((state) => state + 1);
-export const addCount = countBox.mutation((state, action: number = 1) => state + action);
+export const addCount = countBox.mutation(
+  (state, action: number = 1) => state + action,
+  'ADD_COUNT',
+);
 
 describe('mutation', () => {
   it('should create mutation', () => {
     const mutation = addCount();
     expect(mutation.box).toBe(countBox);
-    expect(mutation.type).toBe('mergeTest');
+    expect(mutation.type).toBe('ADD_COUNT');
     expect(mutation.mutator(1, 2)).toEqual(3);
   });
 });

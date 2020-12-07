@@ -14,9 +14,13 @@ describe('createBoxFactory', () => {
   it('should create box factory', () => {
     expect(userFactoryBox).toBeInstanceOf(Box);
     expect(typeof userFactoryBox.fullName()).toBe('function');
-    expect(userFactoryBox.merge({ firstName: 'hello', lastName: 'world' }).args).toEqual({
-      firstName: 'hello',
-      lastName: 'world',
-    });
+    expect(
+      userFactoryBox.merge({ firstName: 'hello', lastName: 'world' }).mutator(new UserModel(), {}),
+    ).toEqual(
+      new UserModel().merge({
+        firstName: 'hello',
+        lastName: 'world',
+      }),
+    );
   });
 });

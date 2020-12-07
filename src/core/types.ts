@@ -21,6 +21,8 @@ export function isJSONSerializable(obj: any): obj is JSONSerializable<any> {
 }
 
 export function fromJSON<S>(preloadedState: JSONState<S>, state: S): S {
-  // TODO
-  return state;
+  if (isJSONSerializable(state)) {
+    return state.fromJSON(preloadedState);
+  }
+  return preloadedState as S;
 }

@@ -35,6 +35,7 @@ export { useStore, useDispatch, MapSelector, useSelector } from './react/hooks';
 
 export { DictKey, AmosDict, createDictBox } from './state/AmosDict';
 export { AmosList, createListBox } from './state/AmosList';
+export { AmosListDict, createListDictBox } from './state/AmosListDict';
 export { AmosRecordDict, createRecordDictBox } from './state/AmosRecordDict';
 export { createBoxFactory } from './state/createBoxFactory';
 export { forkable, fork } from './state/utils';

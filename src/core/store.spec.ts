@@ -6,9 +6,9 @@
 import { addTwiceAsync } from './action.spec';
 import { addCount, countBox, mergeUser, userBox, UserModel } from './box.spec';
 import { selector } from './selector';
+import { selectDoubleCount } from './selector.spec';
 import { reset } from './signal.spec';
 import { createStore, Select } from './store';
-import { arrayEqual } from './utils';
 import { expectCalled } from './utils.spec';
 import fn = jest.fn;
 
@@ -124,26 +124,25 @@ describe('store.clearBoxes', () => {
 describe('select cache', () => {
   it('should not cache function', () => {
     const store = createStore();
-    const selectUesrFunction = fn((select: Select) => select(userBox));
-    const selectUserDefault = selector(fn((select: Select) => select(selectUesrFunction)));
+    const selectUserFunction = fn((select: Select) => select(userBox));
+    const selectUserDefault = selector(fn((select: Select) => select(selectUserFunction)));
     const selectUserId = selector(fn((select: Select) => select(selectUserDefault).id));
     const selectUserIdAdd = selector(
       fn((select: Select, add: number) => select(selectUserId) + add),
     );
-    const selectUserFullName = selector(
-      fn((select: Select) => select(selectUserDefault).fullName()),
-      (select) => {
-        const user = select(selectUserDefault);
-        return [user.firstName, user.lastName];
-      },
+    const selectUserIdAndDoubleCount = selector(
+      fn((select: Select) => select(selectUserId) + select(selectDoubleCount)),
     );
-    const selectUserNamePair = selector(
-      fn((select: Select) => [
-        select(selectUserDefault).firstName,
-        select(selectUserDefault).lastName,
-      ]),
-      void 0,
-      arrayEqual,
-    );
+    store.select(selectUserIdAdd(1));
+    expectCalled(selectUserIdAdd.calc);
+    expectCalled(selectUserDefault.calc);
+    expectCalled(selectUserFunction);
+    store.select(selectUserIdAdd(1));
+    expectCalled(selectUserIdAdd.calc, 0);
+    expectCalled(selectUserDefault.calc, 0);
+    expectCalled(selectUserFunction, 0);
+    store.select(selectUserIdAndDoubleCount);
+    expectCalled(selectUserId.calc, 0);
+    expectCalled(selectDoubleCount.calc);
   });
 });

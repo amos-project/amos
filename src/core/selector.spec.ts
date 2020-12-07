@@ -17,22 +17,17 @@ export const selectCurrentUser = selector(
   void 0,
   'currentUser',
 );
-export const selectFullName = selector(
-  (select) => select(selectCurrentUser).fullName(),
-  (select) => {
-    const user = select(selectCurrentUser);
-    return [user.firstName, user.lastName];
-  },
-);
+
+export const selectFullName = selector((select) => select(selectCurrentUser).fullName());
 
 describe('selector', () => {
   it('should create selector', () => {
-    const { calc, ...props } = selectCurrentUser;
+    const { ...props } = selectCurrentUser;
     expect(props).toEqual({
       type: 'currentUser',
-      calc: calc,
+      calc: props.calc,
       object: 'selector_factory',
-      deps: false,
+      cache: false,
       equalFn: strictEqual,
     });
   });

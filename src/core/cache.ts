@@ -1,13 +1,6 @@
 /*
  * @since 2020-12-05 22:58:04
  * @author acrazing <joking.young@gmail.com>
- *
- * Cache tree:
- *
- * specification: <ID>(B), <ID>(S,S|D)
- *
- * A(S,S) -> B(S,S) -> C(S,S) -> D(B)
- *
  */
 
 import { Box } from './box';
@@ -18,11 +11,8 @@ import { arrayEqual } from './utils';
 export interface TreeNode {
   args: unknown[] | undefined;
   snapshot: Snapshot;
-  lastSnapshot: Snapshot;
   value: unknown;
   refCount: number;
-  deps: Set<TreeNode>;
-  lastDeps: Set<TreeNode>;
   children: Map<unknown, TreeNode>;
   parent: TreeNode | undefined;
 }
@@ -31,11 +21,8 @@ function createNode(parent: undefined | TreeNode): TreeNode {
   return {
     args: void 0,
     snapshot: {},
-    lastSnapshot: {},
     value: void 0,
     refCount: 0,
-    deps: new Set<TreeNode>(),
-    lastDeps: new Set<TreeNode>(),
     children: new Map<unknown, TreeNode>(),
     parent: parent,
   };
@@ -65,20 +52,13 @@ function shouldDelete(
 
 export class Cache {
   private readonly tree = new Map<SelectorFactory, TreeNode>();
-  private readonly latest = new Set<TreeNode>();
-  private readonly stack = Array<TreeNode>(8);
-  private stackSize = 0;
+  private readonly latest = new Map<SelectorFactory, TreeNode>();
+  private snapshot: Snapshot | undefined;
 
-  private current() {
-    return this.stack[this.stackSize - 1];
-  }
-
-  private push(node: TreeNode) {
-    this.stack[this.stackSize++] = node;
-  }
-
-  private pop() {
-    this.stack[--this.stackSize] = void 0 as any;
+  clear() {
+    this.latest.clear();
+    this.tree.clear();
+    this.snapshot = void 0;
   }
 
   get(
@@ -86,16 +66,19 @@ export class Cache {
     discard: Selectable | undefined | null,
     select: Select,
     state: Snapshot,
-  ) {
+  ): unknown {
     const discarded = shouldDelete(selectable, discard);
     if (discarded) {
-      this.decrRef(discarded[0], discarded[1]);
+      this.drop(discarded[0], discarded[1]);
     }
     if (!selectable) {
       return;
-    } else if (!('object' in selectable)) {
+    }
+    if (!('object' in selectable)) {
       if (selectable instanceof Box) {
-        this.current().snapshot[selectable.key] = state[selectable.key];
+        if (this.snapshot) {
+          this.snapshot[selectable.key] = state[selectable.key];
+        }
         return state[selectable.key];
       } else {
         return selectable(select);
@@ -103,7 +86,36 @@ export class Cache {
     }
     const args = selectable.object === 'selector' ? selectable.args : [];
     const factory = selectable.object === 'selector' ? selectable.factory : selectable;
+    if (factory.cache === false || this.snapshot) {
+      // we cache shallow only currently for simplify the select fn
+      return factory.calc(select, ...args);
+    }
     const node = this.ensure(args, factory);
+    if (node.args) {
+      let isDirty = false;
+      for (const k in node.snapshot) {
+        if (node.snapshot.hasOwnProperty(k)) {
+          isDirty = node.snapshot[k] !== state[k];
+          if (isDirty) {
+            break;
+          }
+        }
+      }
+      if (!isDirty) {
+        return node.value;
+      }
+    }
+    try {
+      this.snapshot = {};
+      node.value = factory.calc(select, ...args);
+      node.args = args;
+      node.snapshot = this.snapshot;
+      this.snapshot = void 0;
+      this.latest.set(factory, node);
+      return node.value;
+    } finally {
+      this.snapshot = void 0;
+    }
   }
 
   /**
@@ -112,16 +124,15 @@ export class Cache {
    * @param factory
    * @private
    */
-  private decrRef(args: unknown[], factory: SelectorFactory) {
+  private drop(args: unknown[], factory: SelectorFactory) {
     let node = this.tree.get(factory);
     for (let i = 0; i < args.length && node; i++) {
       node = node.children.get(args[i]);
     }
-    if (!node || node.refCount === 0) {
-      // does not exist or free already(shallow node or latest), do nothing
+    if (!node) {
       return;
     }
-    if (--node.refCount === 0 && node.children.size === 0 && !this.latest.has(node)) {
+    if (--node.refCount === 0 && node.children.size === 0 && this.latest.get(factory) !== node) {
       if (node.parent) {
         node.parent.children.delete(args[args.length - 1]);
       } else {
@@ -130,7 +141,7 @@ export class Cache {
     }
   }
 
-  ensure(args: unknown[], factory: SelectorFactory) {
+  private ensure(args: unknown[], factory: SelectorFactory) {
     let node = this.tree.get(factory);
     if (!node) {
       node = createNode(void 0);

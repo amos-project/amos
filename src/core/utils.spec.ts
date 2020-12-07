@@ -17,9 +17,9 @@ import {
 } from './utils';
 import Mock = jest.Mock;
 
-export function expectCalled(fn: Mock) {
-  expect(fn).toBeCalledTimes(1);
-  fn.mockClear();
+export function expectCalled(fn: (...args: any[]) => any, count = 1) {
+  expect(fn).toBeCalledTimes(count);
+  (fn as Mock).mockClear();
 }
 
 describe('utils', () => {

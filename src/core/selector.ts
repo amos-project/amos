@@ -34,7 +34,7 @@ export interface SelectorFactory<A extends any[] = any, R = any> {
   object: 'selector_factory';
   type: string | undefined;
   calc: (select: Select, ...args: A) => R;
-  cache: boolean | ((select: Select, ...args: A) => unknown[]);
+  cache: boolean;
   equalFn: (oldResult: R, newResult: R) => boolean;
 }
 
@@ -46,7 +46,7 @@ export interface SelectorFactory<A extends any[] = any, R = any> {
  */
 export function selector<A extends any[], R>(
   calc: (select: Select, ...args: A) => R,
-  cache: ((select: Select, ...args: A) => unknown[]) | boolean = false,
+  cache = false,
   equalFn: (oldResult: R, newResult: R) => boolean = strictEqual,
   type?: string,
 ): SelectorFactory<A, R> {

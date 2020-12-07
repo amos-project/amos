@@ -249,6 +249,7 @@ export function createStore(preloadedState?: Snapshot, ...enhancers: StoreEnhanc
       if (reloadState) {
         preloadedState = Object.assign(preloadedState || {}, JSON.parse(JSON.stringify(state)));
         state = {};
+        cache.clear();
       }
       boxes = {};
       listeners.forEach((fn) => fn());
