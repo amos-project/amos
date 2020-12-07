@@ -75,40 +75,31 @@ describe('useSelector', () => {
 
   it('should respect deps', async () => {
     const defaultFn = fn((select: Select, times: number) => select(countBox) * times);
-    const strictFn = fn((select: Select, times: number) => select(countBox) * times);
     const defaultSelector = selector(defaultFn);
-    const strictSelector = selector(strictFn, (select, times) => [select(countBox), times]);
     const inlineFn = fn((select: Select) => select(countBox));
-    const expectCalled = (isDefault: boolean, isStrict: boolean, isInline: boolean) => {
+    const expectCalled = (isDefault: boolean, isInline: boolean) => {
       expect(defaultFn).toBeCalledTimes(isDefault ? 1 : 0);
       defaultFn.mockClear();
-      expect(strictFn).toBeCalledTimes(isStrict ? 1 : 0);
-      strictFn.mockClear();
       expect(inlineFn).toBeCalledTimes(isInline ? 1 : 0);
       inlineFn.mockClear();
     };
     const { result, dispatch, rerender, waitForNextUpdate } = renderUseSelector(
       (props: { multiply: number }) =>
-        [
-          defaultSelector(props.multiply),
-          strictSelector(props.multiply),
-          inlineFn,
-          countBox,
-        ] as const,
+        [defaultSelector(props.multiply), inlineFn, countBox] as const,
       { count: 1, test: { count: 1, greets: ['PRELOAD'] } },
       { multiply: 1 },
     );
-    expectCalled(true, true, true);
-    expect(result.current).toEqual([1, 1, 1, 1]);
+    expectCalled(true, true);
+    expect(result.current).toEqual([1, 1, 1]);
     dispatch(mergeUser({ id: 2 }));
     await waitForNextUpdate();
-    expectCalled(true, true, true);
-    expect(result.current).toEqual([2, 2, 2, 1]);
+    expectCalled(true, true);
+    expect(result.current).toEqual([2, 2, 1]);
     rerender({ multiply: 2 });
-    expectCalled(true, true, true);
-    expect(result.current).toEqual([4, 4, 2, 1]);
+    expectCalled(true, true);
+    expect(result.current).toEqual([4, 2, 1]);
     act(() => dispatch(incrCount()));
-    expectCalled(false, false, false);
-    expect(result.current).toEqual([4, 4, 2, 2]);
+    expectCalled(false, false);
+    expect(result.current).toEqual([4, 2, 2]);
   });
 });

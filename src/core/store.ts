@@ -242,6 +242,9 @@ export function createStore(preloadedState?: Snapshot, ...enhancers: StoreEnhanc
     select: defineAmosObject(
       'store.select',
       (selectable: Selectable | null, discard?: Selectable | null): any => {
+        if (selectable instanceof Box) {
+          ensure(selectable);
+        }
         return cache.get(selectable, discard, store.select, state);
       },
     ),
