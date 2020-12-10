@@ -4,6 +4,7 @@
  */
 
 import { useContext, useDebugValue, useEffect, useReducer, useRef } from 'react';
+import { identity } from '..';
 import { Box } from '../core/box';
 import { Dispatch, Selectable, Store } from '../core/store';
 import { __Context } from './context';
@@ -32,7 +33,7 @@ export type MapSelector<Rs extends readonly Selectable[]> = {
 
 interface StoreRef {
   store: Store;
-  disposer: () => void;
+  dispose: () => void;
   error: any;
 }
 
@@ -107,15 +108,15 @@ function isEqual(selector: Selectable, results: unknown[], index: number, curren
 export function useSelector<Rs extends Selectable[]>(...selectors: Rs): MapSelector<Rs> {
   const [, update] = useReducer((s) => s + 1, 0);
   const store = useStore();
-  const lastSelectors = useRef(selectors);
+  const lastSelectors = useRef<Selectable[]>([]);
   const lastResults = useRef<MapSelector<Rs>>([] as any);
   const lastStore = useRef<StoreRef>(void 0 as any);
   if (lastStore.current?.store !== store) {
-    lastStore.current?.disposer();
+    lastStore.current?.dispose();
     lastStore.current = {
       store,
       error: void 0,
-      disposer: store.subscribe(() => {
+      dispose: store.subscribe(() => {
         try {
           for (let i = 0; i < lastSelectors.current.length; i++) {
             const selector = lastSelectors.current[i];
@@ -134,7 +135,13 @@ export function useSelector<Rs extends Selectable[]>(...selectors: Rs): MapSelec
       }),
     };
   }
-  useEffect(() => () => lastStore.current?.disposer(), []);
+  useEffect(
+    () => () => {
+      lastStore.current?.dispose();
+      lastSelectors.current.forEach((s) => store.select(null, s));
+    },
+    [],
+  );
   if (lastStore.current.error) {
     const error = lastStore.current.error;
     lastStore.current.error = void 0;
@@ -142,35 +149,40 @@ export function useSelector<Rs extends Selectable[]>(...selectors: Rs): MapSelec
   }
   try {
     const ps = lastSelectors.current;
+    for (let i = selectors.length; i < ps.length; i++) {
+      store.select(null, ps[i]);
+    }
     lastSelectors.current = selectors;
-    lastResults.current = selectors.map((s, i) => store.select(s, ps[i])) as any;
+    lastResults.current = selectors.map((s, i) => store.select(s, ps[i] || null)) as any;
   } catch (e) {
     lastResults.current = [] as any;
     throw e;
   }
-  // TODO: print friendly with selector names
-  useDebugValue(lastResults.current, (value: any[]) => {
-    if (typeof process === 'object' && process.env.NODE_ENV === 'development') {
-      return value.reduce((map, value, index) => {
-        const s = selectors[index];
-        let type =
-          s instanceof Box
-            ? s.key
-            : 'object' in s
-            ? s.object === 'selector'
-              ? s.factory.type
-              : s.type
-            : s.type || s.name;
-        if (!type) {
-          type = `anonymous`;
+  useDebugValue(
+    lastResults.current,
+    typeof process === 'object' && process.env.NODE_ENV === 'development'
+      ? (value: any[]) => {
+          return value.reduce((map, value, index) => {
+            const s = selectors[index];
+            let type =
+              s instanceof Box
+                ? s.key
+                : 'object' in s
+                ? s.object === 'selector'
+                  ? s.factory.type
+                  : s.type
+                : s.type || s.name;
+            if (!type) {
+              type = `anonymous`;
+            }
+            if (map.hasOwnProperty(type)) {
+              type = type + '_' + index;
+            }
+            map[type] = value;
+            return map;
+          }, {} as any);
         }
-        if (map.hasOwnProperty(type)) {
-          type = type + '_' + index;
-        }
-        map[type] = value;
-        return map;
-      }, {} as any);
-    }
-  });
+      : identity,
+  );
   return lastResults.current;
 }

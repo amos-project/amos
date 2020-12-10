@@ -5,6 +5,7 @@
 
 import { act, renderHook, RenderHookResult } from '@testing-library/react-hooks';
 import React, { FC, memo } from 'react';
+import { addTwiceAsync } from '../core/action.spec';
 import { countBox, incrCount, mergeUser } from '../core/box.spec';
 import { selector } from '../core/selector';
 import { selectCount, selectDoubleCount, selectMultipleCount } from '../core/selector.spec';
@@ -12,6 +13,7 @@ import { createStore, Select, Selectable, Snapshot, Store } from '../core/store'
 import { Provider } from './context';
 import { MapSelector, useDispatch, useSelector, useStore } from './hooks';
 import fn = jest.fn;
+import Mock = jest.Mock;
 
 export const TestCount = memo(() => {
   const [count, count2] = useSelector(selectCount, selectDoubleCount);
@@ -53,17 +55,17 @@ describe('useSelector', () => {
     expect(result.current).toEqual([1, 1, 2, 3]);
   });
   it('should update', async () => {
-    const { result, waitForNextUpdate, dispatch, rerender } = renderUseSelector(
+    const { result, dispatch, waitForNextUpdate, rerender } = renderUseSelector(
       (props: { multiply: number }) => [selectDoubleCount, selectMultipleCount(props.multiply)],
-      { count: 1, test: { greets: ['PRELOAD'], count: 1 } },
+      { count: 1 },
       { multiply: 3 },
     );
     expect(result.current).toEqual([2, 3]);
-    dispatch(mergeUser({ firstName: 'TEST UPDATE' }));
+    dispatch(addTwiceAsync(1));
     await waitForNextUpdate();
-    expect(result.current).toEqual([4, 6]);
+    expect(result.current).toEqual([6, 9]);
     rerender({ multiply: 4 });
-    expect(result.current).toEqual([4, 8]);
+    expect(result.current).toEqual([6, 12]);
   });
 
   it('should update - box', async () => {
@@ -74,32 +76,34 @@ describe('useSelector', () => {
   });
 
   it('should respect deps', async () => {
-    const defaultFn = fn((select: Select, times: number) => select(countBox) * times);
-    const defaultSelector = selector(defaultFn);
+    const defaultSelector = selector(
+      fn((select: Select, t: number) => {
+        return select(countBox) * t;
+      }),
+    );
     const inlineFn = fn((select: Select) => select(countBox));
-    const expectCalled = (isDefault: boolean, isInline: boolean) => {
-      expect(defaultFn).toBeCalledTimes(isDefault ? 1 : 0);
-      defaultFn.mockClear();
-      expect(inlineFn).toBeCalledTimes(isInline ? 1 : 0);
+    const expectCalled = (defaultCount = 1, inlineCount = 1) => {
+      expect(defaultSelector.calc).toBeCalledTimes(defaultCount);
+      (defaultSelector.calc as Mock).mockClear();
+      expect(inlineFn).toBeCalledTimes(inlineCount);
       inlineFn.mockClear();
     };
-    const { result, dispatch, rerender, waitForNextUpdate } = renderUseSelector(
+    const { result, dispatch, rerender } = renderUseSelector(
       (props: { multiply: number }) =>
         [defaultSelector(props.multiply), inlineFn, countBox] as const,
-      { count: 1, test: { count: 1, greets: ['PRELOAD'] } },
+      { count: 1 },
       { multiply: 1 },
     );
-    expectCalled(true, true);
+    expectCalled(1, 1);
     expect(result.current).toEqual([1, 1, 1]);
     dispatch(mergeUser({ id: 2 }));
-    await waitForNextUpdate();
-    expectCalled(true, true);
-    expect(result.current).toEqual([2, 2, 1]);
+    expectCalled(1, 1);
+    expect(result.current).toEqual([1, 1, 1]);
     rerender({ multiply: 2 });
-    expectCalled(true, true);
-    expect(result.current).toEqual([4, 2, 1]);
+    expectCalled(1, 1);
+    expect(result.current).toEqual([2, 1, 1]);
     act(() => dispatch(incrCount()));
-    expectCalled(false, false);
+    expectCalled(2, 1);
     expect(result.current).toEqual([4, 2, 2]);
   });
 });
