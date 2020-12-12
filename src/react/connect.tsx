@@ -12,9 +12,7 @@ import React, {
   PropsWithoutRef,
   RefAttributes,
 } from 'react';
-import { selector } from '../core/selector';
 import { Dispatch, Select } from '../core/store';
-import { values } from '../core/utils';
 import { Consumer } from './context';
 
 export interface ConnectedProps {
@@ -43,16 +41,15 @@ export type Connector<TOwnedProps extends object = {}, TMappedProps extends obje
 const emptyMapper = () => ({});
 
 export function connect<TMappedProps extends object = {}, TOwnedProps extends object = {}>(
-  extractor: (select: Select, ownedProps: TOwnedProps) => TMappedProps = emptyMapper as any,
+  mapper: (select: Select, ownedProps: TOwnedProps) => TMappedProps = emptyMapper as any,
 ): Connector<TOwnedProps, TMappedProps> {
-  const mapper = selector(extractor, (select, args) => values(args));
   return function connector(Component: any) {
     const ConnectedComponent = forwardRef<any, any>((props, ref) => {
       // TODO listen updates
       return (
         <Consumer>
           {(store) => (
-            <Component {...store.select(mapper(props))} {...props} ref={ref}>
+            <Component {...mapper(store.select, props)} {...props} ref={ref}>
               {props.children}
             </Component>
           )}
