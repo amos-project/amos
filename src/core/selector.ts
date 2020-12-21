@@ -4,7 +4,7 @@
  */
 
 import { Select } from './store';
-import { strictEqual } from './utils';
+import { AmosObject, defineAmosObject, strictEqual } from './utils';
 
 export interface FunctionSelector<R> {
   (select: Select): R;
@@ -20,8 +20,7 @@ export interface FunctionSelector<R> {
  *
  * @stable
  */
-export interface Selector<A extends any[] = any[], R = any> {
-  object: 'selector';
+export interface Selector<A extends any[] = any[], R = any> extends AmosObject<'selector'> {
   args: A;
   factory: SelectorFactory<A, R>;
 }
@@ -29,9 +28,9 @@ export interface Selector<A extends any[] = any[], R = any> {
 /**
  * A `SelectorFactory` is a function to create a `Selector`.
  */
-export interface SelectorFactory<A extends any[] = any, R = any> {
+export interface SelectorFactory<A extends any[] = any, R = any>
+  extends AmosObject<'selector_factory'> {
   (...args: A): Selector<A, R>;
-  object: 'selector_factory';
   type: string | undefined;
   calc: (select: Select, ...args: A) => R;
   cache: boolean;
@@ -50,9 +49,14 @@ export function selector<A extends any[], R>(
   equalFn: (oldResult: R, newResult: R) => boolean = strictEqual,
   type?: string,
 ): SelectorFactory<A, R> {
-  const factory: SelectorFactory<A, R> = Object.assign(
-    (...args: A): Selector<A, R> => ({ object: 'selector', args, factory }),
-    { cache, equalFn, type, calc, object: 'selector_factory' } as const,
+  const factory: SelectorFactory<A, R> = defineAmosObject(
+    'selector_factory',
+    Object.assign((...args: A): Selector<A, R> => defineAmosObject('selector', { args, factory }), {
+      cache,
+      equalFn,
+      type,
+      calc,
+    } as const),
   );
   return factory;
 }

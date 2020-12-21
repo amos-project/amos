@@ -4,9 +4,9 @@
  */
 
 import { Box } from './box';
-import { SelectorFactory } from './selector';
+import { Selector, SelectorFactory } from './selector';
 import { Select, Selectable, Snapshot } from './store';
-import { arrayEqual } from './utils';
+import { arrayEqual, isAmosObject } from './utils';
 
 export interface TreeNode {
   args: unknown[] | undefined;
@@ -32,24 +32,43 @@ function shouldDelete(
   input: Selectable | null,
   discard: Selectable | undefined | null,
 ): [unknown[], SelectorFactory] | false {
-  if (!discard || !('object' in discard)) {
+  if (!discard) {
     return false;
   }
-  const discardArgs = discard.object === 'selector' ? discard.args : [];
-  const discardFactory = discard.object === 'selector' ? discard.factory : discard;
+  let discardArgs: unknown[];
+  let discardFactory: SelectorFactory;
+  if (isAmosObject<Selector>('selector', discard)) {
+    discardArgs = discard.args;
+    discardFactory = discard.factory;
+  } else if (isAmosObject<SelectorFactory>('selector_factory', discard)) {
+    discardArgs = [];
+    discardFactory = discard;
+  } else {
+    return false;
+  }
   if (discardFactory.cache === false) {
     return false;
   }
-  if (!input || !('object' in input)) {
+  if (!input) {
     return [discardArgs, discardFactory];
   }
-  const inputArgs = input.object === 'selector' ? input.args : [];
-  const inputFactory = input.object === 'selector' ? input.factory : input;
+  let inputArgs: unknown[];
+  let inputFactory: SelectorFactory;
+  if (isAmosObject<Selector>('selector', input)) {
+    inputArgs = input.args;
+    inputFactory = input.factory;
+  } else if (isAmosObject<SelectorFactory>('selector_factory', input)) {
+    inputArgs = [];
+    inputFactory = input;
+  } else {
+    return [discardArgs, discardFactory];
+  }
   return inputFactory === discardFactory && arrayEqual(inputArgs, discardArgs)
     ? false
     : [discardArgs, discardFactory];
 }
 
+/** @internal */
 export class Cache {
   private readonly tree = new Map<SelectorFactory, TreeNode>();
   private readonly latest = new Map<SelectorFactory, TreeNode>();
@@ -74,20 +93,25 @@ export class Cache {
     if (!selectable) {
       return;
     }
-    if (!('object' in selectable)) {
-      if (selectable instanceof Box) {
-        if (this.snapshot) {
-          this.snapshot[selectable.key] = state[selectable.key];
-        }
-        return state[selectable.key];
-      } else {
-        return selectable(select);
+    if (selectable instanceof Box) {
+      if (this.snapshot) {
+        this.snapshot[selectable.key] = state[selectable.key];
       }
+      return state[selectable.key];
     }
-    const args = selectable.object === 'selector' ? selectable.args : [];
-    const factory = selectable.object === 'selector' ? selectable.factory : selectable;
+    let args: unknown[];
+    let factory: SelectorFactory;
+    if (isAmosObject<Selector>('selector', selectable)) {
+      args = selectable.args;
+      factory = selectable.factory;
+    } else if (isAmosObject<SelectorFactory>('selector_factory', selectable)) {
+      args = [];
+      factory = selectable;
+    } else {
+      return selectable(select);
+    }
     if (factory.cache === false || this.snapshot) {
-      // we cache shallow only currently for simplify the select fn
+      // we do not process selector deps tree, it complicates the cache system
       return factory.calc(select, ...args);
     }
     const node = this.ensure(args, factory);
@@ -95,8 +119,8 @@ export class Cache {
       let isDirty = false;
       for (const k in node.snapshot) {
         if (node.snapshot.hasOwnProperty(k)) {
-          isDirty = node.snapshot[k] !== state[k];
-          if (isDirty) {
+          if (node.snapshot[k] !== state[k]) {
+            isDirty = true;
             break;
           }
         }
