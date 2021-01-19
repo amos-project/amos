@@ -1,0 +1,26 @@
+{
+  "name": "@kcats/typescript-plugin",
+  "version": "0.1.0",
+  "description": "The typescript plugin for kcats.",
+  "keywords": [
+    "kcats",
+    "typescript-plugin"
+  ],
+  "author": "acrazing <joking.young@gmail.com>",
+  "homepage": "https://github.com/acrazing/kcats",
+  "license": "MIT",
+  "main": "dist/typescript-plugin.cjs.js",
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/acrazing/kcats.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  },
+  "bugs": {
+    "url": "https://github.com/acrazing/kcats/issues"
+  }
+}

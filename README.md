@@ -1,6 +1,6 @@
-# amos
+# kcats
 
-Amos is a decentralized state manager for `React`, inspired by `Redux`, `Vuex` and `Recoil`.
+Kcats is a decentralized state manager for `React`, inspired by `Redux`, `Vuex` and `Recoil`.
 
 ## Highlights
 

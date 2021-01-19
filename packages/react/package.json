@@ -1,0 +1,27 @@
+{
+  "name": "@kcats/react",
+  "version": "0.1.0",
+  "description": "The react binding for kcats.",
+  "keywords": [
+    "kcats",
+    "react",
+    "hooks"
+  ],
+  "author": "acrazing <joking.young@gmail.com>",
+  "homepage": "https://github.com/acrazing/kcats",
+  "license": "MIT",
+  "main": "dist/react.cjs.js",
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/acrazing/kcats.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  },
+  "bugs": {
+    "url": "https://github.com/acrazing/kcats/issues"
+  }
+}

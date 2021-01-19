@@ -1,0 +1,28 @@
+{
+  "name": "@kcats/core",
+  "version": "0.1.0",
+  "description": "A decentralized state manager.",
+  "keywords": [
+    "kcats",
+    "state",
+    "manager",
+    "decentralized"
+  ],
+  "author": "acrazing <joking.young@gmail.com>",
+  "homepage": "https://github.com/acrazing/kcats",
+  "license": "MIT",
+  "main": "dist/core.cjs.js",
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/acrazing/kcats.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  },
+  "bugs": {
+    "url": "https://github.com/acrazing/kcats/issues"
+  }
+}
