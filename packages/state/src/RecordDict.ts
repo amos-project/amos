@@ -4,14 +4,14 @@
  */
 
 import { clone } from '@kcats/core';
-import { KcatsDict, createDictBox, DictKey } from './KcatsDict';
+import { Dict, createDictBox, DictKey } from './Dict';
 import { fork, forkable } from './utils';
 
 @forkable
-export class KcatsRecordDict<
-  KF extends DictKey,
-  V extends { readonly [P in KF]: DictKey }
-> extends KcatsDict<V[KF], V> {
+export class RecordDict<KF extends DictKey, V extends { readonly [P in KF]: DictKey }> extends Dict<
+  V[KF],
+  V
+> {
   constructor(readonly defaultValue: V, readonly keyField: KF) {
     super(defaultValue, defaultValue[keyField] as V[KF]);
   }
@@ -35,7 +35,7 @@ export class KcatsRecordDict<
 }
 
 export const createRecordDictBox = createDictBox.extend(
-  KcatsRecordDict,
+  RecordDict,
   {
     setRecords: true,
     mergeRecords: true,

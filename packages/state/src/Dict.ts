@@ -10,7 +10,7 @@ import { fork, forkable } from './utils';
 export type DictKey = number | string;
 
 @forkable
-export class KcatsDict<K extends DictKey, V> implements JSONSerializable<Record<K, V>> {
+export class Dict<K extends DictKey, V> implements JSONSerializable<Record<K, V>> {
   readonly data: Record<K, V>;
 
   constructor(readonly defaultValue: V, readonly inferKey?: K) {
@@ -113,7 +113,7 @@ export class KcatsDict<K extends DictKey, V> implements JSONSerializable<Record<
 }
 
 export const createDictBox = createBoxFactory(
-  KcatsDict,
+  Dict,
   {
     delete: true,
     update: true,

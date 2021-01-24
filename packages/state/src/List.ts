@@ -8,7 +8,7 @@ import { createBoxFactory } from './createBoxFactory';
 import { fork, forkable } from './utils';
 
 @forkable
-export class KcatsList<T> implements JSONSerializable<T[]> {
+export class List<T> implements JSONSerializable<T[]> {
   constructor(readonly data: T[] = []) {}
 
   fromJSON(state: JSONState<T[]>): this {
@@ -140,7 +140,7 @@ export class KcatsList<T> implements JSONSerializable<T[]> {
 }
 
 export const createListBox = createBoxFactory(
-  KcatsList,
+  List,
   {
     delete: true,
     set: true,

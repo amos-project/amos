@@ -4,11 +4,11 @@
  */
 
 import { UserModel } from '@kcats/testing';
-import { KcatsRecordDict, createRecordDictBox } from './KcatsRecordDict';
+import { RecordDict, createRecordDictBox } from './RecordDict';
 
 describe('KcatsRecordDict', () => {
   it('should create record dict', () => {
-    const dict = new KcatsRecordDict(new UserModel(), 'id');
+    const dict = new RecordDict(new UserModel(), 'id');
     dict.toJSON();
     dict.fromJSON({ 1: { id: 1 } as UserModel });
     dict.setRecords([new UserModel().merge({ id: 2 })]);
@@ -16,7 +16,7 @@ describe('KcatsRecordDict', () => {
   });
 
   it('should create record dict box', () => {
-    const box = createRecordDictBox('test/recordDict', new KcatsRecordDict(new UserModel(), 'id'));
+    const box = createRecordDictBox('test/recordDict', new RecordDict(new UserModel(), 'id'));
 
     box.setRecords([new UserModel()]);
     box.mergeRecords([{ id: 1 }]);

@@ -5,11 +5,11 @@
 
 import { clone, identity } from '@kcats/core';
 import { UserModel } from '@kcats/testing';
-import { KcatsDict, createDictBox } from './KcatsDict';
+import { Dict, createDictBox } from './Dict';
 
 describe('KcatsDict', () => {
   it('should create dict', () => {
-    const dict = new KcatsDict(new UserModel(), 0 as number);
+    const dict = new Dict(new UserModel(), 0 as number);
     dict.toJSON();
     dict.fromJSON({ 1: { id: 1 } as UserModel });
     dict.size();
@@ -29,7 +29,7 @@ describe('KcatsDict', () => {
   });
 
   it('should create dict box factory', () => {
-    const box = createDictBox('test/dict', new KcatsDict(new UserModel(), 0 as number));
+    const box = createDictBox('test/dict', new Dict(new UserModel(), 0 as number));
     box.delete(1);
     box.update(2, (v) => clone(v, { id: 3 }));
     box.mergeItems([[4, { id: 5 }]]);

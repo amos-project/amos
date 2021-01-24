@@ -4,11 +4,11 @@
  */
 
 import { identity } from '@kcats/core';
-import { KcatsList, createListBox } from './KcatsList';
+import { List, createListBox } from './List';
 
 describe('KcatsList', () => {
   it('should create list', () => {
-    const list = new KcatsList([0]);
+    const list = new List([0]);
     list.toJSON();
     list.fromJSON([1]);
     list.size();
@@ -40,7 +40,7 @@ describe('KcatsList', () => {
   });
 
   it('should create list box', () => {
-    const box = createListBox('test/list', new KcatsList([0]));
+    const box = createListBox('test/list', new List([0]));
 
     box.size();
     box.concat([1]);

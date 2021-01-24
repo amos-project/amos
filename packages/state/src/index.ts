@@ -3,9 +3,9 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-export { DictKey, KcatsDict, createDictBox } from './KcatsDict';
-export { KcatsList, createListBox } from './KcatsList';
-export { KcatsListDict, createListDictBox } from './KcatsListDict';
-export { KcatsRecordDict, createRecordDictBox } from './KcatsRecordDict';
+export { DictKey, Dict, createDictBox } from './Dict';
+export { List, createListBox } from './List';
+export { ListDict, createListDictBox } from './ListDict';
+export { RecordDict, createRecordDictBox } from './RecordDict';
 export { createBoxFactory } from './createBoxFactory';
 export { forkable, fork } from './utils';
