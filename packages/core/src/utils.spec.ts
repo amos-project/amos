@@ -3,18 +3,7 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import {
-  arrayEqual,
-  defineKcatsObject,
-  hoistMethod,
-  identity,
-  isKcatsObject,
-  isArray,
-  kKcatsObject,
-  shallowEqual,
-  strictEqual,
-  values,
-} from './utils';
+import { arrayEqual, identity, isArray, shallowEqual, strictEqual, values } from './utils';
 
 describe('utils', () => {
   it('should compare array shallow', () => {
@@ -22,25 +11,6 @@ describe('utils', () => {
     expect(arrayEqual([1], [1, 2])).toBe(false);
     expect(arrayEqual([1, 2], [1, 2])).toBe(true);
     expect(arrayEqual([1, 2], [1, 3])).toBe(false);
-  });
-
-  it('should define kcats object', () => {
-    const fn = defineKcatsObject('kcats.object', () => 1);
-    expect(fn[kKcatsObject] === 'kcats.object').toBe(true);
-    // @ts-expect-error
-    expect(fn[kKcatsObject] === 'bad value').toBe(false);
-
-    expect(isKcatsObject('kcats.object', fn)).toBe(true);
-    expect(isKcatsObject('kcats.object', 1)).toBe(false);
-    expect(isKcatsObject('kcats.object1', fn)).toBe(false);
-  });
-
-  it('should hoist methods', () => {
-    const fn = defineKcatsObject('kcats.object', (id: number) => id * 2);
-    Object.assign(fn, { bar: 1 });
-    const fn2 = hoistMethod(fn, (id: number) => id * 4);
-    expect(fn2(2)).toEqual(8);
-    expect(fn2[kKcatsObject]).toBe('kcats.object');
   });
 
   it('should shallow compare', () => {

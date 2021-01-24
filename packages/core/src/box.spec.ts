@@ -4,23 +4,43 @@
  */
 
 import { addCount, countBox, reset } from '@kcats/testing';
+import { Box } from './box';
+import { fromJSON } from './types';
 
 describe('box', () => {
   it('should create box', () => {
-    expect(countBox.key).toBe('count');
-    expect(countBox.initialState).toEqual(0);
-    expect(countBox.preload(1, countBox.initialState)).toEqual(1);
+    expect(countBox).toEqual(
+      Object.assign(Object.create(Box.prototype), {
+        key: 'count',
+        initialState: 0,
+        listeners: {
+          [reset.type]: expect.any(Function),
+        },
+        preload: fromJSON,
+        setState: expect.any(Function),
+        mergeState: expect.any(Function),
+      }),
+    );
   });
   it('should listen signal', () => {
-    expect(typeof countBox.listeners[reset.type]).toBe('function');
+    expect(typeof countBox.signalSubscribers[reset.type]).toBe('function');
   });
 });
 
 describe('mutation', () => {
+  it('should create mutation factory', () => {
+    expect({ ...addCount }).toEqual({
+      $object: 'mutation_factory',
+      type: 'ADD_COUNT',
+      box: countBox,
+      mutator: expect.any(Function),
+    });
+  });
   it('should create mutation', () => {
-    const mutation = addCount();
-    expect(mutation.box).toBe(countBox);
-    expect(mutation.type).toBe('ADD_COUNT');
-    expect(mutation.mutator(1, 2)).toEqual(3);
+    expect(addCount()).toEqual({
+      $object: 'mutation',
+      args: [],
+      factory: addCount,
+    });
   });
 });

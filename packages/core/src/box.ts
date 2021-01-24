@@ -15,15 +15,18 @@ import { clone } from './utils';
  * to pay attention to any properties of the `Mutation`.
  *
  * The return value of dispatch it is the action.
- *
- * @stable
  */
-export interface Mutation<R = any, A extends any[] = any[], S = any> {
-  object: 'mutation';
+export interface Mutation<S = any, A extends any[] = any> {
+  $object: 'mutation';
+  args: A;
+  factory: MutationFactory;
+}
+
+export interface MutationFactory<S = any, A extends any[] = any> {
+  $object: 'mutation_factory';
+  (...args: A): Mutation<S, A>;
   type: string | undefined;
   box: Box<S>;
-  args: A;
-  result: R;
   mutator: (state: S, ...args: A) => S;
 }
 
@@ -35,14 +38,9 @@ export interface Mutation<R = any, A extends any[] = any[], S = any> {
  *
  * A `Box` could subscribe one or more events by calling `box.subscribe()`
  * method, which will mutate the state of the box when the event is dispatched.
- *
- * @stable
  */
 export class Box<S = any> {
-  readonly key: string;
-  readonly initialState: S;
-  readonly listeners: Record<string, (state: S, data: any) => S>;
-  readonly preload: (preloadedState: JSONState<S>, state: S) => S;
+  readonly signalSubscribers: Record<string, (state: S, data: any) => S>;
 
   /**
    * Create a box.
@@ -58,14 +56,14 @@ export class Box<S = any> {
    * @stable
    */
   constructor(
-    key: string,
-    initialState: S,
-    preload: (preloadedState: JSONState<S>, state: S) => S = fromJSON,
+    readonly key: string,
+    readonly initialState: S,
+    readonly preload: (preloadedState: JSONState<S>, state: S) => S = fromJSON,
   ) {
     this.key = key;
     this.initialState = initialState;
     this.preload = preload;
-    this.listeners = {};
+    this.signalSubscribers = {};
   }
 
   /**
@@ -78,38 +76,44 @@ export class Box<S = any> {
    * @param signal the event factory
    * @param fn the callback
    */
-  listen<T>(signal: string | SignalFactory<any, T>, fn: (state: S, data: T) => S) {
+  subscribeSignal<T>(signal: string | SignalFactory<any, T>, fn: (state: S, data: T) => S) {
     const type = typeof signal === 'string' ? signal : signal.type;
-    this.listeners[type] = fn;
+    this.signalSubscribers[type] = fn;
   }
 
   mutation<A extends any[]>(
     mutator: (state: S, ...args: A) => S,
     type?: string,
-  ): (...args: A) => Mutation<A[0], A, S> {
-    return (...args) => ({ object: 'mutation', type, box: this, args, result: args[0], mutator });
+  ): MutationFactory<S, A> {
+    const factory = Object.assign(
+      (...args: A): Mutation<S, A> => ({
+        $object: 'mutation',
+        args,
+        factory,
+      }),
+      {
+        $object: 'mutation_factory' as const,
+        type,
+        box: this,
+        mutator,
+      },
+    );
+    return factory;
   }
 
-  setState(newState: S | ((prevState: S) => S)): Mutation<void, [], S> {
-    return {
-      object: 'mutation',
-      type: `${this.key}/setState`,
-      box: this,
-      args: [],
-      result: void 0,
-      mutator: (state) =>
-        typeof newState === 'function' ? (newState as (prevState: S) => S)(state) : state,
-    };
-  }
+  setState = this.mutation((state, nextState: S | ((prevState: S) => S)) => {
+    return typeof nextState === 'function' ? (nextState as (prevState: S) => S)(state) : nextState;
+  }, `${this.key}/setState`);
 
-  mergeState(props: Partial<S>): Mutation<void, [], S> {
-    return {
-      object: 'mutation',
-      type: `${this.key}/mergeState`,
-      box: this,
-      args: [],
-      result: void 0,
-      mutator: (state) => clone(state, props),
-    };
-  }
+  mergeState = this.mutation(
+    (state, partialNextState: Partial<S> | ((prevState: S) => Partial<S>)) => {
+      return clone(
+        state,
+        typeof partialNextState === 'function'
+          ? (partialNextState as (prevState: S) => Partial<S>)(state)
+          : partialNextState,
+      );
+    },
+    `${this.key}/mergeState`,
+  );
 }

@@ -7,14 +7,20 @@ import { selectCurrentUser } from '@kcats/testing';
 import { strictEqual } from './utils';
 
 describe('selector', () => {
-  it('should create selector', () => {
-    const { ...props } = selectCurrentUser;
-    expect(props).toEqual({
-      type: 'currentUser',
-      calc: props.calc,
-      object: 'selector_factory',
-      cache: false,
+  it('should create selector factory', () => {
+    expect(selectCurrentUser).toBe(expect.any(Function));
+    expect({ ...selectCurrentUser }).toEqual({
+      $object: 'selector_factory',
+      type: 'CURRENT_USER',
+      cacheStrategy: false,
       equalFn: strictEqual,
+    });
+  });
+  it('should create selector', () => {
+    expect(selectCurrentUser()).toEqual({
+      $object: 'selector',
+      args: [],
+      factory: selectCurrentUser,
     });
   });
 });

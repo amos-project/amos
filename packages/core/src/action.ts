@@ -5,7 +5,7 @@
 
 import { Dispatch, Select } from './store';
 
-export interface FunctionAction<R> {
+export interface FunctionAction<R = any> {
   (): R;
   type?: string;
 }
@@ -21,11 +21,10 @@ export interface FunctionAction<R> {
  *
  * @stable
  */
-export interface Action<R = any, A extends any[] = any> {
-  object: 'action';
-  type: string | undefined;
+export interface Action<A extends any[] = any, R = any> {
+  $object: 'action';
   args: A[];
-  actor: (dispatch: Dispatch, select: Select, ...args: A) => R;
+  factory: ActionFactory<A, R>;
 }
 
 /**
@@ -34,10 +33,15 @@ export interface Action<R = any, A extends any[] = any> {
  *
  * @stable
  */
-export interface ActionFactory<A extends any[], R> {
+export interface ActionFactory<A extends any[] = any, R = any> {
+  $object: 'action_factory';
+  (...args: A): Action<A, R>;
+  actor: (dispatch: Dispatch, select: Select, ...args: A) => R;
+  queryKey: (dispatch: Dispatch, select: Select, ...args: A) => unknown[];
   type: string | undefined;
-  (...args: A): Action<R, A>;
 }
+
+const defaultQueryKey: ActionFactory['queryKey'] = (dispatch, select, ...args) => args;
 
 /**
  * `action` is the recommended way to create an `ActionFactory` to create
@@ -46,15 +50,28 @@ export interface ActionFactory<A extends any[], R> {
  *
  * @param actor The function to be called with internal parameters and dynamicly
  *              injected parameters by calling the `ActionFactory`.
+ * @param queryKey
  * @param type An optional string to identify the type of the created action.
  *
  * @stable
  */
 export function action<A extends any[], R>(
   actor: (dispatch: Dispatch, select: Select, ...args: A) => R,
+  queryKey: (dispatch: Dispatch, select: Select, ...args: A) => unknown[] = defaultQueryKey,
   type?: string,
 ): ActionFactory<A, R> {
-  return Object.assign((...args: A): Action<R, A> => ({ object: 'action', type, args, actor }), {
-    type,
-  });
+  const factory = Object.assign(
+    (...args: A): Action<A, R> => ({
+      $object: 'action',
+      args,
+      factory,
+    }),
+    {
+      $object: 'action_factory' as const,
+      type,
+      actor,
+      queryKey,
+    },
+  );
+  return factory;
 }

@@ -6,13 +6,15 @@
 import { reset } from '@kcats/testing';
 
 describe('event', () => {
-  it('should create event', () => {
-    expect(typeof reset).toBe('function');
-    expect(reset.type).toBe('RESET');
-    expect(reset(1)).toEqual({
-      object: 'signal',
+  it('should create signal factory', () => {
+    expect(reset).toBe(expect.any(Function));
+    expect({ ...reset }).toEqual({ $object: 'signal_factory', type: 'RESET' });
+  });
+  it('should create signal', () => {
+    expect(reset(0)).toEqual({
+      $object: 'signal',
       type: 'RESET',
-      data: { count: 1 },
+      data: { count: 0 },
     });
   });
 });

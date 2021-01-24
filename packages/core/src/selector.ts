@@ -4,7 +4,7 @@
  */
 
 import { Select } from './store';
-import { KcatsObject, defineKcatsObject, strictEqual } from './utils';
+import { strictEqual } from './utils';
 
 export interface FunctionSelector<R> {
   (select: Select): R;
@@ -20,7 +20,8 @@ export interface FunctionSelector<R> {
  *
  * @stable
  */
-export interface Selector<A extends any[] = any[], R = any> extends KcatsObject<'selector'> {
+export interface Selector<A extends any[] = any, R = any> {
+  $object: 'selector';
   args: A;
   factory: SelectorFactory<A, R>;
 }
@@ -28,38 +29,36 @@ export interface Selector<A extends any[] = any[], R = any> extends KcatsObject<
 /**
  * A `SelectorFactory` is a function to create a `Selector`.
  */
-export interface SelectorFactory<A extends any[] = any, R = any>
-  extends KcatsObject<'selector_factory'> {
+export interface SelectorFactory<A extends any[] = any, R = any> {
+  $object: 'selector_factory';
   (...args: A): Selector<A, R>;
   type: string | undefined;
-  calc: (select: Select, ...args: A) => R;
-  cache: boolean;
+  compute: (select: Select, ...args: A) => R;
+  cacheStrategy: boolean | ((select: Select, ...args: A) => unknown[]);
   equalFn: (oldResult: R, newResult: R) => boolean;
 }
 
 /**
- * @param calc the function to get the result
- * @param cache the deps, if is false, the selector will always recompute
+ * @param compute the function to get the result
+ * @param cacheStrategy the deps, if is false, the selector will always recompute
  * @param equalFn
  * @param type
  */
 export function selector<A extends any[], R>(
-  calc: (select: Select, ...args: A) => R,
-  cache = false,
+  compute: (select: Select, ...args: A) => R,
+  cacheStrategy: boolean | ((select: Select, ...args: A) => unknown[]) = false,
   equalFn: (oldResult: R, newResult: R) => boolean = strictEqual,
   type?: string,
 ): SelectorFactory<A, R> {
-  const factory: SelectorFactory<A, R> = defineKcatsObject(
-    'selector_factory',
-    Object.assign(
-      (...args: A): Selector<A, R> => defineKcatsObject('selector', { args, factory }),
-      {
-        cache,
-        equalFn,
-        type,
-        calc,
-      } as const,
-    ),
+  const factory: SelectorFactory<A, R> = Object.assign(
+    (...args: A): Selector<A, R> => ({ $object: 'selector', args, factory }),
+    {
+      $object: 'selector_factory',
+      compute,
+      cacheStrategy,
+      equalFn,
+      type,
+    } as const,
   );
   return factory;
 }

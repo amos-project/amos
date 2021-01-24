@@ -14,7 +14,7 @@ export const selectCurrentUser = selector(
   (select) => select(userBox),
   void 0,
   void 0,
-  'currentUser',
+  'CURRENT_USER',
 );
 
 export const selectFullName = selector((select) => select(selectCurrentUser).fullName());

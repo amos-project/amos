@@ -3,7 +3,7 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { Box } from '@kcats/core';
+import { Box, clone } from '@kcats/core';
 import { reset } from './signal';
 
 export class UserModel {
@@ -12,8 +12,8 @@ export class UserModel {
   readonly firstName: string = '';
   readonly lastName: string = '';
 
-  merge(props: Partial<UserModel>): this {
-    return Object.assign(Object.create(Object.getPrototypeOf(this)), this, props);
+  merge(props: Partial<UserModel>): UserModel {
+    return clone(this, props);
   }
 
   fullName() {
@@ -26,9 +26,11 @@ export const userBox = new Box('users/current', new UserModel());
 export const mergeUser = userBox.mutation((state, props: Partial<UserModel>) => state.merge(props));
 
 export const countBox = new Box('count', 0);
-countBox.listen(reset, (state, data) => data.count);
+
+countBox.subscribeSignal(reset, (state, data) => data.count);
 
 export const incrCount = countBox.mutation((state) => state + 1);
+
 export const addCount = countBox.mutation(
   (state, action: number = 1) => state + action,
   'ADD_COUNT',

@@ -5,7 +5,7 @@
 
 import {
   Dispatchable,
-  hoistMethod,
+  copyFunction,
   Selectable,
   SelectorFactory,
   Snapshot,
@@ -51,7 +51,7 @@ export function withRedux(reduxStore: ReduxStore): StoreEnhancer {
     const kcatsState: Snapshot = store.snapshot();
     // capture selecting snapshot to merge redux state
     let selectingSnapshot: Snapshot | undefined;
-    store.dispatch = hoistMethod(dispatch, (task: any) => {
+    store.dispatch = copyFunction(dispatch, (task: any) => {
       if (Array.isArray(task)) {
         return dispatch(task);
       }
@@ -64,7 +64,7 @@ export function withRedux(reduxStore: ReduxStore): StoreEnhancer {
           return reduxStore.dispatch(task);
       }
     });
-    store.subscribe = hoistMethod(subscribe, (fn) => {
+    store.subscribe = copyFunction(subscribe, (fn) => {
       const dispose = subscribe(fn);
       listeners.push(fn);
       return () => {
@@ -73,7 +73,7 @@ export function withRedux(reduxStore: ReduxStore): StoreEnhancer {
         dispose();
       };
     });
-    store.select = hoistMethod(select, (selectable: any, snapshot?: any) => {
+    store.select = copyFunction(select, (selectable: any, snapshot?: any) => {
       if (snapshot) {
         selectingSnapshot = snapshot;
       }
@@ -114,7 +114,7 @@ export function withRedux(reduxStore: ReduxStore): StoreEnhancer {
       }
     };
     syncState();
-    store.snapshot = hoistMethod(snapshot, () => {
+    store.snapshot = copyFunction(snapshot, () => {
       syncState();
       return snapshot();
     });

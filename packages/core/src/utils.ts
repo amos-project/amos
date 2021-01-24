@@ -30,61 +30,6 @@ export function shallowEqual<T extends object>(a: T, b: T): boolean {
   return true;
 }
 
-/**
- * Copy properties from src function to dst function, and returns dst
- *
- * @param src
- * @param dst
- */
-export function hoistMethod<M extends (...args: any[]) => any>(
-  src: M,
-  dst: (...args: Parameters<M>) => ReturnType<M>,
-): M {
-  const copy = (name: PropertyKey) => {
-    if (dst.hasOwnProperty(name)) {
-      return;
-    }
-    Object.defineProperty(dst, name, Object.getOwnPropertyDescriptor(src, name)!);
-  };
-  Object.getOwnPropertyNames(src).forEach(copy);
-  Object.getOwnPropertySymbols?.(src).forEach(copy);
-  return dst as M;
-}
-
-export const kKcatsObject: unique symbol =
-  typeof Symbol === 'function' ? Symbol('KCATS_OBJECT') : ('@KCATS_OBJECT@' as any);
-
-/**
- * A symbol indicates the object is a kcats' object.
- */
-export interface KcatsObject<K extends string> {
-  [kKcatsObject]: K;
-}
-
-/** @internal */
-export function defineKcatsObject<K extends string, T extends object>(
-  key: K,
-  obj: T,
-): T & KcatsObject<K> {
-  if (!obj.hasOwnProperty(kKcatsObject)) {
-    Object.defineProperty(obj, kKcatsObject, { value: key });
-  }
-  return obj as any;
-}
-
-/**
- * Check an object is an kcats object or not
- *
- * @param key
- * @param o
- */
-export function isKcatsObject<T extends KcatsObject<any>>(
-  key: T[typeof kKcatsObject],
-  o: any,
-): o is T {
-  return !!o && o[kKcatsObject] === key;
-}
-
 /** @internal */
 export function strictEqual<T>(a: T, b: T) {
   return a === b;

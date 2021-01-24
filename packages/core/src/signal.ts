@@ -15,10 +15,10 @@ import { identity } from './utils';
  *
  * @stable
  */
-export interface Signal<T = any> {
-  object: 'signal';
+export interface Signal<D extends any = any> {
+  $object: 'signal';
   type: string;
-  data: T;
+  data: D;
 }
 
 /**
@@ -27,9 +27,10 @@ export interface Signal<T = any> {
  *
  * @stable
  */
-export interface SignalFactory<A extends any[], T> {
+export interface SignalFactory<A extends any[] = any, D = any> {
+  $object: 'signal_factory';
   type: string;
-  (...args: A): Signal<T>;
+  (...args: A): Signal<D>;
 }
 
 /**
@@ -48,7 +49,7 @@ export function signal(type: string): SignalFactory<[], void>;
  *
  * @stable
  */
-export function signal<T>(type: string): SignalFactory<[T], T>;
+export function signal<D>(type: string): SignalFactory<[D], D>;
 /**
  * Create an `EventFactory` which creates an signal, whose value of the data
  * is the return type of `creator`.
@@ -59,13 +60,21 @@ export function signal<T>(type: string): SignalFactory<[T], T>;
  *
  * @stable
  */
-export function signal<A extends any[], T>(
+export function signal<A extends any[], D>(
   type: string,
-  creator: (...args: A) => T,
-): SignalFactory<A, T>;
-export function signal(type: string, creator: any = identity): SignalFactory<any[], any> {
+  creator: (...args: A) => D,
+): SignalFactory<A, D>;
+
+export function signal(type: string, creator: any = identity): SignalFactory {
   return Object.assign(
-    (...args: any[]): Signal<any> => ({ object: 'signal', type, data: creator(...args) }),
-    { type },
+    (...args: any[]): Signal => ({
+      $object: 'signal',
+      type,
+      data: creator(...args),
+    }),
+    {
+      $object: 'signal_factory' as const,
+      type,
+    },
   );
 }

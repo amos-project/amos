@@ -19,12 +19,4 @@ export {
   createStore,
 } from './store';
 export { JSONState, JSONSerializable, isJSONSerializable, fromJSON } from './types';
-export {
-  identity,
-  shallowEqual,
-  hoistMethod,
-  KcatsObject,
-  isKcatsObject,
-  arrayEqual,
-  clone,
-} from './utils';
+export { identity, shallowEqual, arrayEqual, clone } from './utils';
