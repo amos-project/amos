@@ -5,10 +5,9 @@
 
 import { Action, FunctionAction } from './action';
 import { Box, Mutation } from './box';
-import { Cache } from './cache';
 import { FunctionSelector, Selector, SelectorFactory } from './selector';
 import { Signal } from './signal';
-import { KcatsObject, defineKcatsObject, isArray } from './utils';
+import { isArray } from './utils';
 
 /**
  * the state snapshot in store
@@ -22,14 +21,14 @@ export type Snapshot = Record<string, unknown>;
  *
  * @stable
  */
-export type Dispatchable<R = any> = Mutation<R> | Action<R> | Signal<R> | FunctionAction<R>;
+export type Dispatchable<R = any> = Mutation | Action<any, R> | Signal<R> | FunctionAction<R>;
 
 /**
  * base kcats signature, this is used for someone want to change the signature of useDispatch()
  *
  * @stable
  */
-export interface KcatsDispatch extends KcatsObject<'store.dispatch'> {
+export interface KcatsDispatch {
   <R>(task: Dispatchable<R>): R;
   <R1>(tasks: readonly [Dispatchable<R1>]): [R1];
   <R1, R2>(tasks: readonly [Dispatchable<R1>, Dispatchable<R2>]): [R1, R2];
@@ -109,7 +108,7 @@ export interface Dispatch extends KcatsDispatch {}
 export type Selectable<R = any> =
   | Box<R>
   | FunctionSelector<R>
-  | Selector<any[], R>
+  | Selector<any, R>
   | SelectorFactory<[], R>;
 
 /**
@@ -126,18 +125,19 @@ export type Selectable<R = any> =
  * @param selectable
  * @param discard
  */
-export interface Select extends KcatsObject<'store.select'> {
-  (selectable: null, discard: Selectable): void;
-  <A extends Selectable>(selectable: A, discard?: Selectable | null): A extends Box<infer S>
+export interface Select {
+  <A extends Selectable>(selectable: A): A extends Box<infer S>
     ? S
     : A extends SelectorFactory<[], infer R>
     ? R
-    : A extends Selector<any[], infer R>
+    : A extends Selector<any, infer R>
     ? R
     : A extends FunctionSelector<infer R>
     ? R
     : never;
 }
+
+export type Unsubscribe = () => void;
 
 /**
  * Store
@@ -147,12 +147,17 @@ export interface Select extends KcatsObject<'store.select'> {
 export interface Store {
   snapshot: () => Snapshot;
   dispatch: Dispatch;
-  subscribe: (fn: () => void) => () => void;
   select: Select;
-  clearBoxes: (reloadState: boolean) => void;
+  subscribe: (fn: () => void) => Unsubscribe;
+  clear: (reloadState: boolean) => void;
 }
 
 export type StoreEnhancer = (store: Store) => Store;
+
+interface CacheNode<T = unknown> {
+  value: T | undefined;
+  children: Map<unknown, CacheNode>;
+}
 
 /**
  * create a store
@@ -161,10 +166,11 @@ export type StoreEnhancer = (store: Store) => Store;
  *
  * @stable
  */
-export function createStore(preloadedState?: Snapshot, ...enhancers: StoreEnhancer[]): Store {
+export function createStore(preloadedState: Snapshot = {}, ...enhancers: StoreEnhancer[]): Store {
   let state: Snapshot = {};
   let boxes: Record<string, Box> = {};
-  const cache = new Cache();
+  let boxRefs: Record<string, Set<CacheNode>> = {};
+  let cacheTree: Map<SelectorFactory, CacheNode> = new Map<SelectorFactory, CacheNode>();
   const listeners: Array<() => void> = [];
   const ensure = (box: Box) => {
     if (!boxes.hasOwnProperty(box.key)) {
@@ -174,7 +180,7 @@ export function createStore(preloadedState?: Snapshot, ...enhancers: StoreEnhanc
       return;
     }
     let boxState = box.initialState;
-    if (preloadedState?.hasOwnProperty(box.key)) {
+    if (preloadedState.hasOwnProperty(box.key)) {
       boxState = box.preload(preloadedState[box.key], boxState);
     }
     state[box.key] = boxState;
@@ -220,47 +226,36 @@ export function createStore(preloadedState?: Snapshot, ...enhancers: StoreEnhanc
         }
       };
     },
-    dispatch: defineKcatsObject(
-      'store.dispatch',
-      (tasks: Dispatchable | readonly Dispatchable[]) => {
-        dispatching ||= tasks;
-        try {
-          if (isArray(tasks)) {
-            return tasks.map(exec);
-          } else {
-            return exec(tasks);
-          }
-        } finally {
-          if (dispatching === tasks) {
-            dispatching = void 0;
-            listeners.forEach((fn) => fn());
-          }
+    dispatch: (tasks: Dispatchable | readonly Dispatchable[]) => {
+      dispatching ||= tasks;
+      try {
+        if (isArray(tasks)) {
+          return tasks.map(exec);
+        } else {
+          return exec(tasks);
         }
-      },
-    ),
-    // TODO(acrazing): add select cache feature
-    select: defineKcatsObject(
-      'store.select',
-      (selectable: Selectable | null, discard?: Selectable | null): any => {
-        if (selectable instanceof Box) {
-          ensure(selectable);
+      } finally {
+        if (dispatching === tasks) {
+          dispatching = void 0;
+          listeners.forEach((fn) => fn());
         }
-        return cache.get(selectable, discard, store.select, state);
-      },
-    ),
-    clearBoxes: (reloadState: boolean) => {
+      }
+    },
+    select: (selectable: Selectable) => {
+      if (selectable instanceof Box) {
+        ensure(selectable);
+      }
+    },
+    clear: (reloadState) => {
       if (reloadState) {
         preloadedState = Object.assign(preloadedState || {}, JSON.parse(JSON.stringify(state)));
         state = {};
-        cache.clear();
+        boxRefs = {};
+        cacheTree = new Map();
       }
       boxes = {};
       listeners.forEach((fn) => fn());
     },
   };
-  store = enhancers.reduce((previousValue, currentValue) => currentValue(previousValue), store);
-  if (typeof process === 'object' && process.env.NODE_ENV === 'development') {
-    Object.freeze(store);
-  }
-  return store;
+  return enhancers.reduce((previousValue, currentValue) => currentValue(previousValue), store);
 }
