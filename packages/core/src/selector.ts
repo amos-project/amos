@@ -30,23 +30,23 @@ export interface Selector<A extends any[] = any, R = any> {
  * A `SelectorFactory` is a function to create a `Selector`.
  */
 export interface SelectorFactory<A extends any[] = any, R = any> {
-  $object: 'selector_factory';
+  readonly $object: 'selector_factory';
   (...args: A): Selector<A, R>;
-  type: string | undefined;
-  compute: (select: Select, ...args: A) => R;
-  cacheStrategy: boolean | ((select: Select, ...args: A) => unknown[]);
-  equalFn: (oldResult: R, newResult: R) => boolean;
+  readonly type: string | undefined;
+  readonly compute: (select: Select, ...args: A) => R;
+  readonly needCache: boolean;
+  readonly equalFn: (oldResult: R, newResult: R) => boolean;
 }
 
 /**
  * @param compute the function to get the result
- * @param cacheStrategy the deps, if is false, the selector will always recompute
+ * @param needCache the deps, if is false, the selector will always recompute
  * @param equalFn
  * @param type
  */
 export function selector<A extends any[], R>(
   compute: (select: Select, ...args: A) => R,
-  cacheStrategy: boolean | ((select: Select, ...args: A) => unknown[]) = false,
+  needCache = false,
   equalFn: (oldResult: R, newResult: R) => boolean = strictEqual,
   type?: string,
 ): SelectorFactory<A, R> {
@@ -55,7 +55,7 @@ export function selector<A extends any[], R>(
     {
       $object: 'selector_factory',
       compute,
-      cacheStrategy,
+      needCache,
       equalFn,
       type,
     } as const,
