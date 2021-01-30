@@ -16,3 +16,7 @@ local-*
 *.tgz
 .idea/
 .vscode/
+
+.docusaurus
+.cache-loader
+build/
