@@ -111,21 +111,22 @@ export type Selectable<R = any> =
   | Selector<any, R>
   | SelectorFactory<[], R>;
 
-/**
- * select cache strategy
- *
- * 1. cache key: factory + args
- * 2. should recompute: snapshot or deps return value
- * 3. cache mode: if without discard, means it will take/update the latest one,
- *    else it will drop the discard reference, and cache the new one in the tree.
- * 4. who while be cached: selector/factory
- *    if it is called with discard, will put into tree, and drop the discard if
- *    it is free, else it will update the latest.
- *
- * @param selectable
- * @param discard
- */
 export interface Select {
+  /**
+   * compute a selectable thing, cache and return its result.
+   *
+   * A selectable thing could be:
+   *
+   * - a `Box`, will not cache, and return its state directly
+   * - a `FunctionSelector`, will compute and return directly
+   * - a `SelectorFactory`, it will be computed without extra args
+   * - a `Selector`, it will be computed with specified args
+   *
+   * if select a `SelectorFactory` or a `Selector`, it will be cached with
+   * its cache strategy. {@see selector}
+   *
+   * @param selectable
+   */
   <A extends Selectable>(selectable: A): A extends Box<infer S>
     ? S
     : A extends SelectorFactory<[], infer R>
@@ -145,19 +146,66 @@ export type Unsubscribe = () => void;
  * @stable
  */
 export interface Store {
+  /**
+   * get the state snapshot.
+   *
+   * PLEASE DO NOT MUTATE IT.
+   */
   snapshot: () => Snapshot;
+
+  /**
+   * dispatch a `Dispatchable`.
+   */
   dispatch: Dispatch;
+
+  /**
+   * compute a `Selectable` with cache.
+   */
   select: Select;
+
+  /**
+   * subscribe the state update event, it will be triggered when a `Dispatchable` is dispatched.
+   * Please note it will only be triggered once even if a `Dispatchable` mutated the state
+   * multiple times.
+   *
+   * In most cases, especially when used in React, you don't need to call this method.
+   *
+   * @param fn
+   */
   subscribe: (fn: () => void) => Unsubscribe;
-  clear: (reloadState: boolean) => void;
+
+  /**
+   * clean up internal state, including:
+   *
+   * - the box instances
+   * - the caches
+   *
+   * This allows you to reset the internal state when use HMR.
+   *
+   * @param reloadState if true, will clean up state also, which means snapshot will be
+   *                    serialized and parsed by JSON.
+   */
+  resetInternalState: (reloadState: boolean) => void;
 }
 
 export type StoreEnhancer = (store: Store) => Store;
 
+const initialValue = { '@@initial': true };
+
 interface CacheNode<T = unknown> {
-  value: T | undefined;
+  value: T | typeof initialValue;
+  deps: Set<string>;
   dependents: Set<CacheNode>;
   children: Map<unknown, CacheNode>;
+}
+
+function createCacheNode(): CacheNode {
+  return {
+    value: initialValue,
+    deps: new Set<string>(),
+    dependents: new Set<CacheNode>(),
+    children: new Map<unknown, CacheNode>(),
+  };
 }
 
 /**
@@ -190,33 +238,48 @@ export function createStore(preloadedState: Snapshot = {}, ...enhancers: StoreEn
 
   function ensureCache(factory: SelectorFactory, args: unknown[]) {
     if (!cacheTree.has(factory)) {
-      cacheTree.set(factory, { dependents: new Set(), children: new Map(), value: void 0 });
+      cacheTree.set(factory, createCacheNode());
     }
     let node = cacheTree.get(factory)!;
     for (const argv of args) {
       if (!node.children.has(argv)) {
-        node.children.set(argv, { dependents: new Set(), children: new Map(), value: void 0 });
+        node.children.set(argv, createCacheNode());
       }
       node = node.children.get(argv)!;
     }
     return node;
   }
 
-  function revokeCache(node: CacheNode) {
-    if (node.value === void 0) {
-      // avoid circle reference
+  function dropCache(node: CacheNode) {
+    if (node.value === initialValue) {
       return;
     }
-    node.value = void 0;
+    node.value = initialValue;
+    for (const key of node.deps) {
+      boxRefs[key]?.delete(node);
+    }
     for (const dep of node.dependents) {
-      revokeCache(dep);
+      dropCache(dep);
     }
     node.dependents.clear();
   }
 
+  function dropRef(key: string) {
+    if (!boxRefs[key]) {
+      return;
+    }
+    const refs = boxRefs[key];
+    delete boxRefs[key];
+    for (const node of refs) {
+      dropCache(node);
+    }
+    refs.clear();
+    boxRefs[key] = refs;
+  }
+
   let dispatching: Dispatchable | readonly Dispatchable[] | undefined;
-  let selecting: CacheNode | undefined;
   let updatedKeys: Record<string, true> = {};
+  const selecting: CacheNode[] = [];
 
   const exec = (dispatchable: Dispatchable) => {
     if (typeof dispatchable === 'function') {
@@ -232,6 +295,7 @@ export function createStore(preloadedState: Snapshot = {}, ...enhancers: StoreEn
         if (nextState !== state[key]) {
           updatedKeys[key] = true;
           state[key] = nextState;
+          dropRef(key);
         }
         return void 0;
       case 'signal':
@@ -248,6 +312,7 @@ export function createStore(preloadedState: Snapshot = {}, ...enhancers: StoreEn
           if (nextState !== state[key]) {
             updatedKeys[key] = true;
             state[key] = nextState;
+            dropRef(key);
           }
         }
         return dispatchable.data;
@@ -278,14 +343,6 @@ export function createStore(preloadedState: Snapshot = {}, ...enhancers: StoreEn
         if (isRoot) {
           dispatching = void 0;
           listeners.forEach((fn) => fn());
-          for (const key in updatedKeys) {
-            if (updatedKeys.hasOwnProperty(key) && boxRefs.hasOwnProperty(key)) {
-              for (const node of boxRefs[key]) {
-                revokeCache(node);
-              }
-              boxRefs[key].clear();
-            }
-          }
         }
       }
     },
@@ -293,10 +350,12 @@ export function createStore(preloadedState: Snapshot = {}, ...enhancers: StoreEn
       if (typeof selectable === 'function' && !('$object' in selectable)) {
         return selectable(store.select);
       }
+      const parent = selecting[selecting.length - 1];
       if (selectable instanceof Box) {
         const boxState = ensureBox(selectable);
-        if (selecting) {
-          (boxRefs[selectable.key] ||= new Set()).add(selecting);
+        if (parent) {
+          (boxRefs[selectable.key] ||= new Set()).add(parent);
+          parent.deps.add(selectable.key);
         }
         return boxState;
       }
@@ -305,24 +364,21 @@ export function createStore(preloadedState: Snapshot = {}, ...enhancers: StoreEn
       if (!factory.needCache) {
         return factory.compute(store.select, ...args);
       }
-      const cacheNode = ensureCache(factory, args);
-      const isRoot = !selecting;
-      selecting ||= cacheNode;
       try {
-        if (cacheNode.value === void 0) {
+        const cacheNode = ensureCache(factory, args);
+        selecting.push(cacheNode);
+        if (cacheNode.value === initialValue) {
           cacheNode.value = factory.compute(store.select, ...args);
         }
-        if (!isRoot) {
-          cacheNode.dependents.add(selecting);
+        if (parent) {
+          cacheNode.dependents.add(parent);
         }
         return cacheNode.value;
       } finally {
-        if (isRoot) {
-          selecting = void 0;
-        }
+        selecting.pop();
       }
     }) as Select,
-    clear: (reloadState) => {
+    resetInternalState: (reloadState) => {
       if (reloadState) {
         preloadedState = Object.assign(preloadedState || {}, JSON.parse(JSON.stringify(state)));
         state = {};

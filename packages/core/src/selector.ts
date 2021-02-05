@@ -39,10 +39,17 @@ export interface SelectorFactory<A extends any[] = any, R = any> {
 }
 
 /**
- * @param compute the function to get the result
- * @param needCache the deps, if is false, the selector will always recompute
- * @param equalFn
- * @param type
+ * create a selector factory
+ *
+ * @param compute     The function to compute the value
+ * @param needCache   Should cache the value or not.
+ *                    If true, the value of the selector will be cached in a selector
+ *                    factory and args tree. The cache will be invalidated when the
+ *                    state of the box it depends on is mutated.
+ * @param equalFn     The compare function, which is used to detect the value is same
+ *                    or not, which is used in react.
+ * @param type        The type of the selector, for better develop experience in devtools,
+ *                    which could be injected by the compiler plugins.
  */
 export function selector<A extends any[], R>(
   compute: (select: Select, ...args: A) => R,
