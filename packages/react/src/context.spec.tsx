@@ -11,9 +11,9 @@ import { Consumer, Provider } from './context';
 describe('provider', () => {
   it('should provide store', () => {
     const store = createStore();
-    let usedStore: Store | undefined;
+    let usedStore: Store | null = null;
     render(
-      <Provider store={store}>
+      <Provider value={store}>
         <Consumer>
           {(store1) => {
             usedStore = store1;

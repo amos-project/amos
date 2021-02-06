@@ -14,6 +14,7 @@ export {
   Dispatch,
   Selectable,
   Select,
+  Unsubscribe,
   Store,
   StoreEnhancer,
   createStore,

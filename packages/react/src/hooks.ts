@@ -17,7 +17,7 @@ export function useStore(): Store {
   if (!state) {
     throw new Error('[Kcats] you are using hooks without <Provider />.');
   }
-  return state.store;
+  return state;
 }
 
 export function useDispatch(): Dispatch {
@@ -39,8 +39,8 @@ function isEqual(selector: Selectable, results: unknown[], index: number, curren
   if (results.length <= index) {
     return false;
   }
-  return 'object' in selector
-    ? selector.object === 'selector'
+  return '$object' in selector
+    ? selector.$object === 'selector'
       ? selector.factory.equalFn(results[index], current)
       : selector.equalFn(results[index], current)
     : results[index] === current;
@@ -75,31 +75,6 @@ function isEqual(selector: Selectable, results: unknown[], index: number, curren
  *   selectMultipleCount(3), // A Selector
  * );
  * ```
- *
- * The selectors' result is cached, which means:
- *
- * 1. If a selector's dependencies is not updated, it will not be recomputed.
- * 2. If all the results of the selectors are not changed, the component will
- *    not rerender.
- *
- * If the selector is a `Selector`, it will be recomputed:
- *
- * 1. if it has no `deps` function, when its parameters changes, or the state
- *    of the boxes it depends on changes
- * 2. else, when the return value of the deps function changes. The return
- *    value should always be an array, and the compare method is compare each
- *    element of it.
- *
- * and it will be marked as changed:
- *
- * 1. if it has no `compare` function, when the result is not strict equals to
- *    the previous result.
- * 2. else if the compare function returns `false`.
- *
- * If the selector is a pure function, the cache strategy is same to a
- * `Selector` without parameter and without `deps` and `compare` function. If
- * the selector is a `Box`, the cache strategy is same to a `Selector` without
- * parameter and with `deps` as `false` and without `compare` function.
  *
  * @param selectors a selectable array
  */
@@ -136,7 +111,6 @@ export function useSelector<Rs extends Selectable[]>(...selectors: Rs): MapSelec
   useEffect(
     () => () => {
       lastStore.current?.dispose();
-      lastSelectors.current.forEach((s) => store.select(null, s));
     },
     [],
   );
@@ -146,12 +120,8 @@ export function useSelector<Rs extends Selectable[]>(...selectors: Rs): MapSelec
     throw error;
   }
   try {
-    const ps = lastSelectors.current;
-    for (let i = selectors.length; i < ps.length; i++) {
-      store.select(null, ps[i]);
-    }
     lastSelectors.current = selectors;
-    lastResults.current = selectors.map((s, i) => store.select(s, ps[i] || null)) as any;
+    lastResults.current = selectors.map((s) => store.select(s)) as any;
   } catch (e) {
     lastResults.current = [] as any;
     throw e;
@@ -165,8 +135,8 @@ export function useSelector<Rs extends Selectable[]>(...selectors: Rs): MapSelec
             let type =
               s instanceof Box
                 ? s.key
-                : 'object' in s
-                ? s.object === 'selector'
+                : '$object' in s
+                ? s.$object === 'selector'
                   ? s.factory.type
                   : s.type
                 : s.type || s.name;

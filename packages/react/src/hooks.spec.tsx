@@ -22,7 +22,7 @@ import Mock = jest.Mock;
 
 describe('useStore & useDispatch', () => {
   const store = createStore();
-  const wrapper: FC = (props) => <Provider store={store}>{props.children}</Provider>;
+  const wrapper: FC = (props) => <Provider value={store}>{props.children}</Provider>;
   it('should use store & dispatch', async () => {
     const renderStore = renderHook(() => useStore(), { wrapper });
     expect(renderStore.result.current).toBe(store);
@@ -40,7 +40,7 @@ function renderUseSelector<P, Rs extends readonly Selectable[]>(
 ): RenderHookResult<P, MapSelector<Rs>> & Store {
   const store = createStore(preloaded);
   const hook = renderHook((props: P) => useSelector(...fn(props)), {
-    wrapper: (props) => <Provider store={store}>{props.children}</Provider>,
+    wrapper: (props) => <Provider value={store}>{props.children}</Provider>,
     initialProps,
   });
   return Object.assign(hook, store);
@@ -71,7 +71,9 @@ describe('useSelector', () => {
   it('should update - box', async () => {
     const { result, dispatch } = renderUseSelector(() => [countBox] as const);
     expect(result.current).toEqual([0]);
-    act(() => dispatch(incrCount()));
+    act(async () => {
+      await dispatch(incrCount());
+    });
     expect(result.current).toEqual([1]);
   });
 
@@ -83,8 +85,8 @@ describe('useSelector', () => {
     );
     const inlineFn = fn((select: Select) => select(countBox));
     const expectCalled = (defaultCount = 1, inlineCount = 1) => {
-      expect(defaultSelector.calc).toBeCalledTimes(defaultCount);
-      (defaultSelector.calc as Mock).mockClear();
+      expect(defaultSelector.compute).toBeCalledTimes(defaultCount);
+      (defaultSelector.compute as Mock).mockClear();
       expect(inlineFn).toBeCalledTimes(inlineCount);
       inlineFn.mockClear();
     };
@@ -102,7 +104,9 @@ describe('useSelector', () => {
     rerender({ multiply: 2 });
     expectCalled(1, 1);
     expect(result.current).toEqual([2, 1, 1]);
-    act(() => dispatch(incrCount()));
+    act(async () => {
+      await dispatch(incrCount());
+    });
     expectCalled(2, 1);
     expect(result.current).toEqual([4, 2, 2]);
   });
