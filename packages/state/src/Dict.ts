@@ -3,8 +3,13 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { clone, isJSONSerializable, JSONSerializable, JSONState } from '@kcats/core';
-import { createBoxFactory } from './createBoxFactory';
+import {
+  clone,
+  createBoxFactory,
+  isJSONSerializable,
+  JSONSerializable,
+  JSONState,
+} from '@kcats/core';
 import { fork, forkable } from './utils';
 
 export type DictKey = number | string;

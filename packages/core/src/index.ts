@@ -21,3 +21,4 @@ export {
 } from './store';
 export { JSONState, JSONSerializable, isJSONSerializable, fromJSON } from './types';
 export { identity, shallowEqual, arrayEqual, clone } from './utils';
+export { createBoxFactory } from './createBoxFactory';

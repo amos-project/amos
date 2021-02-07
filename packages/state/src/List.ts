@@ -3,8 +3,7 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { clone, JSONSerializable, JSONState } from '@kcats/core';
-import { createBoxFactory } from './createBoxFactory';
+import { clone, createBoxFactory, JSONSerializable, JSONState } from '@kcats/core';
 import { fork, forkable } from './utils';
 
 @forkable

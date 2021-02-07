@@ -7,5 +7,4 @@ export { DictKey, Dict, createDictBox } from './Dict';
 export { List, createListBox } from './List';
 export { ListDict, createListDictBox } from './ListDict';
 export { RecordDict, createRecordDictBox } from './RecordDict';
-export { createBoxFactory } from './createBoxFactory';
 export { forkable, fork } from './utils';
