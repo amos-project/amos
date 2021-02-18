@@ -21,7 +21,7 @@ export type Snapshot = Record<string, unknown>;
  *
  * @stable
  */
-export type Dispatchable<R = any> = Mutation | Action<any, R> | Signal<R> | FunctionAction<R>;
+export type Dispatchable<R = any> = Mutation<R> | Action<any, R> | Signal<R> | FunctionAction<R>;
 
 /**
  * base kcats signature, this is used for someone want to change the signature of useDispatch()
@@ -126,8 +126,7 @@ export interface Select {
    * its cache strategy. {@see selector}
    *
    * @param selectable
-   */
-  <A extends Selectable>(selectable: A): A extends Box<infer S>
+   */ <A extends Selectable>(selectable: A): A extends Box<infer S>
     ? S
     : A extends SelectorFactory<[], infer R>
     ? R
@@ -178,35 +177,15 @@ export interface Store {
    * clean up internal state, including:
    *
    * - the box instances
-   * - the caches
+   * - the selector caches
+   * - the state objects (convert to JSON as preloaded state)
    *
-   * This allows you to reset the internal state when use HMR.
-   *
-   * @param reloadState if true, will clean up state also, which means snapshot will be
-   *                    serialized and parsed by JSON.
+   * This allows you to reset the internal state when using HMR.
    */
-  resetInternalState: (reloadState: boolean) => void;
+  resetInternalState: () => void;
 }
 
 export type StoreEnhancer = (store: Store) => Store;
-
-const initialValue = { '@@initial': true };
-
-interface CacheNode<T = unknown> {
-  value: T | typeof initialValue;
-  deps: Set<string>;
-  dependents: Set<CacheNode>;
-  children: Map<unknown, CacheNode>;
-}
-
-function createCacheNode(): CacheNode {
-  return {
-    value: initialValue,
-    deps: new Set<string>(),
-    dependents: new Set<CacheNode>(),
-    children: new Map<unknown, CacheNode>(),
-  };
-}
 
 /**
  * create a store
@@ -218,8 +197,10 @@ function createCacheNode(): CacheNode {
 export function createStore(preloadedState: Snapshot = {}, ...enhancers: StoreEnhancer[]): Store {
   let state: Snapshot = {};
   let boxes: Record<string, Box> = {};
-  let boxRefs: Record<string, Set<CacheNode>> = {};
-  let cacheTree: Map<SelectorFactory, CacheNode> = new Map<SelectorFactory, CacheNode>();
+  let boxRefs: Record<string, Record<string, true>> = {};
+  let selectorRefs: Record<string, Record<string, true>> = {};
+  let selectorCaches: Record<string, unknown> = {};
+
   const listeners: Array<() => void> = [];
 
   function ensureBox(box: Box) {
@@ -236,32 +217,24 @@ export function createStore(preloadedState: Snapshot = {}, ...enhancers: StoreEn
     return (state[box.key] = boxState);
   }
 
-  function ensureCache(factory: SelectorFactory, args: unknown[]) {
-    if (!cacheTree.has(factory)) {
-      cacheTree.set(factory, createCacheNode());
+  function selectorKey(factory: SelectorFactory, args: unknown[]) {
+    if (typeof factory.cacheStrategy === 'boolean') {
+      return `${factory.id}.${args.join(',')}`;
+    } else {
+      return `${factory.id}.${factory.cacheStrategy(...args)}`;
     }
-    let node = cacheTree.get(factory)!;
-    for (const argv of args) {
-      if (!node.children.has(argv)) {
-        node.children.set(argv, createCacheNode());
-      }
-      node = node.children.get(argv)!;
-    }
-    return node;
   }
 
-  function dropCache(node: CacheNode) {
-    if (node.value === initialValue) {
+  function dropCache(key: string) {
+    delete selectorCaches[key];
+    const refs = selectorRefs[key];
+    if (!refs) {
       return;
     }
-    node.value = initialValue;
-    for (const key of node.deps) {
-      boxRefs[key]?.delete(node);
+    delete selectorRefs[key];
+    for (const dk in refs) {
+      dropCache(dk);
     }
-    for (const dep of node.dependents) {
-      dropCache(dep);
-    }
-    node.dependents.clear();
   }
 
   function dropRef(key: string) {
@@ -270,16 +243,14 @@ export function createStore(preloadedState: Snapshot = {}, ...enhancers: StoreEn
     }
     const refs = boxRefs[key];
     delete boxRefs[key];
-    for (const node of refs) {
-      dropCache(node);
+    for (const sk in refs) {
+      dropCache(sk);
     }
-    refs.clear();
-    boxRefs[key] = refs;
   }
 
   let dispatching: Dispatchable | readonly Dispatchable[] | undefined;
   let updatedKeys: Record<string, true> = {};
-  const selecting: CacheNode[] = [];
+  const selecting: string[] = [];
 
   const exec = (dispatchable: Dispatchable) => {
     if (typeof dispatchable === 'function') {
@@ -297,7 +268,7 @@ export function createStore(preloadedState: Snapshot = {}, ...enhancers: StoreEn
           state[key] = nextState;
           dropRef(key);
         }
-        return void 0;
+        return nextState;
       case 'signal':
         for (const key in boxes) {
           if (!boxes.hasOwnProperty(key)) {
@@ -316,6 +287,8 @@ export function createStore(preloadedState: Snapshot = {}, ...enhancers: StoreEn
           }
         }
         return dispatchable.data;
+      default:
+        throw new TypeError(`dispatching non-dispatchable object: ${dispatchable['$object']}`);
     }
   };
 
@@ -350,42 +323,40 @@ export function createStore(preloadedState: Snapshot = {}, ...enhancers: StoreEn
       if (typeof selectable === 'function' && !('$object' in selectable)) {
         return selectable(store.select);
       }
-      const parent = selecting[selecting.length - 1];
+      const parentKey = selecting[selecting.length - 1];
       if (selectable instanceof Box) {
         const boxState = ensureBox(selectable);
-        if (parent) {
-          (boxRefs[selectable.key] ||= new Set()).add(parent);
-          parent.deps.add(selectable.key);
+        if (parentKey) {
+          (boxRefs[selectable.key] ||= {})[parentKey] = true;
         }
         return boxState;
       }
       const args = selectable.$object === 'selector_factory' ? [] : selectable.args;
       const factory = selectable.$object === 'selector_factory' ? selectable : selectable.factory;
-      if (!factory.needCache) {
+      if (!factory.cacheStrategy) {
         return factory.compute(store.select, ...args);
       }
       try {
-        const cacheNode = ensureCache(factory, args);
-        selecting.push(cacheNode);
-        if (cacheNode.value === initialValue) {
-          cacheNode.value = factory.compute(store.select, ...args);
+        const currentKey = selectorKey(factory, args);
+        selecting.push(currentKey);
+        if (!(currentKey in selectorCaches)) {
+          selectorCaches[currentKey] = factory.compute(store.select, ...args);
         }
-        if (parent) {
-          cacheNode.dependents.add(parent);
+        if (parentKey) {
+          (selectorRefs[currentKey] ||= {})[parentKey] = true;
         }
-        return cacheNode.value;
+        return selectorCaches[currentKey];
       } finally {
         selecting.pop();
       }
     }) as Select,
-    resetInternalState: (reloadState) => {
-      if (reloadState) {
-        preloadedState = Object.assign(preloadedState || {}, JSON.parse(JSON.stringify(state)));
-        state = {};
-        boxRefs = {};
-        cacheTree = new Map();
-      }
+    resetInternalState: () => {
+      preloadedState = Object.assign(preloadedState || {}, JSON.parse(JSON.stringify(state)));
+      state = {};
       boxes = {};
+      boxRefs = {};
+      selectorRefs = {};
+      selectorCaches = {};
       listeners.forEach((fn) => fn());
     },
   };

@@ -14,7 +14,7 @@ import { clone } from './utils';
  * which is created by calling `mutation()` method. You don't need
  * to pay attention to any properties of the `Mutation`.
  *
- * The return value of dispatch it is the action.
+ * The return value of `dispatch(mutation)` is the updated state.
  */
 export interface Mutation<S = any, A extends any[] = any> {
   $object: 'mutation';

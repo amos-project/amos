@@ -3,6 +3,13 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
+let nextId = 1;
+
+/** @internal */
+export function uid() {
+  return nextId++;
+}
+
 /**
  * Returns the first argument
  * @param v

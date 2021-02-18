@@ -5,7 +5,7 @@
 
 export { Mutation, Box } from './box';
 export { FunctionAction, Action, ActionFactory, action } from './action';
-export { FunctionSelector, Selector, SelectorFactory, selector } from './selector';
+export { FunctionSelector, Selector, SelectorFactory, CacheStrategy, selector } from './selector';
 export { Signal, SignalFactory, signal } from './signal';
 export {
   Snapshot,

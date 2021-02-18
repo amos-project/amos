@@ -11,7 +11,7 @@ import { identity } from './utils';
  * an signal is calling the `EventFactory`, which is created by calling `signal()`
  * method.  You don't need to pay attention to any properties of the `Event`.
  *
- * The result of dispatch an `Event` is the data of the `Event`.
+ * The return value of `dispatch(signal)` is the data of the signal.
  *
  * @stable
  */

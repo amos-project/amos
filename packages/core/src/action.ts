@@ -5,6 +5,13 @@
 
 import { Dispatch, Select } from './store';
 
+/**
+ * A simple function is dispatchable also, it is the way to make an inline transaction.
+ *
+ * The return value of `dispatch(fn)` is the return value of the function itself.
+ *
+ * An additional field named `type` is useful to indicate which fn is dispatched in devtools.
+ */
 export interface FunctionAction<R = any> {
   (): R;
   type?: string;
@@ -17,7 +24,7 @@ export interface FunctionAction<R = any> {
  * directly, or calling the `ActionFactory` which is created by `action()`
  * method.
  *
- * The result of dispatch an `Action` is the return value of the `Action`.
+ * The return value of `dispatch(action)` is the return value of the action itself.
  *
  * @stable
  */
