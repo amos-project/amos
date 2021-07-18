@@ -31,7 +31,7 @@ const options = (format) => ({
   plugins: [
     typescript({
       tsconfigOverride: {
-        compilerOptions: { module: 'esnext', declaration: format === 'es' },
+        compilerOptions: { module: 'esnext', declaration: format === 'esm' },
         exclude: ['src/**/*.spec.ts', 'src/**/*.spec.tsx'],
       },
     }),
@@ -44,4 +44,4 @@ const options = (format) => ({
   ],
 });
 
-export default [options('cjs'), options('es'), options('umd')];
+export default [options('cjs'), options('esm'), options('umd')];

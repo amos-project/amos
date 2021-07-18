@@ -3,7 +3,7 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { clone } from '@kcats/core';
+import { clone } from 'amos';
 import { Dict, createDictBox, DictKey } from './Dict';
 import { fork, forkable } from './utils';
 

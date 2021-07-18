@@ -1,14 +1,14 @@
 {
-  "name": "@kcats/react",
-  "version": "0.1.0",
-  "description": "Hybrid kcats with redux.",
+  "name": "amos-redux",
+  "version": "0.3.0-beta.1",
+  "description": "Hybrid amos with redux.",
   "keywords": [
-    "kcats",
+    "amos",
     "redux",
     "hybrid"
   ],
   "author": "acrazing <joking.young@gmail.com>",
-  "homepage": "https://github.com/acrazing/kcats",
+  "homepage": "https://github.com/acrazing/amos",
   "license": "MIT",
   "main": "dist/redux.cjs.js",
   "files": [
@@ -16,21 +16,27 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/acrazing/kcats.git"
+    "url": "git+https://github.com/acrazing/amos.git"
   },
   "scripts": {
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
   "bugs": {
-    "url": "https://github.com/acrazing/kcats/issues"
+    "url": "https://github.com/acrazing/amos/issues"
   },
   "dependencies": {
-    "@kcats/core": "^0.1.0",
-    "@kcats/react": "^0.1.0"
+    "amos": "^0.3.0-beta.1",
+    "amos-react": "^0.3.0-beta.1",
+    "tslib": "^2.3.0"
   },
   "peerDependencies": {
     "@types/react-redux": "*",
     "react-redux": "*",
     "redux": "*"
+  },
+  "devDependencies": {
+    "@reduxjs/toolkit": "^1.6.1",
+    "react-redux": "^7.2.4",
+    "redux": "^4.1.0"
   }
 }

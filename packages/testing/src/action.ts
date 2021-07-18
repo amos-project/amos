@@ -3,14 +3,10 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { action } from '@kcats/core';
+import { action } from 'amos';
 import { addCount } from './box';
 
-export const addTwiceAsync = action(
-  async (dispatch, select, base: number) => {
-    await Promise.resolve();
-    return dispatch(addCount(base * 2));
-  },
-  void 0,
-  'ADD_TWICE_ASYNC',
-);
+export const addTwiceAsync = action(async (dispatch, select, base: number) => {
+  await Promise.resolve();
+  return dispatch(addCount(base * 2));
+});

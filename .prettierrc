@@ -9,5 +9,17 @@
   "bracketSpacing": true,
   "jsxBracketSameLine": false,
   "arrowParens": "always",
-  "endOfLine": "lf"
+  "endOfLine": "lf",
+  "overrides": [
+    {
+      "files": [
+        "types.ts",
+        "index.ts",
+        "*.types.ts"
+      ],
+      "options": {
+        "printWidth": 1000
+      }
+    }
+  ]
 }

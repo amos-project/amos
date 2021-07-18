@@ -3,7 +3,7 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { Dispatch, Dispatchable, Select, Selectable, Snapshot, StoreEnhancer } from '@kcats/core';
+import { Box, Dispatchable, identity, isArray, Selectable, StoreEnhancer } from 'amos';
 
 export const enum DispatchKind {
   Preload = 'P',
@@ -37,9 +37,7 @@ export function withDevTools(options?: DevToolsOptions): StoreEnhancer {
 declare const __REDUX_DEVTOOLS_EXTENSION__:
   | undefined
   | {
-      connect(options?: {
-        name?: string;
-      }): {
+      connect(options?: { name?: string }): {
         init(state: any): void;
         send(action: string | { type: string; [P: string]: any }, state: any): void;
         error(message: string): void;
@@ -53,76 +51,67 @@ declare const __REDUX_DEVTOOLS_EXTENSION__:
  * @param options
  */
 export function forceWithDevTools(options?: DevToolsOptions): StoreEnhancer {
-  if (options?.disable) {
-    return (s) => s;
+  if (options?.disable || typeof __REDUX_DEVTOOLS_EXTENSION__ === 'undefined') {
+    return identity;
   }
-  return (store) => {
-    if (typeof __REDUX_DEVTOOLS_EXTENSION__ === 'undefined') {
-      return store;
-    }
+  return (StoreClass) => {
     const dev = __REDUX_DEVTOOLS_EXTENSION__.connect(options);
-    dev.init(store.snapshot());
-    store.select = ((select: Select) => {
-      const newSelect: Select = ((selectable: Selectable, snapshot?: Snapshot) => {
-        const result = select(selectable, snapshot);
-        if ('key' in selectable && !store.snapshot().hasOwnProperty(selectable.key)) {
-          dev.send(`${DispatchKind.Preload}:${selectable.key}`, store.snapshot());
+    return class extends StoreClass {
+      init() {
+        super.init();
+        dev.init(this.snapshot());
+      }
+
+      protected _select(selectable: Selectable): any {
+        if (selectable instanceof Box && !this.snapshot().hasOwnProperty(selectable.key)) {
+          const result = super._select(selectable);
+          dev.send(`${DispatchKind.Preload}:${selectable.key}`, this.snapshot());
+          return result;
+        } else {
+          return super._select(selectable);
         }
-        return result;
-      }) as Select;
-      return copyProperties(select, newSelect);
-    })(store.select);
-    store.dispatch = ((dispatch: Dispatch) => {
-      const newDispatch: Dispatch = ((task: Dispatchable) => {
-        const result = dispatch(task);
-        if (!Array.isArray(task)) {
-          switch (task.object) {
-            case 'mutation':
-              dev.send(
-                {
-                  type: `${DispatchKind.Mutation}:${task.box.key}/${task.type || 'anonymous'}`,
-                  action: task.result,
-                  args: task.args,
-                },
-                store.snapshot(),
-              );
-              break;
-            case 'signal':
-              dev.send(
-                {
-                  type: `${DispatchKind.Signal}:${task.type}`,
-                  data: task.data,
-                },
-                store.snapshot(),
-              );
-              break;
-            case 'action':
-              dev.send(
-                {
-                  type: `${DispatchKind.Action}:${task.type || 'anonymous'}`,
-                  args: task.args,
-                },
-                store.snapshot(),
-              );
-              break;
+      }
+
+      protected _dispatch(tasks: Dispatchable | readonly Dispatchable[]): any[] {
+        const result = super._dispatch(tasks);
+        if (!isArray(tasks)) {
+          if ('$object' in tasks) {
+            switch (tasks.$object) {
+              case 'MUTATION':
+                dev.send(
+                  {
+                    type: `${DispatchKind.Mutation}:${tasks.factory.box.key}/${
+                      tasks.factory.type || 'anonymous'
+                    }`,
+                    action: result,
+                    args: tasks.args,
+                  },
+                  this.snapshot(),
+                );
+                break;
+              case 'SIGNAL':
+                dev.send(
+                  {
+                    type: `${DispatchKind.Signal}:${tasks.type}`,
+                    data: tasks.data,
+                  },
+                  this.snapshot(),
+                );
+                break;
+              case 'ACTION':
+                dev.send(
+                  {
+                    type: `${DispatchKind.Action}:${tasks.factory.type || 'anonymous'}`,
+                    args: tasks.args,
+                  },
+                  this.snapshot(),
+                );
+                break;
+            }
           }
         }
         return result;
-      }) as Dispatch;
-      return copyProperties(dispatch, newDispatch);
-    })(store.dispatch);
-    return store;
+      }
+    };
   };
-}
-
-function copyProperties<T extends object>(src: T, dst: Partial<T>) {
-  const copy = (name: PropertyKey) => {
-    if (dst.hasOwnProperty(name)) {
-      return;
-    }
-    Object.defineProperty(dst, name, Object.getOwnPropertyDescriptor(src, name)!);
-  };
-  Object.getOwnPropertyNames(src).forEach(copy);
-  Object.getOwnPropertySymbols?.(src).forEach(copy);
-  return dst as T;
 }

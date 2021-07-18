@@ -9,7 +9,9 @@ import {
   isJSONSerializable,
   JSONSerializable,
   JSONState,
-} from '@kcats/core';
+  shallowEqual,
+} from 'amos';
+import { conj1 } from 'amos/src/utils';
 import { fork, forkable } from './utils';
 
 export type DictKey = number | string;
@@ -27,13 +29,13 @@ export class Dict<K extends DictKey, V> implements JSONSerializable<Record<K, V>
   }
 
   fromJSON(state: JSONState<Record<K, V>> & {}): this {
-    const that = clone(this, ({ data: {} } as unknown) as Partial<this>);
+    const that = clone(this, { data: {} } as unknown as Partial<this>);
     for (const key in state) {
       if (state.hasOwnProperty(key)) {
         if (isJSONSerializable(that.defaultValue)) {
-          that.data[(key as unknown) as K] = that.defaultValue.fromJSON(state[key]);
+          that.data[key as unknown as K] = that.defaultValue.fromJSON(state[key]);
         } else {
-          that.data[(key as unknown) as K] = clone(that.defaultValue, state[key]);
+          that.data[key as unknown as K] = clone(that.defaultValue, state[key]);
         }
       }
     }
@@ -128,13 +130,26 @@ export const createDictBox = createBoxFactory(
     setItem: true,
   },
   {
-    map: true,
-    entities: true,
-    values: true,
-    keys: true,
-    has: false,
-    take: false,
-    get: false,
-    size: true,
+    map: { equal: shallowEqual },
+    entities: {
+      equal: (oldResult, newResult) => {
+        if (oldResult.length !== newResult.length) {
+          return false;
+        }
+        for (let i = 0; i < oldResult.length; i++) {
+          if (oldResult[i][0] !== newResult[i][0] || oldResult[i][1] !== newResult[i][1]) {
+            return false;
+          }
+        }
+        return true;
+      },
+      key: conj1,
+    },
+    values: { equal: shallowEqual, key: conj1 },
+    keys: { equal: shallowEqual, key: conj1 },
+    has: {},
+    take: {},
+    get: {},
+    size: {},
   },
 );

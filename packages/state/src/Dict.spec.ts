@@ -3,11 +3,11 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { clone, identity } from '@kcats/core';
-import { UserModel } from '@kcats/testing';
+import { clone, identity } from 'amos';
+import { UserModel } from 'amos-testing';
 import { Dict, createDictBox } from './Dict';
 
-describe('KcatsDict', () => {
+describe('AmosDict', () => {
   it('should create dict', () => {
     const dict = new Dict(new UserModel(), 0 as number);
     dict.toJSON();

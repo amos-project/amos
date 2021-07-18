@@ -3,26 +3,18 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { createStore, Store, StoreEnhancer } from '@kcats/core';
+import { createStore, Store, StoreEnhancer } from 'amos';
 import { forceWithDevTools, withDevTools } from './withDevTools';
 
 describe('withDevTools', () => {
   it('should works', () => {
     const shouldEnhanced = (enhanced: boolean, enhancer: StoreEnhancer) => {
-      let oldStore: Store;
-      const store = createStore(
-        void 0,
-        (store) => {
-          oldStore = { ...store };
-          return store;
-        },
-        enhancer,
-      );
-      const { dispatch, select, snapshot, subscribe } = oldStore!;
-      expect(dispatch === store.dispatch).toBe(!enhanced);
-      expect(select === store.select).toBe(!enhanced);
-      expect(snapshot === store.snapshot).toBe(true);
-      expect(subscribe === store.subscribe).toBe(true);
+      const store = createStore(void 0, enhancer);
+      const pp: Store = Object.getPrototypeOf(Object.getPrototypeOf(store));
+      expect(pp.dispatch === store.dispatch).toBe(!enhanced);
+      expect(pp.select === store.select).toBe(!enhanced);
+      expect(pp.snapshot === store.snapshot).toBe(true);
+      expect(pp.subscribe === store.subscribe).toBe(true);
     };
     const forceEnv = (NODE_ENV: string) => {
       if (typeof process === 'object') {

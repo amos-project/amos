@@ -3,7 +3,7 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { signal } from '@kcats/core';
+import { signal } from 'amos';
 
 export interface ResetEvent {
   count: number;

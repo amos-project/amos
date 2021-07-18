@@ -3,7 +3,7 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { createBoxFactory } from '@kcats/state';
+import { createBoxFactory } from 'amos-state';
 import { UserModel } from './box';
 
 export const createUserBox = createBoxFactory(UserModel, { merge: true }, { fullName: true });

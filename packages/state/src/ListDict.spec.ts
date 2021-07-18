@@ -5,7 +5,7 @@
 
 import { ListDict, createListDictBox } from './ListDict';
 
-describe('KcatsListDict', () => {
+describe('AmosListDict', () => {
   it('should create list dict', () => {
     const list = new ListDict<number, number>([0]);
     list.size();

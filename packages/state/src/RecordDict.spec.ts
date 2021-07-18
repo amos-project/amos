@@ -3,10 +3,10 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { UserModel } from '@kcats/testing';
+import { UserModel } from 'amos-testing';
 import { RecordDict, createRecordDictBox } from './RecordDict';
 
-describe('KcatsRecordDict', () => {
+describe('AmosRecordDict', () => {
   it('should create record dict', () => {
     const dict = new RecordDict(new UserModel(), 'id');
     dict.toJSON();

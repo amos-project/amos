@@ -1,6 +1,6 @@
 ---
 id: why
-title: Why kcats
+title: Why amos
 sidebar_label: Why
 ---
 

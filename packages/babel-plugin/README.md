@@ -1,3 +1,0 @@
-# `@kcats/babel-plugin`
-
-## Usage

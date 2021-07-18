@@ -10,3 +10,4 @@ export * from './selector';
 export * from './connect';
 export * from './hooks';
 export * from './box_factory';
+export * from './utils';

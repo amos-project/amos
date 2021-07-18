@@ -1,11 +1,11 @@
-# `@kcats/store`
+# `amos-store`
 
 > TODO: description
 
 ## Usage
 
 ```
-const store = require('@kcats/store');
+const store = require('amos-store');
 
 // TODO: DEMONSTRATE API
 ```

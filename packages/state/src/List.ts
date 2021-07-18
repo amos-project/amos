@@ -3,7 +3,7 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { clone, createBoxFactory, JSONSerializable, JSONState } from '@kcats/core';
+import { clone, createBoxFactory, JSONSerializable, JSONState, shallowEqual } from 'amos';
 import { fork, forkable } from './utils';
 
 @forkable
@@ -155,18 +155,18 @@ export const createListBox = createBoxFactory(
     concat: true,
   },
   {
-    some: true,
-    reduceRight: true,
-    reduce: true,
-    map: true,
-    lastIndexOf: true,
-    join: true,
-    indexOf: true,
-    includes: true,
-    findIndex: true,
-    find: true,
-    filter: true,
-    every: true,
-    size: false,
+    some: {},
+    reduceRight: {},
+    reduce: {},
+    map: { equal: shallowEqual },
+    lastIndexOf: {},
+    join: {},
+    indexOf: {},
+    includes: {},
+    findIndex: {},
+    find: {},
+    filter: { equal: shallowEqual },
+    every: {},
+    size: {},
   },
 );

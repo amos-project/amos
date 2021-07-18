@@ -3,7 +3,7 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { countBox, selectMultipleCount, TestClass } from '@kcats/testing';
+import { countBox, selectMultipleCount, TestClass } from 'amos-testing';
 import React from 'react';
 import { connect } from './connect';
 
@@ -19,5 +19,7 @@ describe('connect', () => {
     expect(<TC1 id={1} count={1} ref={(instance) => instance?.current()} />).toBeDefined();
     expect(<TC2 id={2} />).toBeDefined();
     expect(<TC3 multiply={3} id={3} />).toBeDefined();
+    // @ts-expect-error
+    expect(<TC3 id={3} />).toBeDefined();
   });
 });

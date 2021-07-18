@@ -3,10 +3,10 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { identity } from '@kcats/core';
+import { identity } from 'amos';
 import { List, createListBox } from './List';
 
-describe('KcatsList', () => {
+describe('AmosList', () => {
   it('should create list', () => {
     const list = new List([0]);
     list.toJSON();

@@ -3,7 +3,7 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { ConnectedProps } from '@kcats/react';
+import { ConnectedProps } from 'amos-react';
 import React, { PureComponent } from 'react';
 import { countBox } from './box';
 

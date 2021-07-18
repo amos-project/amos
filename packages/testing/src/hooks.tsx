@@ -3,7 +3,7 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { useSelector } from '@kcats/react';
+import { useSelector } from 'amos-react';
 import React, { memo } from 'react';
 import { selectCount, selectDoubleCount } from './selector';
 

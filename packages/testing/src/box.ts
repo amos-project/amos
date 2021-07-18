@@ -3,7 +3,7 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { Box, clone } from '@kcats/core';
+import { Box, clone } from 'amos';
 import { reset } from './signal';
 
 export class UserModel {
@@ -27,7 +27,7 @@ export const mergeUser = userBox.mutation((state, props: Partial<UserModel>) => 
 
 export const countBox = new Box('count', 0);
 
-countBox.subscribeSignal(reset, (state, data) => data.count);
+countBox.subscribe(reset, (state, data) => data.count);
 
 export const incrCount = countBox.mutation((state) => state + 1);
 

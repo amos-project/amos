@@ -1,13 +1,13 @@
 {
-  "name": "@kcats/devtools",
-  "version": "0.1.0",
-  "description": "The devtools for kcats",
+  "name": "amos-devtools",
+  "version": "0.3.0-beta.1",
+  "description": "The devtools for amos",
   "keywords": [
-    "kcats",
+    "amos",
     "devtools"
   ],
   "author": "acrazing <joking.young@gmail.com>",
-  "homepage": "https://github.com/acrazing/kcats",
+  "homepage": "https://github.com/acrazing/amos",
   "license": "MIT",
   "main": "dist/devtools.cjs.js",
   "files": [
@@ -15,12 +15,16 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/acrazing/kcats.git"
+    "url": "git+https://github.com/acrazing/amos.git"
   },
   "scripts": {
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
   "bugs": {
-    "url": "https://github.com/acrazing/kcats/issues"
+    "url": "https://github.com/acrazing/amos/issues"
+  },
+  "dependencies": {
+    "amos": "^0.3.0-beta.1",
+    "tslib": "^2.3.0"
   }
 }

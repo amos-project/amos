@@ -3,7 +3,7 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { createStore, Store } from '@kcats/core';
+import { createStore, Store } from 'amos';
 import { render } from '@testing-library/react';
 import React from 'react';
 import { Consumer, Provider } from './context';
@@ -13,7 +13,7 @@ describe('provider', () => {
     const store = createStore();
     let usedStore: Store | null = null;
     render(
-      <Provider value={store}>
+      <Provider store={store}>
         <Consumer>
           {(store1) => {
             usedStore = store1;

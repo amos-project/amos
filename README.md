@@ -1,6 +1,6 @@
-# kcats
+# amos
 
-Kcats is a decentralized state manager for `React`, inspired by `Redux`, `Vuex` and `Recoil`.
+Amos is a decentralized state manager for `React`, inspired by `Redux`, `Vuex` and `Recoil`.
 
 ## Highlights
 
@@ -15,25 +15,25 @@ And more:
 
 - **Strong typed**, all APIs have clear parameter and return value types, especially in TypeScript
   projects.
-- **Lightweight**, The size of the two packages `@kcats/core` and `@kcats/react` is only 3kb after
+- **Lightweight**, The size of the two packages `amos` and `amos-react` is only 3kb after
   gzip compression, and they
   are [Tree-shaking](https://developer.mozilla.org/en-US/docs/Glossary/Tree_shaking) friendly.
 - **Complete**, supports [server-side rendering(SSR)](#server-side-renderingssr),
   [hooks](#with-hooks) and [class components](#with-class-components).
 - **Easy to use**
   - The core concepts and API is similar to `Redux`.
-  - Can be mixed with Redux by using [`@kcats/redux`](#hybrid-with-redux).
-  - Use the same developer tools as Redux: [`@kcats/devtools`](#devtools).
+  - Can be mixed with Redux by using [`amos-redux`](#hybrid-with-redux).
+  - Use the same developer tools as Redux: [`amos-devtools`](#devtools).
 
 **WARNING: THE API IS DESIGNING**
 
 ## Installation
 
 ```bash
-yarn add @kcats/core @kcats/react
+yarn add amos amos-react
 
 # or var npm
-npm i -S @kcats/core @kcats/react
+npm i -S amos amos-react
 ```
 
 ## Quick start
@@ -43,8 +43,8 @@ npm i -S @kcats/core @kcats/react
 ```typescript jsx
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { Box, createStore, identity } from '@kcats/core';
-import { Provider, useDispatch, useSelector } from '@kcats/react';
+import { Box, createStore, identity } from 'amos';
+import { Provider, useDispatch, useSelector } from 'amos-react';
 
 // define a box
 const countBox = new Box('count', 0, identity);

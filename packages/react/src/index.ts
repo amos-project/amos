@@ -3,6 +3,6 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-export { ConnectedProps, ConnectedComponent, Connector, connect } from './connect';
-export { ProviderProps, Provider, ConsumerProps, Consumer } from './context';
-export { useStore, useDispatch, MapSelector, useSelector } from './hooks';
+export { connect, ConnectedComponent, ConnectedProps, Connector } from './connect';
+export { __Context, Consumer, Provider, ProviderProps, useDispatch, useStore } from './context';
+export { useSelector } from './useSelector';

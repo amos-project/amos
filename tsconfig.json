@@ -5,9 +5,9 @@
     "baseUrl": "packages",
     "rootDir": ".",
     "paths": {
-      "@kcats/*": ["*/src"]
+      "amos": ["amos/src"],
+      "amos-*": ["*/src"]
     }
   },
-  "include": ["packages"],
-  "exclude": ["node_modules"]
+  "include": ["packages"]
 }

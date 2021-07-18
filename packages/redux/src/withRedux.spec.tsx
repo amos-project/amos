@@ -3,19 +3,10 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import {
-  action,
-  Box,
-  createStore as createKcatsStore,
-  identity,
-  Select,
-  selector,
-  signal,
-  useSelector,
-} from '@kcats/core';
-import { Provider as KcatsProvider } from '@kcats/react';
 import { combineReducers, createSlice } from '@reduxjs/toolkit';
 import { act, renderHook } from '@testing-library/react-hooks';
+import { action, Box, createStore as createAmosStore, Select, selector, signal } from 'amos';
+import { Provider as AmosProvider, useSelector } from 'amos-react';
 import * as React from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
 import { createStore as createReduxStore, Store as ReduxStore } from 'redux';
@@ -53,13 +44,13 @@ type RootState = ReturnType<typeof reduxNextReducer>;
 const selectReduxCount = (state: RootState) => state.redux_count;
 const selectReduxUser = (state: RootState) => state.redux_user;
 
-const kcatsCountBox = new Box('kcats_count', 0, identity);
+const amosCountBox = new Box('amos_count', 0);
 
-const kcatsIncrement = kcatsCountBox.mutation((state) => state + 1);
+const amosIncrement = amosCountBox.mutation((state) => state + 1);
 
-const selectKcatsCount = selector((select) => select(kcatsCountBox));
+const selectAmosCount = selector((select) => select(amosCountBox));
 
-const selectCountSum = selector((select) => selectKcatsCount(select) + select(selectReduxCount));
+const selectCountSum = selector((select) => select(selectAmosCount) + select(selectReduxCount));
 
 const expectCalled = (fn: Mock, called: boolean) => {
   expect(fn).toBeCalledTimes(+called);
@@ -69,38 +60,38 @@ const expectCalled = (fn: Mock, called: boolean) => {
 describe('withRedux', () => {
   it('should works', () => {
     const reduxStore: ReduxStore = createReduxStore(reduxInitialReducer);
-    const kcatsStore = createKcatsStore(void 0, withRedux(reduxStore));
-    kcatsStore.dispatch(kcatsIncrement());
-    expect(kcatsStore.select(selectKcatsCount)).toBe(1);
+    const amosStore = createAmosStore(void 0, withRedux(reduxStore));
+    amosStore.dispatch(amosIncrement());
+    expect(amosStore.select(selectAmosCount)).toBe(1);
     expect(selectReduxCount(reduxStore.getState())).toBe(0);
-    expect(kcatsStore.select(selectReduxCount)).toBe(0);
-    const action = kcatsStore.dispatch(reduxCount.actions.increment());
+    expect(amosStore.select(selectReduxCount)).toBe(0);
+    const action = amosStore.dispatch(reduxCount.actions.increment());
     expect(action.type).toBe('redux_count/increment');
     expect(selectReduxCount(reduxStore.getState())).toBe(1);
-    expect(kcatsStore.select(selectReduxCount)).toBe(1);
+    expect(amosStore.select(selectReduxCount)).toBe(1);
     reduxStore.replaceReducer(
       combineReducers({
         [reduxCount.name]: reduxCount.reducer,
         [reduxUser.name]: reduxUser.reducer,
       }) as any,
     );
-    expect(kcatsStore.select(selectReduxUser)).toBe('');
-    expect(kcatsStore.snapshot()).toEqual({
-      kcats_count: 1,
+    expect(amosStore.select(selectReduxUser)).toBe('');
+    expect(amosStore.snapshot()).toEqual({
+      amos_count: 1,
       redux_count_from_redux$: 1,
       redux_user_from_redux$: '',
     });
   });
   it('should works with hooks', () => {
     const reduxStore = createReduxStore(reduxInitialReducer);
-    const kcatsStore = createKcatsStore(void 0, withRedux(reduxStore));
-    const inlineCount = fn((select: Select) => select(kcatsCountBox));
+    const amosStore = createAmosStore(void 0, withRedux(reduxStore));
+    const inlineCount = fn((select: Select) => select(amosCountBox));
     const { result } = renderHook(
-      () => useSelector(selectKcatsCount, selectReduxCount, inlineCount, selectCountSum),
+      () => useSelector(selectAmosCount, selectReduxCount, inlineCount, selectCountSum),
       {
         wrapper: (props) => (
           <ReduxProvider store={reduxStore}>
-            <KcatsProvider store={kcatsStore}>{props.children}</KcatsProvider>
+            <AmosProvider store={amosStore}>{props.children}</AmosProvider>
           </ReduxProvider>
         ),
       },
@@ -121,19 +112,19 @@ describe('withRedux', () => {
     // @ts-expect-error
     expect(c3.name).toBeUndefined();
     act(() => {
-      kcatsStore.dispatch(kcatsIncrement());
+      amosStore.dispatch(amosIncrement());
     });
     expect(result.current).toEqual([1, 0, 1, 1]);
     expectCalled(inlineCount, true);
     act(() => {
-      kcatsStore.dispatch(reduxCount.actions.increment());
+      amosStore.dispatch(reduxCount.actions.increment());
     });
     expect(result.current).toEqual([1, 1, 1, 2]);
     expectCalled(inlineCount, false);
   });
 
-  it('should keep kcats types', () => {
-    const store = createKcatsStore(void 0, withRedux(createReduxStore(reduxInitialReducer)));
+  it('should keep amos types', () => {
+    const store = createAmosStore(void 0, withRedux(createReduxStore(reduxInitialReducer)));
     const r1 = store.dispatch({ type: 'REDUX_ACTION' });
     // @ts-expect-error
     expect(r1 === 1);
@@ -146,7 +137,7 @@ describe('withRedux', () => {
     // @ts-expect-error
     expect(r3.type === 'string');
     expect(r3 === 1).toBe(true);
-    const r4 = store.dispatch(kcatsCountBox.mutation((s, k: number) => k)(10));
+    const r4 = store.dispatch(amosCountBox.mutation((s, k: number) => k)(10));
     // @ts-expect-error
     expect(r4.object === 'mutation');
     expect(r4 === 10).toBe(true);
@@ -156,7 +147,7 @@ describe('withRedux', () => {
     const redux = createReduxStore(reduxInitialReducer);
     const listener = fn(() => ({ ...store.snapshot() }));
     redux.subscribe(listener);
-    const store = createKcatsStore(void 0, withRedux(redux));
+    const store = createAmosStore(void 0, withRedux(redux));
     redux.dispatch(reduxCount.actions.increment());
     expect(listener).toHaveReturnedWith({ redux_count_from_redux$: 1 });
   });
