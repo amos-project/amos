@@ -4,7 +4,7 @@
  */
 
 import { AmosObject, Select } from './types';
-import { applyEnhancers, conj1, resolveCallerName, strictEqual } from './utils';
+import { applyEnhancers, resolveCallerName, strictEqual } from './utils';
 
 /**
  * Selector is created by {@see SelectorFactory}, it is used for select some state
@@ -45,16 +45,6 @@ export interface SelectorOptions<A extends any[], R> {
   type?: string;
 
   /**
-   * The key of the args, which is used for caches, it is `args.join('-')` by default.
-   * You do not need to pass this option if your selector's args is primitive and its
-   * type is consistent.
-   *
-   * @param select
-   * @param args
-   */
-  key?: (select: Select, ...args: A) => string;
-
-  /**
    * The equal fn, which is used for check the result is updated or not. If the fn
    * returns true the new result will be ignored when compares the cached result and
    * new result.
@@ -65,15 +55,16 @@ export interface SelectorOptions<A extends any[], R> {
   equal?: (oldResult: R, newResult: R) => boolean;
 
   /**
-   * Determine weather the cache is expired when its dependencies is updated.
+   * The cache key of a selector created by the factory.
    *
-   * - 'passive': any one of its dependencies is expired.
-   * - 'recompute': recompute it and compare by {@see equal} function.
+   * If set, the selector's result will be cached. You should cache a selector
+   * if it is expensive, or it is always changed even if its dependencies is
+   * not changed.
    *
-   * The value is 'recompute' by default, and you do not need to change it in most cases.
-   * You should set it as 'passive' only if the selector is a heave one.
+   * @param select
+   * @param args
    */
-  expire?: 'passive' | 'recompute';
+  cacheKey?: (...args: A) => string | false;
 }
 
 /**
@@ -129,13 +120,11 @@ export function selector<A extends any[], R>(
     (...args: A): Selector<A, R> => ({ $object: 'SELECTOR', args, factory }),
     {
       ...options,
-      key: options.key || conj1,
       equal: options.equal || strictEqual,
-      expire: options.expire || 'recompute',
     },
     {
       $object: 'SELECTOR_FACTORY',
-      id: Math.random().toString().substr(1),
+      id: Math.random().toString().substr(2),
       compute,
     } as const,
   );

@@ -3,9 +3,8 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { Box, MutationFactory } from './box';
+import { Box, BoxOptions, MutationFactory } from './box';
 import { selector, SelectorFactory, SelectorOptions } from './selector';
-import { JSONState } from './types';
 
 export type BoxWithStateMethods<S, KM extends keyof S, KS extends keyof S> = Box<S> &
   {
@@ -21,11 +20,11 @@ export type BoxWithStateMethods<S, KM extends keyof S, KS extends keyof S> = Box
   };
 
 export interface BoxFactory<PS, KM extends keyof PS, KS extends keyof PS> {
-  <S>(
-    key: string,
-    initialState: S,
-    preload?: (preloadedState: JSONState<S>, state: S) => S,
-  ): BoxWithStateMethods<S, KM & keyof S, KS & keyof S>;
+  <S>(key: string, initialState: S, options?: BoxOptions<S>): BoxWithStateMethods<
+    S,
+    KM & keyof S,
+    KS & keyof S
+  >;
   extend<
     NPS,
     NRM extends { [P in keyof NPS]?: NPS[P] extends (...args: infer A) => infer R ? true : never },
@@ -52,15 +51,12 @@ export function createBoxFactory<
   mutations: RM,
   selectors: RS,
 ): BoxFactory<PS, keyof RM & keyof PS, keyof RS & keyof PS> {
-  const boxProto = Object.create(Box.prototype);
-
   function createBox<S>(
     key: string,
     initialState: S,
-    preload?: (preloadedState: JSONState<S>, state: S) => S,
-  ): Box<S> & BoxWithStateMethods<S, keyof RM & keyof S, keyof RS & keyof S> {
-    const box = new Box(key, initialState, preload);
-    Object.setPrototypeOf(box, boxProto);
+    options?: BoxOptions<S>,
+  ): BoxWithStateMethods<S, keyof RM & keyof S, keyof RS & keyof S> {
+    const box = new Box(key, initialState, options);
     for (const km in mutations) {
       if (mutations.hasOwnProperty(km)) {
         Object.defineProperty(box, km, {
@@ -70,7 +66,7 @@ export function createBoxFactory<
     }
     for (const ks in selectors) {
       if (selectors.hasOwnProperty(ks)) {
-        Object.defineProperty(boxProto, ks, {
+        Object.defineProperty(box, ks, {
           value: selector((select: any, ...args) => select(box)[ks](...args), selectors[ks]),
         });
       }

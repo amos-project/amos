@@ -46,14 +46,6 @@ export function shallowEqual<T extends object>(a: T, b: T): boolean {
   return true;
 }
 
-export function conj(...args: any[]) {
-  return args.join('-');
-}
-
-export function conj1(arg0: any, ...args: any[]) {
-  return conj(...args);
-}
-
 export function strictEqual<T>(a: T, b: T) {
   return a === b;
 }
@@ -141,6 +133,13 @@ export class CheapSet<T extends keyof any = string> {
 
   constructor(values: readonly T[] = []) {
     values.forEach((v) => this.add(v));
+  }
+
+  empty() {
+    for (const _value in this.data) {
+      return false;
+    }
+    return true;
   }
 
   add(value: T) {

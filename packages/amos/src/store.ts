@@ -4,6 +4,7 @@
  */
 
 import { Box } from './box';
+import { LRUCache } from './LRUCache';
 import { SelectorFactory } from './selector';
 import {
   Dispatch,
@@ -14,38 +15,32 @@ import {
   Subscribe,
   Unsubscribe,
 } from './types';
-import { CheapMap, CheapSet, isArray, threw, toString, warning } from './utils';
+import { CheapMap, CheapSet, isArray, threw, toString } from './utils';
 
-export interface StoreOptions {}
+export interface StoreOptions {
+  cacheSize?: number;
+}
 
-export interface SelectorCache<A extends any[] = any, R = any> {
-  id: string;
+export interface SelectorCache<A extends any[] = any, R = any> extends LRUNode {
   factory: SelectorFactory<A, R>;
   args: A;
-  owners: CheapSet;
-  usedBoxes: CheapSet;
-  usedSelectors: CheapSet;
   value: R;
+  boxes: Snapshot;
+  selectors: Snapshot;
 }
 
 const VALUE_PLACEHOLDER = { '@AMOS_VALUE_PLACEHOLDER@': true };
 
 export class Store {
+  static DEFAULT_CACHE_SIZE = 1024;
   protected preloadedState: Snapshot;
   protected options: StoreOptions;
   protected listeners: Subscribe[];
   protected dispatching: Dispatchable | readonly Dispatchable[] | undefined;
   protected state: Snapshot;
   protected boxes: CheapMap<Box>;
-  protected expiredBoxes: CheapSet;
-  protected usedBoxes: CheapMap<CheapSet>;
+  protected cache: LRUCache<SelectorCache>;
   protected selectorStack: SelectorCache[];
-
-  /**
-   * The caches of selectors, please note it may be dirty.
-   * @protected
-   */
-  protected selectorCaches: CheapMap<SelectorCache>;
 
   constructor(preloadedState: Snapshot = {}, options: StoreOptions = {}) {
     this.preloadedState = preloadedState;
@@ -54,16 +49,15 @@ export class Store {
     this.boxes = new CheapMap<Box>();
     this.listeners = [];
     this.dispatching = void 0;
-    this.selectorStack = [];
-    this.expiredBoxes = new CheapSet<string>();
-    this.usedBoxes = new CheapMap<CheapSet>();
-    this.selectorCaches = new CheapMap<SelectorCache>();
+    this.cache = new LRUCache<SelectorCache>(options.cacheSize ?? Store.DEFAULT_CACHE_SIZE);
   }
 
   /**
    * executed after construct, used for enhancers.
    */
-  init() {}
+  init(): this {
+    return this;
+  }
 
   /**
    * Take the snapshot of the state.
@@ -145,7 +139,6 @@ export class Store {
         const nextState = dispatchable.factory.mutator(this.state[key], ...dispatchable.args);
         if (nextState !== this.state[key]) {
           this.state[key] = nextState;
-          this.expiredBoxes.add(key);
         }
         return nextState;
       case 'SIGNAL':
@@ -161,7 +154,6 @@ export class Store {
           const nextState = fn(this.state[key], dispatchable.data);
           if (nextState !== this.state[key]) {
             this.state[key] = nextState;
-            this.expiredBoxes.add(key);
           }
         }
         return dispatchable.data;
@@ -186,9 +178,6 @@ export class Store {
    * @protected
    */
   protected _dispatch(tasks: Dispatchable | readonly Dispatchable[]) {
-    if (process.env.NODE_ENV === 'development') {
-      threw(!!this.selectorStack.length, 'You cannot dispatch a dispatchable in selector.');
-    }
     const isRoot = !this.dispatching;
     if (isRoot) {
       this.dispatching = tasks;
@@ -205,68 +194,6 @@ export class Store {
         this.notify();
       }
     }
-  }
-
-  /**
-   * Drop the expired selector caches.
-   *
-   * @protected
-   */
-  protected dropExpiredCaches() {
-    const verified = new CheapSet();
-    const drop = (id: string) => {};
-    const verify = (id: string): boolean => {
-      if (verified.has(id)) {
-        // verified selectors, return directly.
-        return this.selectorCaches.has(id);
-      }
-      const cache = this.selectorCaches.get(id);
-      if (!cache) {
-        // it is dropped already.
-        return false;
-      }
-      if (cache.usedSelectors.every(verify)) {
-        // every deps selector is ok, check boxes
-        if (cache.usedBoxes.every((key) => !this.expiredBoxes.has(key))) {
-          // box is also fine, it is fine
-          verified.add(id);
-          return true;
-        } else {
-          verified.add(id);
-          if (cache.factory.expire === 'passive') {
-            drop(id);
-            return false;
-          } else {
-            try {
-              const newValue = cache.factory.compute(this.select, ...cache.args);
-              if (cache.factory.equal!(cache.value, newValue)) {
-                return true;
-              } else {
-                drop(id);
-                return false;
-              }
-            } catch (e) {
-              warning(true, e?.stack || e + '');
-              drop(id);
-              return false;
-            }
-          }
-        }
-      } else {
-        // if deps is expired, it will recompute all its dependents,
-        // if expired, it should be dropped and added to verified already.
-        return this.selectorCaches.has(id);
-      }
-    };
-
-    this.expiredBoxes.forEach((key) => {
-      const ref = this.usedBoxes.get(key);
-      if (!ref) {
-        return;
-      }
-      ref.forEach(verify);
-    });
-    this.expiredBoxes.clear();
   }
 
   /**
@@ -298,7 +225,6 @@ export class Store {
    * @protected
    */
   protected _select(selectable: Selectable) {
-    this.dropExpiredCaches();
     // select function
     if (typeof selectable === 'function' && !('$object' in selectable)) {
       return selectable(this.select);
@@ -310,12 +236,7 @@ export class Store {
     if (selectable instanceof Box) {
       const boxState = this.ensureBox(selectable);
       if (parent) {
-        if (!this.usedBoxes.has(selectable.key)) {
-          this.usedBoxes.set(selectable.key, new CheapSet([selectable.key]));
-        } else {
-          this.usedBoxes.take(selectable.key).add(selectable.key);
-        }
-        parent.usedBoxes.add(selectable.key);
+        parent.boxes[selectable.key] = boxState;
       }
       return boxState;
     }
@@ -323,8 +244,12 @@ export class Store {
     // select selector or selector factory
     const args = selectable.$object === 'SELECTOR_FACTORY' ? [] : selectable.args;
     const factory = selectable.$object === 'SELECTOR_FACTORY' ? selectable : selectable.factory;
+    const key = factory.cacheKey?.(...args);
+    if (!key && key !== '') {
+      return factory.compute(this.select, ...args);
+    }
     try {
-      const id = `${factory.type}${factory.id}.${factory.key!(this.select, ...args)}`;
+      const id = `${factory.type}.${factory.id}.${key}`;
       let node = this.selectorCaches.get(id);
       if (!node) {
         node = {
@@ -386,9 +311,6 @@ export class Store {
       this.state = {};
     }
     this.boxes.clear();
-    this.expiredBoxes.clear();
-    this.usedBoxes.clear();
-    this.selectorCaches.clear();
     this.notify();
   }
 }

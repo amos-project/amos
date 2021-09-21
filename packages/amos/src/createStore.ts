@@ -14,7 +14,7 @@ export function createStore(
   options: StoreOptions = {},
   ...enhancers: StoreEnhancer[]
 ): Store {
-  const store = new (applyEnhancers(Store, enhancers))(preloadedState, options);
+  const store = new (applyEnhancers(Store, enhancers))(preloadedState, options).init();
   store.init();
   return store;
 }

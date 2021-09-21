@@ -7,7 +7,7 @@ export { applyEnhancers, arrayEqual, clone, fromJSON, identity, isArray, isJSONS
 export { signal, Signal, SignalEnhancer, SignalFactory, SignalOptions } from './signal';
 export { Box, BoxOptions, BoxWatchOptions, Mutation, MutationFactory } from './box';
 export { selector, FunctionSelector, Selector, SelectorEnhancer, SelectorFactory, SelectorOptions } from './selector';
-export { action, Action, ActionEnhancer, ActionFactory, ActionOptions, FunctionAction } from './action';
+export { action, Action, ActionEnhancer, ActionFactory, ActionOptions } from './action';
 export { AmosDispatch, AmosObject, Dispatch, Dispatchable, JSONSerializable, JSONState, MapSelector, Select, Selectable, Snapshot, Subscribe, Unsubscribe } from './types';
 export { Store, StoreOptions } from './store';
 export { createBoxFactory, BoxFactory, BoxWithStateMethods } from './createBoxFactory';

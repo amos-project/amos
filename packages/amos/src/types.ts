@@ -56,3 +56,9 @@ export type Unsubscribe = () => void;
 export type MapSelector<Rs extends readonly Selectable[]> = {
   [P in keyof Rs]: Rs[P] extends Selectable<infer R> ? R : never;
 };
+
+export interface Cache<T> {
+  get(id: string): T | undefined;
+  set(id: string, value: T): void;
+  delete(id: string): void;
+}
