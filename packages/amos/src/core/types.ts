@@ -9,7 +9,7 @@ import { FunctionSelector, Selector, SelectorFactory } from './selector';
 import { Signal } from './signal';
 
 export interface AmosObject<T extends string> {
-  $object: T;
+  $amos: T;
 }
 
 export type JSONState<S> = S extends { toJSON(): infer R } ? JSONState<R> : S extends object ? { [P in keyof S]: JSONState<S[P]> } : S;

@@ -5,7 +5,7 @@
 
 import { clone } from 'amos';
 import { Dict, createDictBox, DictKey } from './Dict';
-import { fork, forkable } from './utils';
+import { fork, forkable } from '../../../state/src/utils';
 
 @forkable
 export class RecordDict<KF extends DictKey, V extends { readonly [P in KF]: DictKey }> extends Dict<

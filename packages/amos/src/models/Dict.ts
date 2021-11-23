@@ -11,8 +11,8 @@ import {
   JSONState,
   shallowEqual,
 } from 'amos';
-import { conj1 } from 'amos/src/utils';
-import { fork, forkable } from './utils';
+import { conj1 } from 'amos/src/core/utils';
+import { fork, forkable } from '../../../state/src/utils';
 
 export type DictKey = number | string;
 
@@ -118,6 +118,8 @@ export class Dict<K extends DictKey, V> implements JSONSerializable<Record<K, V>
     return result;
   }
 }
+
+Date.UTC();
 
 export const createDictBox = createBoxFactory(
   Dict,

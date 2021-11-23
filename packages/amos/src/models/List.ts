@@ -4,7 +4,7 @@
  */
 
 import { clone, createBoxFactory, JSONSerializable, JSONState, shallowEqual } from 'amos';
-import { fork, forkable } from './utils';
+import { fork, forkable } from '../../../state/src/utils';
 
 @forkable
 export class List<T> implements JSONSerializable<T[]> {
