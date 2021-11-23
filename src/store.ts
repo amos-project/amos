@@ -226,7 +226,8 @@ export function createStore(preloadedState?: Snapshot, ...enhancers: StoreEnhanc
         } finally {
           if (--dispatchDepth === 0) {
             if (Object.keys(dispatchingSnapshot).length > 0) {
-              listeners.forEach((fn) => fn(dispatchingSnapshot));
+              const resultSnapshot = { ...dispatchingSnapshot };
+              listeners.forEach((fn) => fn(resultSnapshot));
             }
           }
         }
