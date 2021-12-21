@@ -3,18 +3,16 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { clone, createBoxFactory, JSONSerializable, JSONState, shallowEqual } from 'amos';
-import { fork, forkable } from '../../../state/src/utils';
+import { arrayEqual, clone, createBoxFactory } from 'amos';
 
-@forkable
-export class List<T> implements JSONSerializable<T[]> {
-  constructor(readonly data: T[] = []) {}
+export class List<T> {
+  constructor(readonly data: readonly T[] = []) {}
 
-  fromJSON(state: JSONState<T[]>): this {
-    return clone(this, { data: state as T[] } as Partial<this>);
+  fromJSON(state: readonly T[]): this {
+    return clone(this, { data: state } as any);
   }
 
-  toJSON(): T[] {
+  toJSON(): readonly T[] {
     return this.data;
   }
 
@@ -22,28 +20,44 @@ export class List<T> implements JSONSerializable<T[]> {
     return this.data.length;
   }
 
-  concat(other: readonly T[]): this {
-    return clone(this, { data: this.data.concat(other) } as Partial<this>);
+  concat(...items: ConcatArray<T>[]): this {
+    return this.make(this.data.concat(...items));
   }
 
-  every(predicate: (value: T, index: number, array: T[]) => unknown): boolean {
+  copyWithin(target: number, start: number, end?: number): this {
+    return this.make(this.data.slice().copyWithin(target, start, end));
+  }
+
+  every(predicate: (value: T, index: number) => boolean): boolean {
     return this.data.every(predicate);
   }
 
-  filter(predicate: (value: T, index: number, array: T[]) => unknown): this {
-    return clone(this, { data: this.data.filter(predicate) } as Partial<this>);
+  fill(value: T, start?: number, end?: number): this {
+    return this.make(this.data.slice().fill(value, start, end));
   }
 
-  find(predicate: (value: T, index: number, obj: T[]) => unknown): T | undefined {
+  filter(predicate: (value: T, index: number) => boolean): readonly T[] {
+    return this.data.filter(predicate);
+  }
+
+  filterThis(predicate: (value: T, index: number) => boolean): this {
+    return this.make(this.data.filter(predicate));
+  }
+
+  find(predicate: (value: T, index: number) => boolean): T | undefined {
     return this.data.find(predicate);
   }
 
-  findIndex(predicate: (value: T, index: number, obj: T[]) => unknown): number {
+  findIndex(predicate: (value: T, index: number) => boolean): number {
     return this.data.findIndex(predicate);
   }
 
-  forEach(callbackFn: (value: T, index: number, array: T[]) => void): void {
-    this.data.forEach(callbackFn);
+  flat<D extends number = 1>(depth?: D): FlatArray<readonly T[], D>[] {
+    return this.data.flat<readonly T[], D>(depth);
+  }
+
+  forEach(callbackfn: (value: T, index: number) => void): void {
+    this.data.forEach(callbackfn);
   }
 
   includes(searchElement: T, fromIndex?: number): boolean {
@@ -62,111 +76,117 @@ export class List<T> implements JSONSerializable<T[]> {
     return this.data.lastIndexOf(searchElement, fromIndex);
   }
 
-  map<U>(callbackFn: (value: T, index: number, array: T[]) => U): U[] {
-    return this.data.map(callbackFn);
+  map<U>(callbackfn: (value: T, index: number) => U): U[] {
+    return this.data.map(callbackfn);
   }
 
-  mapThis(callbackFn: (value: T, index: number, array: T[]) => T): this {
-    return clone(this, { data: this.data.map(callbackFn) } as Partial<this>);
+  mapThis(callbackfn: (value: T, index: number) => T): this {
+    return this.make(this.data.map(callbackfn));
   }
 
   pop(): this {
-    this.data.pop();
-    return fork(this);
+    const data = this.data.slice();
+    data.pop();
+    return this.make(data);
   }
 
   push(...items: T[]): this {
-    this.data.push(...items);
-    return fork(this);
+    const data = this.data.slice();
+    data.push(...items);
+    return this.make(data);
   }
 
   reduce<U>(
-    callbackFn: (previousValue: U, currentValue: T, currentIndex: number, array: T[]) => U,
+    callbackfn: (previousValue: U, currentValue: T, currentIndex: number) => U,
     initialValue: U,
   ): U {
-    return this.data.reduce(callbackFn, initialValue);
+    return this.data.reduce(callbackfn, initialValue);
   }
 
   reduceRight<U>(
-    callbackFn: (previousValue: U, currentValue: T, currentIndex: number, array: T[]) => U,
+    callbackfn: (previousValue: U, currentValue: T, currentIndex: number) => U,
     initialValue: U,
   ): U {
-    return this.data.reduceRight(callbackFn, initialValue);
+    return this.data.reduceRight(callbackfn, initialValue);
   }
 
   reverse(): this {
-    this.data.reverse();
-    return fork(this);
+    return this.make(this.data.slice().reverse());
   }
 
   shift(): this {
-    this.data.shift();
-    return fork(this);
+    const data = this.data.slice();
+    data.shift();
+    return this.make(data);
   }
 
   slice(start?: number, end?: number): this {
-    return clone(this, { data: this.data.slice(start, end) } as Partial<this>);
+    return this.make(this.data.slice(start, end));
   }
 
-  some(predicate: (value: T, index: number, array: T[]) => unknown): boolean {
+  some(predicate: (value: T, index: number) => boolean): boolean {
     return this.data.some(predicate);
   }
 
   sort(compareFn?: (a: T, b: T) => number): this {
-    this.data.sort(compareFn);
-    return fork(this);
+    return this.make(this.data.slice().sort(compareFn));
   }
 
-  splice(start: number, deleteCount = 0, ...items: T[]): this {
-    this.data.splice(start, deleteCount, ...items);
-    return fork(this);
+  splice(start: number, deleteCount: number, ...items: T[]): this {
+    const data = this.data.slice();
+    data.splice(start, deleteCount, ...items);
+    return this.make(data);
+  }
+
+  delete(index: number): this {
+    return this.splice(index, 1);
   }
 
   unshift(...items: T[]): this {
-    this.data.unshift(...items);
-    return fork(this);
+    const data = this.data.slice();
+    data.unshift(...items);
+    return this.make(data);
   }
 
   set(index: number, value: T): this {
-    this.data[index] = value;
-    return fork(this);
+    const data = this.data.slice();
+    data[index] = value;
+    return this.make(data);
   }
 
-  delete(value: T): this {
-    const index = this.data.indexOf(value);
-    return index === -1 ? this : this.splice(index, 1);
+  private make(data: readonly T[]): this {
+    return clone(this, { data } as any);
   }
 }
 
-export const createListBox = createBoxFactory(
-  List,
-  {
-    delete: true,
-    set: true,
-    unshift: true,
-    splice: true,
-    sort: true,
-    slice: true,
-    shift: true,
-    reverse: true,
-    push: true,
-    pop: true,
-    mapThis: true,
-    concat: true,
+export const createListBox = createBoxFactory(List, {
+  mutations: {
+    set: {},
+    unshift: {},
+    splice: {},
+    sort: {},
+    slice: {},
+    shift: {},
+    reverse: {},
+    push: {},
+    pop: {},
+    mapThis: {},
+    concat: {},
+    delete: {},
   },
-  {
+  selectors: {
     some: {},
     reduceRight: {},
     reduce: {},
-    map: { equal: shallowEqual },
+    map: { equal: arrayEqual },
     lastIndexOf: {},
     join: {},
     indexOf: {},
     includes: {},
     findIndex: {},
     find: {},
-    filter: { equal: shallowEqual },
+    filter: { equal: arrayEqual },
     every: {},
     size: {},
   },
-);
+});

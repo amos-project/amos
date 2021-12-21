@@ -62,3 +62,6 @@ export interface Cache<T> {
   set(id: string, value: T): void;
   delete(id: string): void;
 }
+
+// see {@link https://stackoverflow.com/a/50375286/4380247}
+export type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (k: infer I) => void ? I : never;

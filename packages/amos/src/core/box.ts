@@ -4,7 +4,7 @@
  */
 
 import { SignalFactory } from './signal';
-import { AmosObject, JSONState, MapSelector, Selectable } from './types';
+import { AmosObject, JSONState } from './types';
 import { clone, fromJSON, resolveCallerName, threw, warning } from './utils';
 
 export interface MutationFactory<A extends any[] = any, S = any>
@@ -20,11 +20,6 @@ export interface Mutation<A extends any[] = any, S = any> extends AmosObject<'MU
   factory: MutationFactory<A, S>;
 }
 
-export interface BoxWatchOptions<S, T extends readonly Selectable[]> {
-  selectors: T;
-  handler: (state: S, ...args: MapSelector<T>) => S;
-}
-
 export interface BoxOptions<S> {
   /**
    * determine how to load preloaded state to the box.
@@ -38,6 +33,34 @@ export interface BoxOptions<S> {
 
 export class Box<S = any> {
   readonly signals: Record<string, (state: S, data: any) => S> = {};
+  /**
+   * replace state with new state.
+   *
+   * @param nextState - the next state or its factory
+   */
+  setState = this.mutation((state, nextState: S | ((prevState: S) => S)) => {
+    state = typeof nextState === 'function' ? (nextState as (prevState: S) => S)(state) : nextState;
+    if (process.env.NODE_ENV === 'development') {
+      warning(typeof state === 'function', 'state should not be a function.');
+    }
+    return state;
+  }, `${this.key}/setState`);
+  /**
+   * merge state with partial props, it only works with object state.
+   *
+   * @param partialNextState - the partial next state properties or its factory
+   */
+  mergeState = this.mutation(
+    (state, partialNextState: Partial<S> | ((prevState: S) => Partial<S>)) => {
+      return clone(
+        state,
+        typeof partialNextState === 'function'
+          ? (partialNextState as (prevState: S) => Partial<S>)(state)
+          : partialNextState,
+      );
+    },
+    `${this.key}/mergeState`,
+  );
 
   /**
    * create a box instance
@@ -100,34 +123,4 @@ export class Box<S = any> {
   subscribe<D>(signal: SignalFactory<any, D>, handler: (state: S, data: D) => S) {
     this.signals[signal.type] = handler;
   }
-
-  /**
-   * replace state with new state.
-   *
-   * @param nextState - the next state or its factory
-   */
-  setState = this.mutation((state, nextState: S | ((prevState: S) => S)) => {
-    state = typeof nextState === 'function' ? (nextState as (prevState: S) => S)(state) : nextState;
-    if (process.env.NODE_ENV === 'development') {
-      warning(typeof state === 'function', 'state should not be a function.');
-    }
-    return state;
-  }, `${this.key}/setState`);
-
-  /**
-   * merge state with partial props, it only works with object state.
-   *
-   * @param partialNextState - the partial next state properties or its factory
-   */
-  mergeState = this.mutation(
-    (state, partialNextState: Partial<S> | ((prevState: S) => Partial<S>)) => {
-      return clone(
-        state,
-        typeof partialNextState === 'function'
-          ? (partialNextState as (prevState: S) => Partial<S>)(state)
-          : partialNextState,
-      );
-    },
-    `${this.key}/mergeState`,
-  );
 }
