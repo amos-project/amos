@@ -1,19 +1,15 @@
 {
-  "name": "amos",
+  "name": "amos-core",
   "version": "0.3.0-beta.1",
-  "description": "An out-of-the-box state management library designed for your large-scale projects.",
+  "description": "The core infrastructure of amos.",
   "keywords": [
-    "amos",
-    "state",
-    "management",
-    "decentralized",
-    "shape"
+    "amos"
   ],
   "author": "acrazing <joking.young@gmail.com>",
   "homepage": "https://github.com/acrazing/amos",
   "license": "MIT",
-  "main": "dist/amos.cjs.js",
-  "module": "dist/amos.esm.js",
+  "main": "dist/amos-core.cjs.js",
+  "module": "dist/amos-core.esm.js",
   "files": [
     "dist"
   ],
@@ -22,7 +18,7 @@
     "url": "git+https://github.com/acrazing/amos.git"
   },
   "scripts": {
-    "test": "jest"
+    "test": "echo \"Error: run tests from root\" && exit 1"
   },
   "bugs": {
     "url": "https://github.com/acrazing/amos/issues"

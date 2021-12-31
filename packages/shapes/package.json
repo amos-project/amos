@@ -1,19 +1,17 @@
 {
-  "name": "amos",
+  "name": "amos-shapes",
   "version": "0.3.0-beta.1",
-  "description": "An out-of-the-box state management library designed for your large-scale projects.",
+  "description": "The common data shapes built by amos.",
   "keywords": [
     "amos",
-    "state",
-    "management",
-    "decentralized",
-    "shape"
+    "shapes",
+    "data-structure"
   ],
   "author": "acrazing <joking.young@gmail.com>",
   "homepage": "https://github.com/acrazing/amos",
   "license": "MIT",
-  "main": "dist/amos.cjs.js",
-  "module": "dist/amos.esm.js",
+  "main": "dist/amos-shapes.cjs.js",
+  "module": "dist/amos-shapes.esm.js",
   "files": [
     "dist"
   ],
@@ -22,7 +20,7 @@
     "url": "git+https://github.com/acrazing/amos.git"
   },
   "scripts": {
-    "test": "jest"
+    "test": "echo \"Error: run tests from root\" && exit 1"
   },
   "bugs": {
     "url": "https://github.com/acrazing/amos/issues"
