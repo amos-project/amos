@@ -1,0 +1,10 @@
+/*
+ * @since 2022-01-05 10:03:21
+ * @author junbao <junbao@moego.pet>
+ */
+
+import { BoolBox, NumberBox } from 'amos-boxes';
+import { LOGOUT } from './session.signals';
+
+export const countBox = new NumberBox('count').subscribe(LOGOUT, () => 0);
+export const darkModeBox = new BoolBox('ui.darkMode');

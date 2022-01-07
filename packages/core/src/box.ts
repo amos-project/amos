@@ -3,36 +3,24 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
+import { clone } from 'amos-utils';
+import { resolveCallerName, threw, warning } from '../../utils/src/misc';
+import { Selector, selector, SelectorOptions } from './selector';
 import { SignalFactory } from './signal';
-import { AmosObject, JSONState } from './types';
-import { clone, fromJSON, resolveCallerName, threw, warning } from '../../utils/src/utils';
-
-export interface MutationFactory<A extends any[] = any, S = any>
-  extends AmosObject<'MUTATION_FACTORY'> {
-  type: string | undefined;
-  box: Box<S>;
-  mutator: (state: S, ...args: A) => S;
-  (...args: A): Mutation<A, S>;
-}
+import { AmosObject, createAmosObject } from './types';
 
 export interface Mutation<A extends any[] = any, S = any> extends AmosObject<'MUTATION'> {
+  type: string;
   args: A;
-  factory: MutationFactory<A, S>;
+  box: Box<S>;
+  mutator: (state: S, ...args: A) => S;
 }
 
-export interface BoxOptions<S> {
-  /**
-   * determine how to load preloaded state to the box.
-   * By default, if the fromJSON method exists in the state object,
-   * the method will be called and its return value will be used as
-   * the loading result, otherwise `preloadedState` will be used
-   * directly as the loading result.
-   */
-  preload?: (preloadedState: JSONState<S>, state: S) => S;
-}
+export interface BoxOptions<S> {}
 
-export class Box<S> {
+export class Box<S = any> {
   readonly signals: Record<string, (state: S, data: any) => S> = {};
+
   /**
    * replace state with new state.
    *
@@ -44,7 +32,8 @@ export class Box<S> {
       warning(typeof state === 'function', 'state should not be a function.');
     }
     return state;
-  }, `${this.key}/setState`);
+  }, 'SET_STATE');
+
   /**
    * merge state with partial props, it only works with object state.
    *
@@ -59,8 +48,13 @@ export class Box<S> {
           : partialNextState,
       );
     },
-    `${this.key}/mergeState`,
+    'MERGE_STATE',
   );
+
+  /**
+   * Reset state to the initial state.
+   */
+  resetState = this.mutation(() => this.initialState, 'RESET_STATE');
 
   /**
    * create a box instance
@@ -69,14 +63,34 @@ export class Box<S> {
    * @param initialState - the initial state of the box, it should not be a function
    * @param options - the extra options for the box {@see BoxOptions}
    */
-  constructor(readonly initialState: S, readonly options: BoxOptions<S> = {}) {
+  constructor(
+    readonly key: string,
+    readonly initialState: S,
+    readonly options: BoxOptions<S> = {},
+  ) {
     if (process.env.NODE_ENV === 'development') {
       threw(typeof initialState === 'function', 'initialState should not be a function.');
     }
-    this.options = {
-      ...options,
-      preload: options.preload ?? fromJSON,
-    };
+  }
+
+  selector<A extends any[], R>(
+    computer: (state: S, ...args: A) => R,
+    options?: SelectorOptions<A, R>,
+  ): (...args: A) => Selector<A, R>;
+  selector<T>(key: keyof S): T;
+  selector(a?: any, b: any = {}) {
+    if (typeof a === 'string') {
+      b.type ??= a;
+      return selector((select, ...args: any) => (select(this) as any)[a](...args), b);
+    }
+    const computer = a;
+    const options = b;
+    if (process.env.NODE_ENV === 'development' && !options.type) {
+      options.type = resolveCallerName();
+    } else {
+      options.type = 'ANONYMOUS';
+    }
+    return selector((select, ...args: any) => computer(select(this), ...args), options);
   }
 
   /**
@@ -90,24 +104,25 @@ export class Box<S> {
   mutation<A extends any[]>(
     mutator: (state: S, ...args: A) => S,
     type?: string,
-  ): MutationFactory<A, S> {
+  ): (...args: A) => Mutation<A, S>;
+  mutation<T>(key: keyof S): T;
+  mutation(a: any, type?: string) {
+    if (typeof a === 'string') {
+      return this.mutation((state: any, ...args: any) => state[a](...args), a);
+    }
     if (process.env.NODE_ENV === 'development' && !type) {
       type = resolveCallerName();
+    } else {
+      type = 'ANONYMOUS';
     }
-    const factory: MutationFactory<A, S> = Object.assign(
-      (...args: A): Mutation<A, S> => ({
-        $object: 'MUTATION',
-        args,
-        factory,
-      }),
-      {
-        $object: 'MUTATION_FACTORY' as const,
-        type,
-        box: this,
+    const mutator = a;
+    return (...args: any) =>
+      createAmosObject('MUTATION', {
         mutator,
-      },
-    );
-    return factory;
+        type: type!,
+        args,
+        box: this,
+      });
   }
 
   /**
@@ -116,7 +131,8 @@ export class Box<S> {
    * @param signal
    * @param handler
    */
-  subscribe<D>(signal: SignalFactory<any, D>, handler: (state: S, data: D) => S) {
+  subscribe<D>(signal: SignalFactory<any, D>, handler: (state: S, data: D) => S): this {
     this.signals[signal.type] = handler;
+    return this;
   }
 }

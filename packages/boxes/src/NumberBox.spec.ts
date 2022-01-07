@@ -3,12 +3,11 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { createNumberBox } from './NumberBox';
+import { numberBox } from 'amos-testing';
 
 describe('NumberBox', function () {
   it('should create NumberBox', function () {
-    const box = createNumberBox(0);
-    box.add(1);
-    box.multiply(2);
+    numberBox.add(1);
+    numberBox.multiply(2);
   });
 });

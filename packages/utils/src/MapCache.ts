@@ -3,7 +3,7 @@
  * @author junbao <junbao@mymoement.com>
  */
 
-import { Cache } from './types';
+import { Cache } from './Cache';
 
 export class MapCache<T> implements Cache<T> {
   get(id: string): T | undefined {

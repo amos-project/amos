@@ -3,8 +3,9 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
+import { applyEnhancers } from '../../utils/src/enhancer';
+import { identity } from '../../utils/src/equals';
 import { AmosObject } from './types';
-import { applyEnhancers, identity } from '../../utils/src/utils';
 
 /**
  * An `Signal` is a dispatchable object, which will notify all the subscribed
@@ -75,13 +76,13 @@ export function signal(type: string, creator: any, options?: any): SignalFactory
   creator ??= identity;
   let factory: SignalFactory = Object.assign(
     (...args: any[]): Signal => ({
-      $object: 'SIGNAL',
+      $amos: 'SIGNAL',
       type,
       data: creator(...args),
     }),
     options,
     {
-      $object: 'SIGNAL_FACTORY' as const,
+      $amos: 'SIGNAL_FACTORY' as const,
       type,
     },
   );

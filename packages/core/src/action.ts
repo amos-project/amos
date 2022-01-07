@@ -3,8 +3,8 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
+import { applyEnhancers, resolveCallerName } from 'amos-utils';
 import { AmosObject, Dispatch, Select } from './types';
-import { applyEnhancers, resolveCallerName } from '../../utils/src/utils';
 
 export interface ActionOptions<A extends any[], R = any> {
   /**

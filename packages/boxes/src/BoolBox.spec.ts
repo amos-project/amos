@@ -3,14 +3,12 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { createBoolBox } from './BoolBox';
+import { boolBox } from 'amos-testing';
 
 describe('BoolBox', function () {
   it('should create BoolBox', () => {
-    const box = createBoolBox();
-    expect(box.initialState).toBeFalsy();
-    expect(box.toggle()).toBeDefined();
-    expect(box.open()).toBeDefined();
-    expect(box.close()).toBeDefined();
+    boolBox.toggle();
+    boolBox.open();
+    boolBox.close();
   });
 });

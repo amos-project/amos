@@ -5,7 +5,6 @@
 
 import { addCount, countBox, reset } from 'amos-testing';
 import { Box } from './box';
-import { fromJSON } from '../../utils/src/utils';
 
 describe('box', () => {
   it('should create box', () => {
@@ -16,7 +15,6 @@ describe('box', () => {
         listeners: {
           [reset.type]: expect.any(Function),
         },
-        preload: fromJSON,
         setState: expect.any(Function),
         mergeState: expect.any(Function),
       }),

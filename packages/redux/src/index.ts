@@ -3,6 +3,4 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-export { withRedux } from './withRedux';
-
-export const VERSION = '__VERSION__';
+export * from './withRedux';

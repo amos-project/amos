@@ -3,7 +3,8 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { Box, Dispatchable, identity, isArray, Selectable, StoreEnhancer } from 'amos';
+import { Box, Dispatchable, identity, Selectable, StoreEnhancer } from 'amos-core';
+import { isArray } from 'amos-utils';
 
 export const enum DispatchKind {
   Preload = 'P',

@@ -8,7 +8,7 @@ import {
   addTwiceAsync,
   countBox,
   expectCalled,
-  mergeUser,
+  setUserName,
   reset,
   selectDoubleCount,
   userBox,
@@ -117,7 +117,7 @@ describe('store.clearBoxes', () => {
         avatarPath: 'A1',
       } as UserModel,
     });
-    store.dispatch(mergeUser({ id: 2 }));
+    store.dispatch(setUserName({ id: 2 }));
     const fakeFn = fn();
     const u2 = store.select(userBox);
     store.resetInternalState();

@@ -3,9 +3,9 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { EntityInstance, EntityObject } from './Entity';
+import { Record, RecordObject } from './Record';
 
 export interface PagedListModel<T> {}
 
-export interface PagedList<T> extends EntityInstance<PagedListModel<T>> {}
-export class PagedList<T> extends EntityObject<PagedListModel<any>>({}) {}
+export interface PagedList<T> extends Record<PagedListModel<T>> {}
+export class PagedList<T> extends RecordObject<PagedListModel<any>>({}) {}

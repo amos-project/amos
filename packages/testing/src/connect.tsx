@@ -5,7 +5,7 @@
 
 import { ConnectedProps } from 'amos-react';
 import React, { PureComponent } from 'react';
-import { countBox } from './box';
+import { countBox } from './store/misc.boxes';
 
 export interface TestClassProps extends ConnectedProps {
   id: number;

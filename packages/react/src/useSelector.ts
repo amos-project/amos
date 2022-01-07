@@ -3,7 +3,7 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { Box, identity, MapSelector, Selectable, Store } from 'amos';
+import { Box, identity, MapSelector, Selectable, Store } from 'amos-core';
 import { useDebugValue, useEffect, useReducer, useRef } from 'react';
 import { useStore } from './context';
 

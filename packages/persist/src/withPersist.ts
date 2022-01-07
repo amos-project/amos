@@ -3,7 +3,7 @@
  * @author junbao <junbao@mymoement.com>
  */
 
-import { Box, StoreEnhancer } from 'amos';
+import { Box, StoreEnhancer } from 'amos-core';
 import { PersistedState, PersistOptions } from './types';
 
 export function withPersist(options: PersistOptions): StoreEnhancer {

@@ -3,4 +3,4 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-export { DispatchKind, DevToolsOptions, withDevTools, forceWithDevTools } from './withDevTools';
+export * from './withDevTools';

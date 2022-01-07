@@ -8,7 +8,7 @@ import {
   addTwiceAsync,
   countBox,
   incrCount,
-  mergeUser,
+  setUserName,
   selectCount,
   selectDoubleCount,
   selectMultipleCount,
@@ -103,7 +103,7 @@ describe('useSelector', () => {
     );
     expectCalled(1, 1);
     expect(result.current).toEqual([1, 1, 1]);
-    dispatch(mergeUser({ id: 2 }));
+    dispatch(setUserName({ id: 2 }));
     expectCalled(1, 1);
     expect(result.current).toEqual([1, 1, 1]);
     rerender({ multiply: 2 });

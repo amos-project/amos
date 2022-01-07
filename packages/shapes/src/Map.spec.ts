@@ -3,14 +3,14 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { Beth, idCompare, Jerry, Jessica, Morty, Rick, UserEntity } from './Entity.spec';
+import { Beth, idCompare, Jerry, Jessica, Morty, Rick, UserRecord } from './Record.spec';
 import { createMapBox, Map } from './Map';
 
-export const UserModelMap = createMapBox('User.modelMap', Map.num(new UserEntity()));
+export const UserModelMap = createMapBox('User.modelMap', Map.num(new UserRecord()));
 
 describe('AmosDict', () => {
   it('should create Map', () => {
-    let dict = new Map(new UserEntity(), 0 as number);
+    let dict = new Map(new UserRecord(), 0 as number);
     dict.toJSON();
     dict = dict.fromJSON({ [Rick.id]: Rick.toJSON() });
     dict.size();

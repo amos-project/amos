@@ -3,7 +3,7 @@
  * @author junbao <junbao@mymoement.com>
  */
 
-import { Cache } from './types';
+import { Cache } from './Cache';
 
 interface LRUNode<T> {
   id: string;

@@ -3,7 +3,7 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { createStore, Store, StoreEnhancer } from 'amos';
+import { createStore, Store, StoreEnhancer } from 'amos-core';
 import { forceWithDevTools, withDevTools } from './withDevTools';
 
 describe('withDevTools', () => {

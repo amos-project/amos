@@ -3,8 +3,10 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
+import { applyEnhancers } from '../../utils/src/enhancer';
+import { strictEqual } from '../../utils/src/equals';
 import { AmosObject, Select } from './types';
-import { applyEnhancers, resolveCallerName, strictEqual } from '../../utils/src/utils';
+import { resolveCallerName } from '../../utils/src/misc';
 
 /**
  * Selector is created by {@see SelectorFactory}, it is used for select some state
@@ -117,13 +119,13 @@ export function selector<A extends any[], R>(
   }
 
   let factory: SelectorFactory<A, R> = Object.assign(
-    (...args: A): Selector<A, R> => ({ $object: 'SELECTOR', args, factory }),
+    (...args: A): Selector<A, R> => ({ $amos: 'SELECTOR', args, factory }),
     {
       ...options,
       equal: options.equal || strictEqual,
     },
     {
-      $object: 'SELECTOR_FACTORY',
+      $amos: 'SELECTOR_FACTORY',
       id: Math.random().toString().substr(2),
       compute,
     } as const,

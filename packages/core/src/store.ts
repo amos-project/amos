@@ -3,19 +3,14 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
+import { Subscribe, Unsubscribe } from 'amos-utils';
+import { OMap } from '../../utils/src/OMap';
+import { OSet } from '../../utils/src/OSet';
 import { Box } from './box';
-import { LRUCache } from './LRUCache';
+import { LRUCache } from '../../utils/src/LRUCache';
 import { SelectorFactory } from './selector';
-import {
-  Dispatch,
-  Dispatchable,
-  Select,
-  Selectable,
-  Snapshot,
-  Subscribe,
-  Unsubscribe,
-} from './types';
-import { CheapMap, CheapSet, isArray, threw, toString } from '../../utils/src/utils';
+import { Dispatch, Dispatchable, Select, Selectable, Snapshot } from './types';
+import { isArray, threw, toString } from '../../utils/src/misc';
 
 export interface StoreOptions {
   cacheSize?: number;
@@ -38,7 +33,7 @@ export class Store {
   protected listeners: Subscribe[];
   protected dispatching: Dispatchable | readonly Dispatchable[] | undefined;
   protected state: Snapshot;
-  protected boxes: CheapMap<Box>;
+  protected boxes: OMap<Box>;
   protected cache: LRUCache<SelectorCache>;
   protected selectorStack: SelectorCache[];
 
@@ -46,7 +41,7 @@ export class Store {
     this.preloadedState = preloadedState;
     this.options = options;
     this.state = {};
-    this.boxes = new CheapMap<Box>();
+    this.boxes = new OMap<Box>();
     this.listeners = [];
     this.dispatching = void 0;
     this.cache = new LRUCache<SelectorCache>(options.cacheSize ?? Store.DEFAULT_CACHE_SIZE);
@@ -256,9 +251,9 @@ export class Store {
           id: id,
           factory: factory,
           args: args,
-          owners: new CheapSet(),
-          usedBoxes: new CheapSet(),
-          usedSelectors: new CheapSet(),
+          owners: new OSet(),
+          usedBoxes: new OSet(),
+          usedSelectors: new OSet(),
           value: VALUE_PLACEHOLDER,
         };
       }

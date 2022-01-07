@@ -3,19 +3,15 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { Box, BoxOptions, MutationFactory } from 'amos-core';
-
-export interface NumberBox extends Box<number> {
-  add: MutationFactory<[number], number>;
-  multiply: MutationFactory<[number], number>;
-}
+import { Box, BoxOptions } from 'amos-core';
 
 // should consider the method is selector and mutation at the same time.
 // note: don't plan to deal with restricted types of scenarios, it should be the base box type.
-export function createNumberBox(initialState = 0, options?: BoxOptions<number>): NumberBox {
-  const box = new Box(initialState, options);
-  return Object.assign(box, {
-    add: box.mutation((state, value: number) => state + value, 'ADD'),
-    multiply: box.mutation((state, value: number) => state * value, 'MULTIPLY'),
-  });
+export class NumberBox extends Box<number> {
+  add = this.mutation((state, value: number) => state + value, 'ADD');
+  multiply = this.mutation((state, value: number) => state * value, 'MULTIPLY');
+
+  constructor(key: string, initialState: number = 0, options?: BoxOptions<number>) {
+    super(key, initialState, options);
+  }
 }

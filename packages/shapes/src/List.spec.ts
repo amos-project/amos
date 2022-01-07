@@ -3,14 +3,14 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { identity } from 'amos';
-import { falsy, noop, truly } from '../../utils/src/utils';
-import { createListBox, List } from './List';
-import { ListMap } from './ListMap';
+import { falsy, identity, noop, truly } from 'amos-utils';
+import { List } from './List';
 
 describe('AmosList', () => {
   it('should create list', () => {
+    expect(new List().isValid()).toBeFalsy();
     let list = new List([0, 1]);
+    expect(list.isValid()).toBeTruthy();
     expect(list.fromJSON([1, 2]).data).toEqual([1, 2]);
     expect(list.toJSON()).toEqual([0, 1]);
     expect(list.size()).toEqual(2);
@@ -49,41 +49,11 @@ describe('AmosList', () => {
     list.reverse();
     list.shift();
     list.slice();
-    list.some(identity);
+    list.some(truly);
     list.sort();
-    list.splice(9);
+    list.splice(9, 1);
     list.unshift(10);
     list.set(10, 11);
     list.delete(12);
-  });
-
-  it('should create list box', () => {
-    const box = createListBox('test/list', new List([0]));
-
-    box.size();
-    box.concat([1]);
-    box.every(identity);
-    box.findIndex(identity);
-    box.find(identity);
-    box.findIndex(identity);
-    box.includes(2);
-    box.indexOf(3);
-    box.join('4');
-    box.lastIndexOf(5);
-    box.map(identity);
-    box.mapThis(identity);
-    box.pop();
-    box.push(6);
-    box.reduce(identity, 7);
-    box.reduceRight(identity, 8);
-    box.reverse();
-    box.shift();
-    box.slice();
-    box.some(identity);
-    box.sort();
-    box.splice(9);
-    box.unshift(10);
-    box.set(11, 12);
-    box.delete(13);
   });
 });

@@ -3,11 +3,26 @@
  * @author junbao <junbao@mymoement.com>
  */
 
-import { Box } from 'amos';
+import { Box } from 'amos-core';
+import { JSONState } from 'amos-utils';
 
-declare module 'amos' {
+export interface PersistedState<T> {
+  v: number;
+  s: T;
+}
+
+export interface BoxPersistOptions<S> {
+  version: number;
+  migrations?: {
+    from: number;
+    to: number;
+    handler: (jsonState: any) => JSONState<S>;
+  }[];
+}
+
+declare module 'amos-core' {
   export interface BoxOptions<S> {
-    persistVersion?: number;
+    persist?: BoxPersistOptions<S>;
   }
 }
 
@@ -44,9 +59,4 @@ export interface PersistOptions {
    * Please note the `excludes` has priority over `includes`.
    */
   excludes?: Array<Box | string>;
-}
-
-export interface PersistedState<T> {
-  v: number;
-  s: T;
 }

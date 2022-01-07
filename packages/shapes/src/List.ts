@@ -3,10 +3,14 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { arrayEqual, clone, createBoxFactory } from 'amos';
+import { clone, Cloneable } from 'amos-utils';
 
-export class List<T> {
-  constructor(readonly data: readonly T[] = []) {}
+const arr: any[] = [];
+
+export class List<T> extends Cloneable {
+  constructor(readonly data: readonly T[] = arr, isValid = data !== arr) {
+    super(isValid);
+  }
 
   fromJSON(state: readonly T[]): this {
     return clone(this, { data: state } as any);
@@ -14,6 +18,10 @@ export class List<T> {
 
   toJSON(): readonly T[] {
     return this.data;
+  }
+
+  get(index: number) {
+    return this.data[index];
   }
 
   size() {
@@ -158,35 +166,3 @@ export class List<T> {
     return clone(this, { data } as any);
   }
 }
-
-export const createListBox = createBoxFactory(List, {
-  mutations: {
-    set: {},
-    unshift: {},
-    splice: {},
-    sort: {},
-    slice: {},
-    shift: {},
-    reverse: {},
-    push: {},
-    pop: {},
-    mapThis: {},
-    concat: {},
-    delete: {},
-  },
-  selectors: {
-    some: {},
-    reduceRight: {},
-    reduce: {},
-    map: { equal: arrayEqual },
-    lastIndexOf: {},
-    join: {},
-    indexOf: {},
-    includes: {},
-    findIndex: {},
-    find: {},
-    filter: { equal: arrayEqual },
-    every: {},
-    size: {},
-  },
-});

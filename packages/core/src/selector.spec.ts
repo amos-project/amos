@@ -4,7 +4,7 @@
  */
 
 import { selectCurrentUser } from 'amos-testing';
-import { strictEqual } from '../../utils/src/utils';
+import { strictEqual } from '../../utils/src/equals';
 
 describe('selector', () => {
   it('should create selector factory', () => {

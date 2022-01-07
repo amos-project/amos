@@ -12,11 +12,13 @@ export interface AmosObject<T extends string> {
   $amos: T;
 }
 
-export type JSONState<S> = S extends { toJSON(): infer R } ? JSONState<R> : S extends object ? { [P in keyof S]: JSONState<S[P]> } : S;
+export function createAmosObject<T extends AmosObject<any>>(key: T['$amos'], props: Omit<T, '$amos'>): T {
+  (props as T).$amos = key;
+  return props as T;
+}
 
-export interface JSONSerializable<S> {
-  toJSON(): S;
-  fromJSON(state: JSONState<S>): this;
+export function isAmosObject<K extends string>(obj: any, key: K): obj is AmosObject<K> {
+  return !!obj && obj.$amos === key;
 }
 
 export type Snapshot = Record<string, unknown>;
@@ -50,20 +52,6 @@ export interface Select {
   <A extends Selectable>(selectable: A): A extends Selectable<infer R> ? R : never;
 }
 
-export type Subscribe = () => void;
-export type Unsubscribe = () => void;
-
 export type MapSelector<Rs extends readonly Selectable[]> = {
   [P in keyof Rs]: Rs[P] extends Selectable<infer R> ? R : never;
 };
-
-export interface Cache<T> {
-  get(id: string): T | undefined;
-  set(id: string, value: T): void;
-  delete(id: string): void;
-}
-
-// see {@link https://stackoverflow.com/a/50375286/4380247}
-export type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (k: infer I) => void ? I : never;
-
-export type FnValue<T> = T | (() => T);

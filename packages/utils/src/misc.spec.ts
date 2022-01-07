@@ -3,7 +3,8 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { arrayEqual, identity, isArray, shallowEqual, strictEqual, values } from './utils';
+import { arrayEqual, identity, shallowEqual, strictEqual } from './equals';
+import { isArray, values } from './misc';
 
 describe('utils', () => {
   it('should compare array shallow', () => {

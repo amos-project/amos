@@ -3,28 +3,14 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { Box, BoxOptions, MutationFactory } from 'amos-core';
+import { Box, BoxOptions } from 'amos-core';
 
-export interface BoolBox extends Box<boolean> {
-  /**
-   * Toggle the value
-   */
-  toggle: MutationFactory<[], boolean>;
-  /**
-   * Set value to true
-   */
-  open: MutationFactory<[], boolean>;
-  /**
-   * Set value to false
-   */
-  close: MutationFactory<[], boolean>;
-}
+export class BoolBox extends Box<boolean> {
+  toggle = this.mutation((state) => !state, 'TOGGLE');
+  open = this.mutation(() => true, 'OPEN');
+  close = this.mutation(() => false, 'CLOSE');
 
-export function createBoolBox(initialState = false, options?: BoxOptions<boolean>): BoolBox {
-  const box = new Box(initialState, options);
-  return Object.assign(box, {
-    toggle: box.mutation((state) => !state, 'TOGGLE'),
-    open: box.mutation(() => true, 'OPEN'),
-    close: box.mutation(() => false, 'CLOSE'),
-  });
+  constructor(key: string, initialState: boolean = false, options?: BoxOptions<boolean>) {
+    super(key, initialState, options);
+  }
 }

@@ -3,9 +3,9 @@
  * @author junbao <junbao@mymoement.com>
  */
 
+import { applyEnhancers } from 'amos-utils';
 import { Store, StoreOptions } from './store';
 import { Snapshot } from './types';
-import { applyEnhancers } from '../../utils/src/utils';
 
 export type StoreEnhancer = (StoreClass: typeof Store) => typeof Store;
 

@@ -5,6 +5,12 @@
 
 import Mock = jest.Mock;
 
+export const ANY: any = void 0;
+
+export function sleep(timeout: number = 0): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, timeout));
+}
+
 export function expectCalled(fn: (...args: any[]) => any, count = 1) {
   expect(fn).toBeCalledTimes(count);
   (fn as Mock).mockClear();

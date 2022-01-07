@@ -3,38 +3,35 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { arrayEqual, clone, createBoxFactory, strictEqual } from 'amos-amos';
-import { JSONState } from '../../core/src/types';
-import { isJSONSerializable, shapeEqual } from '../../utils/src/utils';
+import {
+  clone,
+  IDOf,
+  isJSONSerializable,
+  JSONSerializable,
+  JSONState,
+  Pair,
+  PartialRecord,
+  ToString,
+} from 'amos-utils';
 
-export type Pair<K extends keyof any, V> = readonly [K, V];
-
-export class Map<K extends keyof any, V> {
-  readonly data: Record<K, V>;
+export class Map<K, V> implements JSONSerializable<PartialRecord<IDOf<K>, V>> {
+  readonly data: PartialRecord<IDOf<K>, V>;
 
   constructor(readonly defaultValue: V, readonly inferKey?: K) {
-    this.data = {} as Record<K, V>;
+    this.data = {} as Record<IDOf<K>, V>;
   }
 
-  static num<V>(defaultValue: V) {
-    return new Map(defaultValue, 0 as number);
-  }
-
-  static str<V>(defaultValue: V) {
-    return new Map(defaultValue, '' as string);
-  }
-
-  toJSON(): Record<K, V> {
+  toJSON(): PartialRecord<IDOf<K>, V> {
     return this.data;
   }
 
-  fromJSON(state: JSONState<Record<K, V>>): this {
+  fromJSON(state: JSONState<PartialRecord<IDOf<K>, V>>): this {
     const that = clone(this, { data: {} } as any);
     for (const key in state) {
       if (isJSONSerializable(that.defaultValue)) {
-        that.data[key as unknown as K] = that.defaultValue.fromJSON(state[key]);
+        that.data[key as unknown as IDOf<K>] = that.defaultValue.fromJSON(state[key]);
       } else {
-        that.data[key as unknown as K] = clone(that.defaultValue, state[key]);
+        that.data[key as unknown as IDOf<K>] = clone(that.defaultValue, state[key]);
       }
     }
     return that;
@@ -44,38 +41,38 @@ export class Map<K extends keyof any, V> {
     return Object.keys(this.data).length;
   }
 
-  has(key: K): boolean {
+  has(key: IDOf<K>): boolean {
     return this.data.hasOwnProperty(key);
   }
 
-  get(key: K): V {
+  get(key: IDOf<K>): V {
     return this.data[key] ?? this.defaultValue;
   }
 
-  keys(): string[] {
-    return Object.keys(this.data);
+  keys(): ToString<K>[] {
+    return Object.keys(this.data) as ToString<K>[];
   }
 
   values(): V[] {
     return Object.values(this.data);
   }
 
-  entities(): Pair<string, V>[] {
-    return this.keys().map((k) => [k, this.data[k as K]]);
+  entities(): Pair<ToString<K>, V>[] {
+    return this.keys().map((k) => [k as ToString<K>, this.data[k as IDOf<K>]!]);
   }
 
-  map<U>(callbackFn: (value: V, key: string, index: number) => U): U[] {
+  map<U>(callbackFn: (value: V, key: ToString<K>, index: number) => U): U[] {
     const result: U[] = [];
     let index = 0;
     for (const key in this.data) {
       if (this.data.hasOwnProperty(key)) {
-        result.push(callbackFn(this.data[key as K], key, index));
+        result.push(callbackFn(this.data[key as IDOf<K>]!, key as ToString<K>, index));
       }
     }
     return result;
   }
 
-  set(key: K, item: V): this {
+  set(key: IDOf<K>, item: V): this {
     if (this.get(key) === item) {
       return this;
     }
@@ -87,7 +84,7 @@ export class Map<K extends keyof any, V> {
     } as any);
   }
 
-  merge(key: K, props: Partial<V>): this {
+  merge(key: IDOf<K>, props: Partial<V>): this {
     const value = this.get(key);
     for (const key in props) {
       if (value[key] !== props[key]) {
@@ -102,7 +99,7 @@ export class Map<K extends keyof any, V> {
     return this;
   }
 
-  setAll(items: readonly Pair<K, V>[]): this {
+  setAll(items: readonly Pair<IDOf<K>, V>[]): this {
     items = items.filter(([key, value]) => this.get(key) !== value);
     if (items.length === 0) {
       return this;
@@ -113,12 +110,12 @@ export class Map<K extends keyof any, V> {
         ...items.reduce((prev, now) => {
           prev[now[0]] = now[1];
           return prev;
-        }, {} as Record<K, V>),
+        }, {} as Record<IDOf<K>, V>),
       },
     } as any);
   }
 
-  mergeAll(items: readonly Pair<K, Partial<V>>[]): this {
+  mergeAll(items: readonly Pair<IDOf<K>, Partial<V>>[]): this {
     items = items.filter(([key, props]) => {
       const value = this.get(key);
       for (const p in props) {
@@ -137,17 +134,17 @@ export class Map<K extends keyof any, V> {
         ...items.reduce((prev, now) => {
           prev[now[0]] = clone(this.get(now[0]), now[1]);
           return prev;
-        }, {} as Record<K, V>),
+        }, {} as Record<IDOf<K>, V>),
       },
     } as any);
   }
 
-  update(key: K, updater: (v: V) => V): this {
+  update(key: IDOf<K>, updater: (v: V) => V): this {
     return this.set(key, updater(this.get(key)));
   }
 
-  delete(key: K): this {
-    if (!this.data.hasOwnProperty(key)) {
+  delete(key: IDOf<K>): this {
+    if (!this.has(key)) {
       return this;
     }
     const that = clone(this, { data: { ...this.data } } as any);
@@ -156,23 +153,6 @@ export class Map<K extends keyof any, V> {
   }
 }
 
-export const createMapBox = createBoxFactory(Map, {
-  mutations: {
-    set: {},
-    merge: {},
-    setAll: {},
-    mergeAll: {},
-    update: {},
-    delete: {},
-  },
-  selectors: {
-    size: {},
-    has: {},
-    get: {},
-    keys: { equal: arrayEqual },
-    values: { equal: arrayEqual },
-    entities: { equal: shapeEqual<Pair<keyof any, any>[]>([[strictEqual]]) },
-    map: { equal: arrayEqual },
-  },
-  methods: {},
-});
+export type MapKey<T> = T extends Map<infer K, infer V> ? K : never;
+export type MapValue<T> = T extends Map<infer K, infer V> ? V : never;
+export type MapPair<T> = T extends Map<infer K, infer V> ? Pair<K, V> : never;

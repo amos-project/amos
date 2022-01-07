@@ -3,10 +3,10 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { Dispatchable, Select, Selectable, StoreEnhancer } from 'amos';
+import { Dispatchable, Select, Selectable, StoreEnhancer } from 'amos-core';
 import { Action, Store as ReduxStore } from 'redux';
 
-declare module 'amos' {
+declare module 'amos-core' {
   export interface Select {
     <R>(reduxSelector: (state: any) => R): R extends Selectable<infer SR> ? SR : R;
   }
