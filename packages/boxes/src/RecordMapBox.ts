@@ -4,8 +4,8 @@
  */
 
 import { Box, BoxOptions, SelectorFactory } from 'amos-core';
-import { Record, RecordMap, RecordProps } from 'amos-shapes';
-import { FnValue, UnionToIntersection } from 'amos-utils';
+import { Record, RecordMap, RecordMapKeyField, RecordProps } from 'amos-shapes';
+import { CtorValue, FnValue, IDKeyof, IDOf, UnionToIntersection } from 'amos-utils';
 import { MapBox } from './MapBox';
 
 export type RelationMap<TBox extends RecordMapBox<any, any, any>> = {
@@ -55,11 +55,9 @@ export type RelationMethods<
     string}`]: RelationMethodMap<TBox, TRelationMap>['$relations'][K];
 };
 
-export class RecordMapBox<
-  V extends Record<any>,
-  KF extends keyof RecordProps<V>,
-  T extends RecordMap<V, KF>,
-> extends MapBox<RecordProps<V>[KF] & keyof any, V, T> {
+export class RecordMapBox<S extends RecordMap<any, any, any>> extends MapBox<
+  RecordMapKeyField<any>
+> {
   relations<TRelationMap extends RelationMap<this>>(
     relationMap: TRelationMap,
   ): this & RelationMethods<this, TRelationMap> {
@@ -68,14 +66,13 @@ export class RecordMapBox<
   }
 }
 
-export function createRecordMapBox<V extends Record<any>, KF extends keyof RecordProps<V>>(
+export function createRecordMapBox<R extends Record<any>, KF extends keyof RecordProps<R>>(
   key: string,
-  defaultValue: V | (new () => V),
+  defaultValue: CtorValue<R>,
   keyField: KF,
-  options?: BoxOptions<RecordMap<V, KF>>,
-): RecordMapBox<V, KF, RecordMap<V, KF>> {
+) {
   defaultValue = typeof defaultValue === 'function' ? new defaultValue() : defaultValue;
-  return new RecordMapBox<V, KF, RecordMap<V, KF>>(
+  return new RecordMapBox<RecordProps<R>, KF, R, RecordMap<RecordProps<any>, any, any>>(
     key,
     new RecordMap(defaultValue, keyField),
     options,

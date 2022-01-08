@@ -5,7 +5,7 @@
 
 import { clone, Cloneable, JSONSerializable, JSONState, PartialRequired } from 'amos-utils';
 
-export interface RecordProto<P extends object> extends JSONSerializable<P>, Cloneable {
+export interface IRecord<P extends object> extends JSONSerializable<P>, Cloneable {
   get<K extends keyof P>(key: K): P[K];
   set<K extends keyof P>(key: K, value: P[K]): this;
   merge(props: Partial<P>): this;
@@ -14,7 +14,7 @@ export interface RecordProto<P extends object> extends JSONSerializable<P>, Clon
   fromJSON(props: JSONState<P>): this;
 }
 
-export type Record<P extends object> = Readonly<P> & RecordProto<P>;
+export type Record<P extends object> = Readonly<P> & IRecord<P>;
 
 export type RecordProps<T> = T extends Record<infer P> ? P : T;
 export type PartialProps<T> = Partial<RecordProps<T>>;
@@ -28,7 +28,7 @@ export interface RecordConstructor<P extends object> {
 }
 
 export function Record<P extends object>(props: P): RecordConstructor<P> {
-  return class Record extends Cloneable implements RecordProto<P> {
+  return class Record extends Cloneable implements IRecord<P> {
     constructor(data?: Partial<P>, isValid = data !== void 0) {
       super(isValid);
       Object.assign(this, props, data);

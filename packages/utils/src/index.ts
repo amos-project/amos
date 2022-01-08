@@ -3,13 +3,14 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-export * from './Cache';
 export * from './clone';
-export * from './enum';
 export * from './enhancer';
+export * from './enum';
 export * from './equals';
 export * from './JSONSerializable';
+export * from './LRUMap';
+export * from './misc';
 export * from './OMap';
 export * from './OSet';
+export * from './storage';
 export * from './types';
-export * from './misc';

@@ -4,7 +4,7 @@
  */
 
 import { createRecordMapBox } from 'amos-boxes';
-import { Record } from 'amos-shapes';
+import { Record, RecordMap } from 'amos-shapes';
 
 export class UserRecord extends Record({
   id: 0,
@@ -29,6 +29,8 @@ export const users = [Rick, Beth, Jerry, Jessica, Morty];
 export function idCompare(a: { readonly id: number }, b: { readonly id: number }) {
   return a.id - b.id;
 }
+
+export const userMap = new RecordMap(new UserRecord(), 'id');
 
 export const userMapBox = createRecordMapBox('user.userMap', new UserRecord(), 'id').relations({
   father: ['fatherId'],

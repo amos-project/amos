@@ -3,8 +3,8 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { ANY } from 'amos-testing';
 import { JSONSerializable, JSONState } from './JSONSerializable';
+import { ANY } from './misc';
 
 describe('JSONSerializable', function () {
   it('should derive JSONState', function () {

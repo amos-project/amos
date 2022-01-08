@@ -3,41 +3,38 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { Box, BoxOptions, Mutation, Selector } from 'amos-core';
+import { Box, Mutation, Selector } from 'amos-core';
 import { Map, MapKey, MapPair, MapValue } from 'amos-shapes';
-import { Pair } from 'amos-utils';
+import { IDOf, Pair } from 'amos-utils';
 
-export class MapBox<K, V, T extends Map<K, V>> extends Box<T> {
+export class MapBox<S extends Map<any, any>> extends Box<S> {
   size: () => Selector<[], number> = this.selector('size');
-  has: (key: MapKey<T>) => Selector<[MapKey<T>], boolean> = this.selector('has');
-  get: (key: MapKey<T>) => Selector<[MapKey<T>], MapValue<T>> = this.selector('get');
-  keys: () => Selector<[], ReturnType<T['keys']>> = this.selector('keys');
-  values: () => Selector<[], ReturnType<T['values']>> = this.selector('values');
-  entities: () => Selector<[], ReturnType<T['entities']>> = this.selector('entities');
+  has: (key: MapKey<S>) => Selector<[MapKey<S>], boolean> = this.selector('hasItem');
+  get: (key: MapKey<S>) => Selector<[MapKey<S>], MapValue<S>> = this.selector('getItem');
+  keys: () => Selector<[], ReturnType<S['keys']>> = this.selector('keys');
   map: <U>(
-    callbackFn: (value: MapValue<T>, key: MapKey<T>, index: number) => U,
-  ) => Selector<[(value: MapValue<T>, key: MapKey<T>, index: number) => U], U[]> =
+    callbackFn: (value: MapValue<S>, key: MapKey<S>, index: number) => U,
+  ) => Selector<[(value: MapValue<S>, key: MapKey<S>, index: number) => U], U[]> =
     this.selector('map');
 
-  set: (key: MapKey<T>, value: MapValue<T>) => Mutation<[MapKey<T>, MapValue<T>], T> =
-    this.mutation('set');
+  set: (key: MapKey<S>, value: MapValue<S>) => Mutation<[MapKey<S>, MapValue<S>], S> =
+    this.mutation('setItem');
   merge: (
-    key: MapKey<T>,
-    props: Partial<MapValue<T>>,
-  ) => Mutation<[MapKey<T>, Partial<MapValue<T>>], T> = this.mutation('merge');
-  setAll: (items: readonly MapPair<T>[]) => Mutation<[readonly MapPair<T>[]], T> =
+    key: MapKey<S>,
+    props: Partial<MapValue<S>>,
+  ) => Mutation<[MapKey<S>, Partial<MapValue<S>>], S> = this.mutation('mergeItem');
+  setAll: (items: readonly MapPair<S>[]) => Mutation<[readonly MapPair<S>[]], S> =
     this.mutation('setAll');
   mergeAll: (
-    items: readonly Pair<MapKey<T>, Partial<MapValue<T>>>[],
-  ) => Mutation<[readonly Pair<MapKey<T>, Partial<MapValue<T>>>[]], T> = this.mutation('mergeAll');
-  delete: (key: MapKey<T>) => Mutation<[MapKey<T>], T> = this.mutation('delete');
+    items: readonly Pair<MapKey<S>, Partial<MapValue<S>>>[],
+  ) => Mutation<[readonly Pair<MapKey<S>, Partial<MapValue<S>>>[]], S> = this.mutation('mergeAll');
+  removeItem: (key: MapKey<S>) => Mutation<[MapKey<S>], S> = this.mutation('removeItem');
 }
 
 export function createMapBox<K, V>(
   key: string,
-  defaultValue: V,
   inferKey: K,
-  options?: BoxOptions<Map<K & keyof any, V>>,
-): MapBox<K & keyof any, V, Map<K & keyof any, V>> {
-  return new MapBox(key, new Map(defaultValue, inferKey as any), options);
+  defaultValue: V,
+): MapBox<Map<IDOf<K>, V>> {
+  return new MapBox(key, new Map(inferKey as IDOf<K>, defaultValue));
 }

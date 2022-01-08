@@ -4,41 +4,66 @@
  */
 
 import { threw } from './misc';
+import { StorageMap } from './storage';
+import { IDOf, Pair, PartialRecord, ToString } from './types';
 
-export class OMap<V, K extends keyof any = string> {
-  private data: Record<K, V> = {} as Record<K, V>;
+export class OMap<V, K = string> implements StorageMap<IDOf<K>, V> {
+  private data: PartialRecord<IDOf<K>, V> = {};
 
-  set(key: K, value: V) {
-    this.data[key] = value;
+  constructor(items?: readonly Pair<K, V>[]) {
+    items?.forEach(([key, value]) => (this.data[key as IDOf<K>] = value));
   }
 
-  delete(key: K) {
-    delete this.data[key];
+  size(): number {
+    let size = 0;
+    for (const _k in this.data) {
+      size++;
+    }
+    return size;
   }
 
-  clear() {
-    this.data = {} as Record<K, V>;
+  keys(): ToString<IDOf<K>>[] {
+    return Object.keys(this.data) as ToString<IDOf<K>>[];
   }
 
-  has(key: K) {
+  hasItem(key: IDOf<K>): boolean {
     return this.data.hasOwnProperty(key);
   }
 
-  get(key: K): V | undefined {
+  getItem(key: IDOf<K>): V | undefined {
     return this.data[key];
   }
 
-  take(key: K): V {
+  takeItem(key: IDOf<K>): V {
     if (process.env.NODE_ENV === 'development') {
-      threw(!this.has(key), `Cannot get non-existent key ${key}.`);
+      threw(!this.hasItem(key), `Cannot get non-existent key ${key}.`);
     }
-    return this.data[key];
+    return this.data[key]!;
   }
 
-  some(fn: (value: V, key: K extends string ? K : string) => boolean): boolean {
+  setItem(key: IDOf<K>, value: V): this {
+    this.data[key] = value;
+    return this;
+  }
+
+  mergeItem(key: IDOf<K>, value: Partial<V>): this {
+    return this.setItem(key, Object.assign(this.takeItem(key), value));
+  }
+
+  removeItem(key: IDOf<K>): this {
+    delete this.data[key];
+    return this;
+  }
+
+  clear(): this {
+    this.data = {};
+    return this;
+  }
+
+  some(fn: (value: V, key: ToString<K>) => boolean): boolean {
     for (const key in this.data) {
       if (this.data.hasOwnProperty(key)) {
-        if (fn(this.data[key], key)) {
+        if (fn(this.data[key as IDOf<K>]!, key as ToString<K>)) {
           return true;
         }
       }
@@ -46,10 +71,10 @@ export class OMap<V, K extends keyof any = string> {
     return false;
   }
 
-  every(fn: (value: V, key: K extends string ? K : string) => boolean): boolean {
+  every(fn: (value: V, key: ToString<K>) => boolean): boolean {
     for (const key in this.data) {
       if (this.data.hasOwnProperty(key)) {
-        if (!fn(this.data[key], key)) {
+        if (!fn(this.data[key as IDOf<K>]!, key as ToString<K>)) {
           return false;
         }
       }

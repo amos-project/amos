@@ -6,7 +6,5 @@
 export * from './List';
 export * from './ListMap';
 export * from './Map';
-export * from './PagedList';
-export * from './PagedListMap';
 export * from './Record';
 export * from './RecordMap';

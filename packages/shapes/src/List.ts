@@ -3,20 +3,20 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { clone, Cloneable } from 'amos-utils';
+import { clone, Cloneable, JSONSerializable, JSONState } from 'amos-utils';
 
-const arr: any[] = [];
+export class List<E> extends Cloneable implements JSONSerializable<readonly E[]> {
+  protected readonly data: readonly E[] = [];
 
-export class List<T> extends Cloneable {
-  constructor(readonly data: readonly T[] = arr, isValid = data !== arr) {
+  constructor(protected readonly defaultElement: E, isValid: boolean = false) {
     super(isValid);
   }
 
-  fromJSON(state: readonly T[]): this {
-    return clone(this, { data: state } as any);
+  fromJSON(state: JSONState<readonly E[]>): this {
+    return clone(this, { data: state.map((v) => clone(this.defaultElement, v as any)) } as any);
   }
 
-  toJSON(): readonly T[] {
+  toJSON(): readonly E[] {
     return this.data;
   }
 
@@ -28,51 +28,51 @@ export class List<T> extends Cloneable {
     return this.data.length;
   }
 
-  concat(...items: ConcatArray<T>[]): this {
-    return this.make(this.data.concat(...items));
+  concat(...items: ConcatArray<E>[]): this {
+    return this.reset(this.data.concat(...items));
   }
 
   copyWithin(target: number, start: number, end?: number): this {
-    return this.make(this.data.slice().copyWithin(target, start, end));
+    return this.reset(this.data.slice().copyWithin(target, start, end));
   }
 
-  every(predicate: (value: T, index: number) => boolean): boolean {
+  every(predicate: (value: E, index: number) => boolean): boolean {
     return this.data.every(predicate);
   }
 
-  fill(value: T, start?: number, end?: number): this {
-    return this.make(this.data.slice().fill(value, start, end));
+  fill(value: E, start?: number, end?: number): this {
+    return this.reset(this.data.slice().fill(value, start, end));
   }
 
-  filter(predicate: (value: T, index: number) => boolean): readonly T[] {
+  filter(predicate: (value: E, index: number) => boolean): readonly E[] {
     return this.data.filter(predicate);
   }
 
-  filterThis(predicate: (value: T, index: number) => boolean): this {
-    return this.make(this.data.filter(predicate));
+  filterThis(predicate: (value: E, index: number) => boolean): this {
+    return this.reset(this.data.filter(predicate));
   }
 
-  find(predicate: (value: T, index: number) => boolean): T | undefined {
+  find(predicate: (value: E, index: number) => boolean): E | undefined {
     return this.data.find(predicate);
   }
 
-  findIndex(predicate: (value: T, index: number) => boolean): number {
+  findIndex(predicate: (value: E, index: number) => boolean): number {
     return this.data.findIndex(predicate);
   }
 
-  flat<D extends number = 1>(depth?: D): FlatArray<readonly T[], D>[] {
-    return this.data.flat<readonly T[], D>(depth);
+  flat<D extends number = 1>(depth?: D): FlatArray<readonly E[], D>[] {
+    return this.data.flat<readonly E[], D>(depth);
   }
 
-  forEach(callbackfn: (value: T, index: number) => void): void {
+  forEach(callbackfn: (value: E, index: number) => void): void {
     this.data.forEach(callbackfn);
   }
 
-  includes(searchElement: T, fromIndex?: number): boolean {
+  includes(searchElement: E, fromIndex?: number): boolean {
     return this.data.includes(searchElement, fromIndex);
   }
 
-  indexOf(searchElement: T, fromIndex?: number): number {
+  indexOf(searchElement: E, fromIndex?: number): number {
     return this.data.indexOf(searchElement, fromIndex);
   }
 
@@ -80,89 +80,91 @@ export class List<T> extends Cloneable {
     return this.data.join(separator);
   }
 
-  lastIndexOf(searchElement: T, fromIndex?: number): number {
+  lastIndexOf(searchElement: E, fromIndex?: number): number {
     return this.data.lastIndexOf(searchElement, fromIndex);
   }
 
-  map<U>(callbackfn: (value: T, index: number) => U): U[] {
+  map<U>(callbackfn: (value: E, index: number) => U): U[] {
     return this.data.map(callbackfn);
   }
 
-  mapThis(callbackfn: (value: T, index: number) => T): this {
-    return this.make(this.data.map(callbackfn));
+  mapThis(callbackfn: (value: E, index: number) => E): this {
+    return this.reset(this.data.map(callbackfn));
   }
 
   pop(): this {
     const data = this.data.slice();
     data.pop();
-    return this.make(data);
+    return this.reset(data);
   }
 
-  push(...items: T[]): this {
+  push(...items: E[]): this {
     const data = this.data.slice();
     data.push(...items);
-    return this.make(data);
+    return this.reset(data);
   }
 
   reduce<U>(
-    callbackfn: (previousValue: U, currentValue: T, currentIndex: number) => U,
+    callbackfn: (previousValue: U, currentValue: E, currentIndex: number) => U,
     initialValue: U,
   ): U {
     return this.data.reduce(callbackfn, initialValue);
   }
 
   reduceRight<U>(
-    callbackfn: (previousValue: U, currentValue: T, currentIndex: number) => U,
+    callbackfn: (previousValue: U, currentValue: E, currentIndex: number) => U,
     initialValue: U,
   ): U {
     return this.data.reduceRight(callbackfn, initialValue);
   }
 
   reverse(): this {
-    return this.make(this.data.slice().reverse());
+    return this.reset(this.data.slice().reverse());
   }
 
   shift(): this {
     const data = this.data.slice();
     data.shift();
-    return this.make(data);
+    return this.reset(data);
   }
 
   slice(start?: number, end?: number): this {
-    return this.make(this.data.slice(start, end));
+    return this.reset(this.data.slice(start, end));
   }
 
-  some(predicate: (value: T, index: number) => boolean): boolean {
+  some(predicate: (value: E, index: number) => boolean): boolean {
     return this.data.some(predicate);
   }
 
-  sort(compareFn?: (a: T, b: T) => number): this {
-    return this.make(this.data.slice().sort(compareFn));
+  sort(compareFn?: (a: E, b: E) => number): this {
+    return this.reset(this.data.slice().sort(compareFn));
   }
 
-  splice(start: number, deleteCount: number, ...items: T[]): this {
+  splice(start: number, deleteCount: number, ...items: E[]): this {
     const data = this.data.slice();
     data.splice(start, deleteCount, ...items);
-    return this.make(data);
+    return this.reset(data);
   }
 
   delete(index: number): this {
     return this.splice(index, 1);
   }
 
-  unshift(...items: T[]): this {
+  unshift(...items: E[]): this {
     const data = this.data.slice();
     data.unshift(...items);
-    return this.make(data);
+    return this.reset(data);
   }
 
-  set(index: number, value: T): this {
+  set(index: number, value: E): this {
     const data = this.data.slice();
     data[index] = value;
-    return this.make(data);
+    return this.reset(data);
   }
 
-  private make(data: readonly T[]): this {
+  reset(data: readonly E[]): this {
     return clone(this, { data } as any);
   }
 }
+
+export type ListElem<L> = L extends List<infer E> ? E : never;

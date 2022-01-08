@@ -3,37 +3,52 @@
  * @author junbao <junbao@moego.pet>
  */
 
-export class OSet<T extends keyof any = string> {
-  private data: Record<T, true> = {} as Record<T, true>;
+import { StorageMap } from './storage';
+import { ID, PartialRecord, ToString } from './types';
+
+export class OSet<T extends ID = string> implements StorageMap<T, T> {
+  private data: PartialRecord<T, true> = {};
 
   constructor(values: readonly T[] = []) {
-    values.forEach((v) => this.add(v));
+    values.forEach((v) => (this.data[v] = true));
   }
 
-  empty() {
-    for (const _value in this.data) {
-      return false;
-    }
-    return true;
+  size(): number {
+    return Object.keys(this.data).length;
   }
 
-  add(value: T) {
-    this.data[value] = true;
+  keys(): ToString<T>[] {
+    return Object.keys(this.data) as ToString<T>[];
   }
 
-  delete(value: T) {
-    delete this.data[value];
-  }
-
-  clear() {
-    this.data = {} as Record<T, true>;
-  }
-
-  has(value: T) {
+  hasItem(value: T): boolean {
     return this.data.hasOwnProperty(value);
   }
 
-  forEach(fn: (value: T extends string ? T : string) => void) {
+  getItem(key: T): T | undefined {
+    return this.hasItem(key) ? key : void 0;
+  }
+
+  setItem(value: T): this {
+    this.data[value] = true;
+    return this;
+  }
+
+  mergeItem(key: T): this {
+    throw new Error('The operation is not supported');
+  }
+
+  removeItem(value: T): this {
+    delete this.data[value];
+    return this;
+  }
+
+  clear(): this {
+    this.data = {};
+    return this;
+  }
+
+  forEach(fn: (value: ToString<T>) => void) {
     for (const value in this.data) {
       if (this.data.hasOwnProperty(value)) {
         fn(value);
@@ -41,7 +56,7 @@ export class OSet<T extends keyof any = string> {
     }
   }
 
-  some(fn: (value: T extends string ? T : string) => boolean): boolean {
+  some(fn: (value: ToString<T>) => boolean): boolean {
     for (const value in this.data) {
       if (this.data.hasOwnProperty(value)) {
         if (fn(value)) {
@@ -52,7 +67,7 @@ export class OSet<T extends keyof any = string> {
     return false;
   }
 
-  every(fn: (value: T extends string ? T : string) => boolean): boolean {
+  every(fn: (value: ToString<T>) => boolean): boolean {
     for (const value in this.data) {
       if (this.data.hasOwnProperty(value)) {
         if (!fn(value)) {

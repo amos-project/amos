@@ -14,6 +14,7 @@ export type Unsubscribe = () => void;
 export type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (k: infer I) => void ? I : never;
 
 export type FnValue<T> = T | (() => T);
+export type CtorValue<T> = T | (new () => T);
 
 export type ToString<T> = T extends string ? T : T extends { toString(): infer U } ? (U extends string ? U : string) : string;
 

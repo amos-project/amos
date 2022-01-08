@@ -5,33 +5,34 @@
 
 import {
   clone,
-  IDOf,
+  ID,
   isJSONSerializable,
   JSONSerializable,
   JSONState,
   Pair,
   PartialRecord,
+  StorageMap,
   ToString,
 } from 'amos-utils';
 
-export class Map<K, V> implements JSONSerializable<PartialRecord<IDOf<K>, V>> {
-  readonly data: PartialRecord<IDOf<K>, V>;
+export class Map<K extends ID, V>
+  implements JSONSerializable<PartialRecord<K, V>>, StorageMap<K, V>
+{
+  readonly data: PartialRecord<K, V> = {};
 
-  constructor(readonly defaultValue: V, readonly inferKey?: K) {
-    this.data = {} as Record<IDOf<K>, V>;
-  }
+  constructor(readonly defaultValue: V) {}
 
-  toJSON(): PartialRecord<IDOf<K>, V> {
+  toJSON(): PartialRecord<K, V> {
     return this.data;
   }
 
-  fromJSON(state: JSONState<PartialRecord<IDOf<K>, V>>): this {
+  fromJSON(state: JSONState<PartialRecord<K, V>>): this {
     const that = clone(this, { data: {} } as any);
     for (const key in state) {
       if (isJSONSerializable(that.defaultValue)) {
-        that.data[key as unknown as IDOf<K>] = that.defaultValue.fromJSON(state[key]);
+        that.data[key as unknown as K] = that.defaultValue.fromJSON(state[key]);
       } else {
-        that.data[key as unknown as IDOf<K>] = clone(that.defaultValue, state[key]);
+        that.data[key as unknown as K] = clone(that.defaultValue, state[key]);
       }
     }
     return that;
@@ -41,39 +42,20 @@ export class Map<K, V> implements JSONSerializable<PartialRecord<IDOf<K>, V>> {
     return Object.keys(this.data).length;
   }
 
-  has(key: IDOf<K>): boolean {
-    return this.data.hasOwnProperty(key);
-  }
-
-  get(key: IDOf<K>): V {
-    return this.data[key] ?? this.defaultValue;
-  }
-
   keys(): ToString<K>[] {
     return Object.keys(this.data) as ToString<K>[];
   }
 
-  values(): V[] {
-    return Object.values(this.data);
+  hasItem(key: K): boolean {
+    return this.data.hasOwnProperty(key);
   }
 
-  entities(): Pair<ToString<K>, V>[] {
-    return this.keys().map((k) => [k as ToString<K>, this.data[k as IDOf<K>]!]);
+  getItem(key: K): V {
+    return this.data[key] ?? this.defaultValue;
   }
 
-  map<U>(callbackFn: (value: V, key: ToString<K>, index: number) => U): U[] {
-    const result: U[] = [];
-    let index = 0;
-    for (const key in this.data) {
-      if (this.data.hasOwnProperty(key)) {
-        result.push(callbackFn(this.data[key as IDOf<K>]!, key as ToString<K>, index));
-      }
-    }
-    return result;
-  }
-
-  set(key: IDOf<K>, item: V): this {
-    if (this.get(key) === item) {
+  setItem(key: K, item: V): this {
+    if (this.getItem(key) === item) {
       return this;
     }
     return clone(this, {
@@ -84,8 +66,8 @@ export class Map<K, V> implements JSONSerializable<PartialRecord<IDOf<K>, V>> {
     } as any);
   }
 
-  merge(key: IDOf<K>, props: Partial<V>): this {
-    const value = this.get(key);
+  mergeItem(key: K, props: Partial<V>): this {
+    const value = this.getItem(key);
     for (const key in props) {
       if (value[key] !== props[key]) {
         return clone(this, {
@@ -99,8 +81,8 @@ export class Map<K, V> implements JSONSerializable<PartialRecord<IDOf<K>, V>> {
     return this;
   }
 
-  setAll(items: readonly Pair<IDOf<K>, V>[]): this {
-    items = items.filter(([key, value]) => this.get(key) !== value);
+  setAll(items: readonly Pair<K, V>[]): this {
+    items = items.filter(([key, value]) => this.getItem(key) !== value);
     if (items.length === 0) {
       return this;
     }
@@ -110,14 +92,14 @@ export class Map<K, V> implements JSONSerializable<PartialRecord<IDOf<K>, V>> {
         ...items.reduce((prev, now) => {
           prev[now[0]] = now[1];
           return prev;
-        }, {} as Record<IDOf<K>, V>),
+        }, {} as Record<K, V>),
       },
     } as any);
   }
 
-  mergeAll(items: readonly Pair<IDOf<K>, Partial<V>>[]): this {
+  mergeAll(items: readonly Pair<K, Partial<V>>[]): this {
     items = items.filter(([key, props]) => {
-      const value = this.get(key);
+      const value = this.getItem(key);
       for (const p in props) {
         if (value[p] !== props[p]) {
           return true;
@@ -132,24 +114,39 @@ export class Map<K, V> implements JSONSerializable<PartialRecord<IDOf<K>, V>> {
       data: {
         ...this.data,
         ...items.reduce((prev, now) => {
-          prev[now[0]] = clone(this.get(now[0]), now[1]);
+          prev[now[0]] = clone(this.getItem(now[0]), now[1]);
           return prev;
-        }, {} as Record<IDOf<K>, V>),
+        }, {} as Record<K, V>),
       },
     } as any);
   }
 
-  update(key: IDOf<K>, updater: (v: V) => V): this {
-    return this.set(key, updater(this.get(key)));
+  updateItem(key: K, updater: (v: V) => V): this {
+    return this.setItem(key, updater(this.getItem(key)));
   }
 
-  delete(key: IDOf<K>): this {
-    if (!this.has(key)) {
+  removeItem(key: K): this {
+    if (!this.hasItem(key)) {
       return this;
     }
     const that = clone(this, { data: { ...this.data } } as any);
     delete that.data[key];
     return that;
+  }
+
+  clear(): this {
+    return clone(this, { data: {} } as {});
+  }
+
+  map<U>(callbackFn: (value: V, key: ToString<K>, index: number) => U): U[] {
+    const result: U[] = [];
+    let index = 0;
+    for (const key in this.data) {
+      if (this.data.hasOwnProperty(key)) {
+        result.push(callbackFn(this.data[key as K]!, key as ToString<K>, index++));
+      }
+    }
+    return result;
   }
 }
 

@@ -5,8 +5,6 @@
 
 import Mock = jest.Mock;
 
-export const ANY: any = void 0;
-
 export function sleep(timeout: number = 0): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, timeout));
 }

@@ -9,10 +9,10 @@ import { userMapBox } from 'amos-testing';
 import { createStrictEnum, EnumValues } from 'amos-utils';
 
 export const TodoStatus = createStrictEnum({
-  created: [1, 'created'],
-  started: [2, 'started'],
-  finished: [3, 'finished'],
-  deleted: [4, 'deleted'],
+  created: [1, { group: 'TODO' }],
+  started: [2, { group: 'IN PROGRESS' }],
+  finished: [3, { group: 'DONE' }],
+  deleted: [4, { group: 'BACKLOG' }],
 });
 
 export interface TodoModel {

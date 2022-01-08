@@ -3,52 +3,49 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { Beth, idCompare, Jerry, Jessica, Morty, Rick, UserRecord } from './Record.spec';
-import { createMapBox, Map } from './Map';
+import { Map } from './Map';
 
-export const UserModelMap = createMapBox('User.modelMap', Map.num(new UserRecord()));
-
-describe('AmosDict', () => {
-  it('should create Map', () => {
-    let dict = new Map(new UserRecord(), 0 as number);
-    dict.toJSON();
-    dict = dict.fromJSON({ [Rick.id]: Rick.toJSON() });
-    dict.size();
-    dict = dict.set(Morty.id, Morty);
-    dict = dict.merge(Jerry.id, Jerry.toJSON());
-    dict = dict.setAll([[Jessica.id, Jessica]]);
-    dict = dict.mergeAll([[Beth.id, Beth.toJSON()]]);
-    dict = dict.update(Rick.id, (v) => v.set('firstName', v.firstName.repeat(2)));
-    expect(dict.toJSON()).toEqual({
-      [Rick.id]: Rick,
-      [Morty.id]: Morty,
-      [Jessica.id]: Jerry,
-      [Jerry.id]: Jerry,
-      [Beth.id]: Beth,
-    });
-    dict = dict.delete(Jerry.id);
-    expect(dict.has(Jerry.id)).toBeFalsy();
-    expect(dict.get(Morty.id)).toEqual(Morty);
-    expect(dict.has(Morty.id)).toBeTruthy();
-    expect(dict.keys().sort()).toEqual([Rick.id, Morty.id, Jessica.id, Beth.id].sort());
-    expect(dict.values().sort(idCompare)).toEqual([Rick, Morty, Jerry, Beth].sort(idCompare));
-    expect(dict.entities().sort(([a], [b]) => +a - +b)).toEqual(
-      [Rick, Morty, Jerry, Beth].sort(idCompare).map((a) => [a.id + '', a]),
-    );
-  });
-
-  it('should create MapBox', () => {
-    UserModelMap.delete(1);
-    UserModelMap.update(Jerry.id, () => Jerry);
-    UserModelMap.set(Jerry.id, Jerry);
-    UserModelMap.merge(Jerry.id, Jerry.toJSON());
-    UserModelMap.mergeAll([[Jerry.id, Jerry.toJSON()]]);
-    UserModelMap.setAll([[Jerry.id, Jerry]]);
-
-    UserModelMap.get(Jerry.id);
-    UserModelMap.has(Jerry.id);
-    UserModelMap.keys();
-    UserModelMap.values();
-    UserModelMap.entities();
+describe('Map', function () {
+  it('should create Map', function () {
+    let m1 = new Map<number, number>(0);
+    m1 = m1.fromJSON({ '-3': -1, '-1': 0 });
+    m1 = m1.setItem(1, 2);
+    m1 = m1.mergeItem(3, 4);
+    m1 = m1.setAll([
+      [5, 6],
+      [7, 8],
+    ]);
+    m1 = m1.mergeAll([
+      [9, 10],
+      [11, 12],
+    ]);
+    m1 = m1.updateItem(1, (v) => v * 2);
+    m1 = m1.removeItem(11);
+    const m2 = m1.clear();
+    expect([
+      m1.size(),
+      m1.keys().sort(),
+      m1.hasItem(-1),
+      m1.hasItem(11),
+      m1.getItem(1),
+      m1.map((value, key, index) => [value, key, index] as const).sort(([a], [b]) => a - b),
+      m2.size(),
+    ]).toEqual([
+      7,
+      ['-3', '-1', '1', '3', '5', '7', '9'],
+      true,
+      false,
+      4,
+      [
+        [-1, '-3', 0],
+        [0, '-1', 1],
+        [2, '1', 2],
+        [4, '3', 3],
+        [6, '5', 4],
+        [8, '7', 5],
+        [10, '9', 6],
+      ],
+      0,
+    ]);
   });
 });

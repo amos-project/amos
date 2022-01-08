@@ -4,7 +4,7 @@
  */
 
 import { Box } from 'amos-core';
-import { JSONState } from 'amos-utils';
+import { JSONState, StorageEngine } from 'amos-utils';
 
 export interface PersistedState<T> {
   v: number;
@@ -24,16 +24,6 @@ declare module 'amos-core' {
   export interface BoxOptions<S> {
     persist?: BoxPersistOptions<S>;
   }
-}
-
-/**
- * The storage engine, supports Storage in web and AsyncStorage in React Native.
- */
-export interface StorageEngine {
-  getItem(key: string): string | null | Promise<string | null>;
-  setItem(key: string, value: string): void | Promise<void>;
-  mergeItem?(key: string, value: string): void | Promise<void>;
-  removeItem(key: string): void | Promise<void>;
 }
 
 export interface PersistOptions {

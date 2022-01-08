@@ -8,18 +8,18 @@ import { List } from './List';
 
 describe('AmosList', () => {
   it('should create list', () => {
-    expect(new List().isValid()).toBeFalsy();
-    let list = new List([0, 1]);
+    expect(new List(0).isValid()).toBeFalsy();
+    let list = new List(0).reset([0, 1]);
     expect(list.isValid()).toBeTruthy();
-    expect(list.fromJSON([1, 2]).data).toEqual([1, 2]);
+    expect(list.fromJSON([1, 2]).toJSON()).toEqual([1, 2]);
     expect(list.toJSON()).toEqual([0, 1]);
     expect(list.size()).toEqual(2);
-    expect(list.concat([2, 3]).data).toEqual([0, 1, 2, 3]);
-    expect(list.copyWithin(0, 1, 2).data).toEqual([1, 1]);
+    expect(list.concat([2, 3]).toJSON()).toEqual([0, 1, 2, 3]);
+    expect(list.copyWithin(0, 1, 2).toJSON()).toEqual([1, 1]);
     expect(list.every((v) => v > 2)).toEqual(false);
-    expect(list.fill(1).data).toEqual([1, 1]);
+    expect(list.fill(1).toJSON()).toEqual([1, 1]);
     expect(list.filter((v) => v > 0)).toEqual([1]);
-    expect(list.filterThis((v) => v > 0).data).toEqual([1]);
+    expect(list.filterThis((v) => v > 0).toJSON()).toEqual([1]);
     expect(list.find((v) => v === 1)).toEqual(1);
     expect(list.findIndex((v) => v === 1)).toEqual(1);
     expect(

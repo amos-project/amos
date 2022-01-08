@@ -7,7 +7,7 @@ import { Subscribe, Unsubscribe } from 'amos-utils';
 import { OMap } from '../../utils/src/OMap';
 import { OSet } from '../../utils/src/OSet';
 import { Box } from './box';
-import { LRUCache } from '../../utils/src/LRUCache';
+import { LRUMap } from '../../utils/src/LRUMap';
 import { SelectorFactory } from './selector';
 import { Dispatch, Dispatchable, Select, Selectable, Snapshot } from './types';
 import { isArray, threw, toString } from '../../utils/src/misc';
@@ -34,7 +34,7 @@ export class Store {
   protected dispatching: Dispatchable | readonly Dispatchable[] | undefined;
   protected state: Snapshot;
   protected boxes: OMap<Box>;
-  protected cache: LRUCache<SelectorCache>;
+  protected cache: LRUMap<SelectorCache>;
   protected selectorStack: SelectorCache[];
 
   constructor(preloadedState: Snapshot = {}, options: StoreOptions = {}) {
@@ -44,7 +44,7 @@ export class Store {
     this.boxes = new OMap<Box>();
     this.listeners = [];
     this.dispatching = void 0;
-    this.cache = new LRUCache<SelectorCache>(options.cacheSize ?? Store.DEFAULT_CACHE_SIZE);
+    this.cache = new LRUMap<SelectorCache>(options.cacheSize ?? Store.DEFAULT_CACHE_SIZE);
   }
 
   /**

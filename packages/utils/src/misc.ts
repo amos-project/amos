@@ -3,6 +3,8 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
+import { CtorValue } from './types';
+
 export function resolveCallerName(depth = 2) {
   try {
     let caller: Function = resolveCallerName;
@@ -44,4 +46,10 @@ export function threw(shouldThrow: boolean, message: string): asserts shouldThro
 
 export function toString(obj: unknown) {
   return Object.prototype.toString.call(obj);
+}
+
+export const ANY: any = void 0;
+
+export function resolveCtorValue<V>(value: CtorValue<V>): V {
+  return typeof value === 'function' ? new (value as any)() : value;
 }

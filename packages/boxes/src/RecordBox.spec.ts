@@ -3,7 +3,8 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { ANY, currentUserBox, Morty } from 'amos-testing';
+import { currentUserBox, Morty } from 'amos-testing';
+import { ANY } from 'amos-utils';
 
 describe('RecordBox', function () {
   it('should create RecordBox', function () {
