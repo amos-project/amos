@@ -50,7 +50,7 @@ export function createPagedListBox<E extends ID, NT extends ID = E>(
   inferNextType: NT,
   options?: BoxOptions<PagedList<E, NT>>,
 ) {
-  return createRecordBox(key, new PagedList<E, NT>(), options);
+  return createRecordBox(key, new PagedList<E, NT>());
 }
 
 export function createPagedListMapBox<E extends ID, NT extends ID = E, OT extends ID = number>(

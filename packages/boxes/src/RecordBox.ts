@@ -3,31 +3,28 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { Box, BoxOptions, Mutation, Selector } from 'amos-core';
+import { BoxWithStateMethods, createBoxFactory, Mutation, Selector } from 'amos-core';
 import { Record, RecordProps } from 'amos-shapes';
-import { CtorValue } from 'amos-utils';
+import { CtorValue, resolveCtorValue } from 'amos-utils';
 
-export class RecordBox<P extends object, R extends Record<P>> extends Box<R> {
-  get: <K extends keyof P>(key: K) => Selector<[K], P[K]> = this.selector('get');
+export type RecordBox<R extends Record<any>> = BoxWithStateMethods<R, 'merge', 'isValid'> & {
+  get<K extends keyof RecordProps<R>>(key: K): Selector<[K], R[K]>;
 
-  set: <K extends keyof P>(key: K, value: P[K]) => Mutation<[K, P[K]], R> = this.mutation('set');
-
-  update: <K extends keyof P>(
+  set<K extends keyof RecordProps<R>>(key: K, value: R[K]): Mutation<[K, R[K]], R>;
+  update<K extends keyof RecordProps<R>>(
     key: K,
-    updater: (value: P[K]) => P[K],
-  ) => Mutation<[K, (value: P[K]) => P[K]], R> = this.mutation('update');
+    updater: (value: R[K], record: R) => R[K],
+  ): Mutation<[K, (value: R[K], record: R) => R[K]], R>;
+};
 
-  isValid: () => Selector<[], boolean> = this.selector('isValid');
-}
+export const RecordBox = createBoxFactory<RecordBox<any>>({
+  mutations: { set: null, update: null, merge: null },
+  selectors: { isValid: null, get: null },
+});
 
 export function createRecordBox<R extends Record<any>>(
   key: string,
   initialState: CtorValue<R>,
-  options?: BoxOptions<R>,
-): RecordBox<RecordProps<R>, R> {
-  return new RecordBox(
-    key,
-    typeof initialState === 'function' ? new initialState() : initialState,
-    options,
-  );
+): RecordBox<R> {
+  return new RecordBox(key, resolveCtorValue(initialState));
 }

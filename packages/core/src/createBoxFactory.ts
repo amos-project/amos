@@ -19,7 +19,7 @@ export type BoxWithStateMethods<
 };
 
 export interface BoxFactory<B extends Box> {
-  new <SB extends Box>(key: string, initialState: SB['initialState']): SB;
+  new <S, SB extends Box<S>>(key: string, initialState: S): SB;
 
   extends<NB extends Box>(options: BoxFactoryOptions<NB, B>): BoxFactory<NB>;
 }

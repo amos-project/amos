@@ -85,7 +85,7 @@ const BarBox = FooBox.extends<BarBox<any>>({
 });
 
 function createBarBox<T, U>(key: string, data: T, bar: U): BarBox<Bar<T, U>> {
-  return new BarBox<BarBox<Bar<T, U>>>(key, new Bar(data, bar));
+  return new BarBox(key, new Bar(data, bar));
 }
 
 const barBox = createBarBox('unit.boxFactory.bar', { foo: 'bar', bar: 1 }, { baz: true });

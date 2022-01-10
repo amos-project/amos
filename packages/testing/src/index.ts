@@ -3,6 +3,7 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
+export * from './store/example.boxes';
 export * from './store/misc.boxes';
 export * from './store/post.boxes';
 export * from './store/session.actions';

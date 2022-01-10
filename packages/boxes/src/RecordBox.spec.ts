@@ -3,16 +3,22 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { currentUserBox, Morty } from 'amos-testing';
-import { ANY } from 'amos-utils';
+import { dispatch, exampleBox, select } from 'amos-testing';
 
 describe('RecordBox', function () {
   it('should create RecordBox', function () {
-    currentUserBox.get('firstName').factory.compute(ANY, ANY);
-    // @ts-expect-error
-    currentUserBox.get('unknownField');
-    currentUserBox.set('firstName', Morty.firstName);
-    currentUserBox.update('lastName', (value) => value.repeat(2));
-    currentUserBox.isValid();
+    select(exampleBox).resolveType();
+    select(exampleBox.get('link')).substr(1);
+    select(exampleBox).isValid().valueOf();
+    dispatch(exampleBox.set('link', 'https://github.com/'));
+    dispatch(exampleBox.update('count', (c) => c + 1));
+    dispatch(exampleBox.merge({ title: 'hello', content: 'world' }));
+    expect(select(exampleBox).toJSON()).toEqual({
+      title: 'hello',
+      content: 'world',
+      link: 'https://github.com/',
+      count: 1,
+    });
+    expect(select(exampleBox).resolveType()).toBe('http');
   });
 });
