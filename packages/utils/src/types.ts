@@ -13,6 +13,8 @@ export type Unsubscribe = () => void;
 // see {@link https://stackoverflow.com/a/50375286/4380247}
 export type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (k: infer I) => void ? I : never;
 
+export type Replace<A, B> = Omit<A, keyof B> & B;
+
 export type FnValue<T, A extends any[] = []> = T | ((...args: A) => T);
 export type CtorValue<T, A extends any[] = []> = T | (new (...args: A) => T);
 export type Ctor<T, A extends any[] = []> = new (...args: A) => T;

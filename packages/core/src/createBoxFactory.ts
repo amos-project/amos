@@ -3,71 +3,63 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { ANY, CtorValue } from 'amos-utils';
-import { Box, MutationFactory } from './box';
-import { selector, SelectorFactory } from './selector';
+import { resolveCallerName } from 'amos-utils';
+import { Box, implementation, Mutation, MutationFactory } from './box';
+import { Selector, SelectorFactory } from './selector';
 
-export type ShapedBox<S, KM extends string, KS extends string> = Box<S> & {
+export type BoxWithStateMethods<
+  S,
+  KM extends keyof S,
+  KS extends keyof S,
+  SB extends Box = Box<S>,
+> = SB & {
   [P in keyof S & KM]: S[P] extends (...args: infer A) => S ? MutationFactory<A, S> : never;
 } & {
   [P in keyof S & KS]: S[P] extends (...args: infer A) => infer R ? SelectorFactory<A, R> : never;
 };
 
-export interface BoxFactory<KM extends string, KS extends string> {
-  <S>(key: string, initialState: S): ShapedBox<S, KM, KS>;
+export interface BoxFactory<B extends Box> {
+  new <SB extends Box>(key: string, initialState: SB['initialState']): SB;
 
-  extends<NPS, NKM extends keyof NPS & string, NKS extends keyof NPS & string>(
-    inferProto: CtorValue<NPS, any[]>,
-    options: BoxFactoryOptions<NKM, NKS>,
-  ): BoxFactory<KM | NKM, KS | NKS>;
+  extends<NB extends Box>(options: BoxFactoryOptions<NB, B>): BoxFactory<NB>;
 }
 
-export interface BoxFactoryOptions<KM extends string, KS extends string> {
-  mutations: Record<KM, boolean>;
-  selectors: Record<KS, boolean>;
+export interface BoxFactoryOptions<B extends Box, SB extends Box = Box> {
+  mutations: {
+    [P in keyof B as B[P] extends (...args: any[]) => Mutation
+      ? P extends keyof SB
+        ? never
+        : P
+      : never]: null;
+  };
+  selectors: {
+    [P in keyof B as B[P] extends (...args: any[]) => Selector
+      ? P extends keyof SB
+        ? never
+        : P
+      : never]: null;
+  };
   name?: string;
 }
 
-export function createBoxFactory<PS, KM extends keyof PS & string, KS extends keyof PS & string>(
-  inferProto: CtorValue<PS, any[]>,
-  options: BoxFactoryOptions<KM, KS>,
-): BoxFactory<KM, KS> {
-  const { mutations, selectors } = options;
-
-  class EnhancedBox extends Box {}
-
-  if (options.name) {
-    Object.defineProperty(EnhancedBox, 'name', { value: options.name });
+export function createBoxFactory<B extends Box, SB extends Box = Box>(
+  options: BoxFactoryOptions<B, SB>,
+): BoxFactory<B> {
+  class EnhancedBox extends Box {
+    static extends<NB extends Box>(nextOptions: BoxFactoryOptions<NB, B>): BoxFactory<NB> {
+      Object.assign(nextOptions.mutations, options.mutations);
+      Object.assign(nextOptions.selectors, options.selectors);
+      nextOptions.name = resolveCallerName();
+      return createBoxFactory(nextOptions);
+    }
   }
 
-  function createBox<S>(key: string, initialState: S): ShapedBox<S, KM, KS> {
-    const box = new Box(key, initialState);
-    for (const km in mutations) {
-      if (mutations.hasOwnProperty(km)) {
-        Object.defineProperty(box, km, {
-          value: box.mutation((state: any, ...args) => state[km](...args), `${key}.${km}`),
-        });
-      }
-    }
-    for (const ks in selectors) {
-      if (selectors.hasOwnProperty(ks)) {
-        Object.defineProperty(box, ks, {
-          value: selector((select: any, ...args) => select(box)[ks](...args), { type: ks }),
-        });
-      }
-    }
-    return box as any;
+  if (process.env.NODE_ENV === 'development') {
+    options.name ??= resolveCallerName();
+    Object.defineProperty(EnhancedBox, 'name', { value: options.name || '' });
   }
 
-  createBox.extends = <NPS, NKM extends keyof NPS & string, NKS extends keyof NPS & string>(
-    nextProto: CtorValue<NPS, any[]>,
-    options: BoxFactoryOptions<NKM, NKS>,
-  ): BoxFactory<KM | NKM, KS | NKS> => {
-    return createBoxFactory<NPS & PS, KM | NKM, KS | NKS>(ANY, {
-      mutations: { ...mutations, ...options.mutations },
-      selectors: { ...selectors, ...options.selectors },
-    });
-  };
+  implementation<EnhancedBox>(EnhancedBox, options.mutations, options.selectors);
 
-  return createBox as any;
+  return EnhancedBox as any;
 }
