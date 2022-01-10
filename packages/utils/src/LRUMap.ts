@@ -7,7 +7,7 @@ import { threw } from './misc';
 import { StorageMap } from './storage';
 import { IDOf, PartialRecord, ToString } from './types';
 
-interface LRUNode<K, T> {
+export interface LRUNode<K, T> {
   key: IDOf<K>;
   value: T;
   left: this | undefined;

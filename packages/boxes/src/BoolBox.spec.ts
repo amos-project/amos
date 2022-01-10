@@ -3,12 +3,22 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { boolBox } from 'amos-testing';
+import { darkModeBox, dispatch, select } from 'amos-testing';
 
 describe('BoolBox', function () {
   it('should create BoolBox', () => {
-    boolBox.toggle();
-    boolBox.open();
-    boolBox.close();
+    expect([
+      select(darkModeBox),
+      dispatch(darkModeBox.toggle()),
+      select(darkModeBox),
+      dispatch(darkModeBox.close()),
+      select(darkModeBox),
+      dispatch(darkModeBox.open()),
+      select(darkModeBox),
+      dispatch(darkModeBox.setState(false)),
+      select(darkModeBox),
+      dispatch(darkModeBox.mergeState(true)),
+      select(darkModeBox),
+    ]).toEqual([false, true, true, false, false, true, true, false, false, true, true]);
   });
 });

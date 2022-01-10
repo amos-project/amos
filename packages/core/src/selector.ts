@@ -59,9 +59,7 @@ export interface SelectorOptions<A extends any[], R> {
   /**
    * The cache key of a selector created by the factory.
    *
-   * If set, the selector's result will be cached. You should cache a selector
-   * if it is expensive, or it is always changed even if its dependencies is
-   * not changed.
+   * If set, the selector's result will be cached. You should cache a selector if it is expensive.
    *
    * @param select
    * @param args

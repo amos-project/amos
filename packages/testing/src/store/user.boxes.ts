@@ -3,7 +3,7 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { createRecordMapBox } from 'amos-boxes';
+import { createListBox, createRecordMapBox } from 'amos-boxes';
 import { Record, RecordMap } from 'amos-shapes';
 
 export class UserRecord extends Record({
@@ -36,3 +36,5 @@ export const userMapBox = createRecordMapBox('user.userMap', new UserRecord(), '
   father: ['fatherId'],
   mother: ['motherId'],
 });
+
+export const onlineUserListBox = createListBox('users.onlineList', 0);

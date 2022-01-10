@@ -3,7 +3,7 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { Box, BoxOptions } from 'amos-core';
+import { Box } from 'amos-core';
 
 // should consider the method is selector and mutation at the same time.
 // note: don't plan to deal with restricted types of scenarios, it should be the base box type.
@@ -11,7 +11,7 @@ export class NumberBox extends Box<number> {
   add = this.mutation((state, value: number) => state + value, 'ADD');
   multiply = this.mutation((state, value: number) => state * value, 'MULTIPLY');
 
-  constructor(key: string, initialState: number = 0, options?: BoxOptions<number>) {
-    super(key, initialState, options);
+  constructor(key: string, initialState: number = 0) {
+    super(key, initialState);
   }
 }

@@ -5,4 +5,6 @@
 
 import { createStore } from 'amos-core';
 
-export const entry = createStore();
+export const store = createStore();
+
+export const { select, dispatch } = store;

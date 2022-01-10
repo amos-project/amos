@@ -10,6 +10,7 @@ export * from './equals';
 export * from './JSONSerializable';
 export * from './LRUMap';
 export * from './misc';
+export * from './NotImplemented';
 export * from './OMap';
 export * from './OSet';
 export * from './storage';

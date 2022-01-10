@@ -3,9 +3,16 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { clone } from 'amos-utils';
-import { resolveCallerName, threw, warning } from '../../utils/src/misc';
-import { Selector, selector, SelectorOptions } from './selector';
+import {
+  clone,
+  Ctor,
+  FnValue,
+  NotImplemented,
+  resolveCallerName,
+  resolveFnValue,
+  threw,
+  WellPartial,
+} from 'amos-utils';
 import { SignalFactory } from './signal';
 import { AmosObject, createAmosObject } from './types';
 
@@ -13,116 +20,37 @@ export interface Mutation<A extends any[] = any, S = any> extends AmosObject<'MU
   type: string;
   args: A;
   box: Box<S>;
-  mutator: (state: S, ...args: A) => S;
+  mutator: (this: Box<S>, state: S, ...args: A) => S;
 }
+
+export type MutationFactory<A extends any[], S> = (this: Box<S>, ...args: A) => Mutation<A, S>;
 
 export interface BoxOptions<S> {}
 
 export class Box<S = any> {
   readonly signals: Record<string, (state: S, data: any) => S> = {};
-
-  /**
-   * replace state with new state.
-   *
-   * @param nextState - the next state or its factory
-   */
-  setState = this.mutation((state, nextState: S | ((prevState: S) => S)) => {
-    state = typeof nextState === 'function' ? (nextState as (prevState: S) => S)(state) : nextState;
-    if (process.env.NODE_ENV === 'development') {
-      warning(typeof state === 'function', 'state should not be a function.');
-    }
-    return state;
-  }, 'SET_STATE');
-
-  /**
-   * merge state with partial props, it only works with object state.
-   *
-   * @param partialNextState - the partial next state properties or its factory
-   */
-  mergeState = this.mutation(
-    (state, partialNextState: Partial<S> | ((prevState: S) => Partial<S>)) => {
-      return clone(
-        state,
-        typeof partialNextState === 'function'
-          ? (partialNextState as (prevState: S) => Partial<S>)(state)
-          : partialNextState,
-      );
-    },
-    'MERGE_STATE',
-  );
-
-  /**
-   * Reset state to the initial state.
-   */
-  resetState = this.mutation(() => this.initialState, 'RESET_STATE');
+  readonly options: BoxOptions<S>;
 
   /**
    * create a box instance
    *
    * @param key - the unique key of the box, it should be unique in your system
    * @param initialState - the initial state of the box, it should not be a function
-   * @param options - the extra options for the box {@see BoxOptions}
    */
-  constructor(
-    readonly key: string,
-    readonly initialState: S,
-    readonly options: BoxOptions<S> = {},
-  ) {
+  constructor(readonly key: string, readonly initialState: S) {
     if (process.env.NODE_ENV === 'development') {
       threw(typeof initialState === 'function', 'initialState should not be a function.');
     }
-  }
-
-  selector<A extends any[], R>(
-    computer: (state: S, ...args: A) => R,
-    options?: SelectorOptions<A, R>,
-  ): (...args: A) => Selector<A, R>;
-  selector<T>(key: keyof S): T;
-  selector(a?: any, b: any = {}) {
-    if (typeof a === 'string') {
-      b.type ??= a;
-      return selector((select, ...args: any) => (select(this) as any)[a](...args), b);
-    }
-    const computer = a;
-    const options = b;
-    if (process.env.NODE_ENV === 'development' && !options.type) {
-      options.type = resolveCallerName();
-    } else {
-      options.type = 'ANONYMOUS';
-    }
-    return selector((select, ...args: any) => computer(select(this), ...args), options);
+    this.options = {};
   }
 
   /**
-   * Create a mutation factory, which returns a mutation object.
-   * mutation is dispatchable.
-   * The returns value will be used as the next state of the box.
-   *
-   * @param mutator
-   * @param type
+   * Update the options of the box.
+   * @param options
    */
-  mutation<A extends any[]>(
-    mutator: (state: S, ...args: A) => S,
-    type?: string,
-  ): (...args: A) => Mutation<A, S>;
-  mutation<T>(key: keyof S): T;
-  mutation(a: any, type?: string) {
-    if (typeof a === 'string') {
-      return this.mutation((state: any, ...args: any) => state[a](...args), a);
-    }
-    if (process.env.NODE_ENV === 'development' && !type) {
-      type = resolveCallerName();
-    } else {
-      type = 'ANONYMOUS';
-    }
-    const mutator = a;
-    return (...args: any) =>
-      createAmosObject('MUTATION', {
-        mutator,
-        type: type!,
-        args,
-        box: this,
-      });
+  config(options: Partial<BoxOptions<S>>): this {
+    Object.assign(this.options, options);
+    return this;
   }
 
   /**
@@ -135,4 +63,85 @@ export class Box<S = any> {
     this.signals[signal.type] = handler;
     return this;
   }
+
+  /**
+   * replace state with new state.
+   *
+   * @param nextState - the next state or its transformer
+   */
+  setState(nextState: FnValue<S, [S]>): Mutation<[FnValue<S, [S]>], S> {
+    throw new NotImplemented();
+  }
+
+  /**
+   * merge state with partial props, it only works with object state.
+   *
+   * @param partialNextState - the partial next state properties or its factory
+   */
+  mergeState(partialNextState: FnValue<WellPartial<S>, [S]>): Mutation<[WellPartial<S>], S> {
+    throw new NotImplemented();
+  }
+
+  /**
+   * Reset state to the initial state.
+   */
+  resetState(): Mutation<[], S> {
+    throw new NotImplemented();
+  }
 }
+
+export function mutation<S, A extends any[]>(
+  box: Box<S>,
+  mutator: (state: S, ...args: A) => S,
+  type?: string,
+): MutationFactory<A, S> {
+  if (!type && process.env.NODE_ENV === 'development') {
+    type = resolveCallerName();
+  }
+  return (...args: A) => createAmosObject('MUTATION', { type: type!, box, args, mutator });
+}
+
+/**
+ * implementation the mutations & selectors for a box.
+ * @param box
+ * @param mutations
+ * @param selectors
+ */
+export function implementation<B extends Box>(
+  box: Ctor<B, any[]>,
+  mutations: {
+    [P in keyof B]?: B[P] extends (...args: infer A) => B['initialState']
+      ? (state: B['initialState'], ...args: A) => B['initialState']
+      : null;
+  },
+  selectors: {
+    [P in keyof B]?: B[P] extends (...args: infer A) => infer R
+      ? (state: B['initialState'], ...args: A) => R
+      : null;
+  },
+) {
+  for (const k in mutations) {
+    const mutator =
+      typeof mutations[k] === 'function'
+        ? mutations[k]
+        : (state: any, ...args: any[]) => state[k](...args);
+    (Box.prototype as any)[k] = function (...args: any[]) {
+      return createAmosObject('MUTATION', { k, args, mutator, box: this });
+    };
+  }
+  Object.assign(Box.prototype, mutations, selectors);
+}
+
+implementation(
+  Box,
+  {
+    setState: <S>(state: S, nextState: FnValue<S, [S]>) => resolveFnValue(nextState, state),
+    mergeState: <S>(state: S, partialNextState: FnValue<WellPartial<S>, [S]>) => {
+      return clone(state, resolveFnValue(partialNextState, state));
+    },
+    resetState: function () {
+      return this.initialState;
+    },
+  },
+  {},
+);

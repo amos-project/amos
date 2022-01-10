@@ -3,21 +3,11 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import {
-  addCount,
-  addTwiceAsync,
-  countBox,
-  expectCalled,
-  setUserName,
-  reset,
-  selectDoubleCount,
-  userBox,
-  UserModel,
-} from 'amos-testing';
+import fn = jest.fn;
+import { countBox, expectCalled, logout } from 'amos-testing';
 import { selector } from './selector';
 import { Store } from './store';
 import { Select } from './types';
-import fn = jest.fn;
 
 describe('new Store', () => {
   it('should create store', () => {
@@ -56,7 +46,7 @@ describe('store.snapshot', () => {
 describe('store.dispatch', () => {
   it('should dispatch mutation', () => {
     const store = new Store({ count: 1 });
-    const r1 = store.dispatch(addCount(2));
+    const r1 = store.dispatch(countBox.add(2));
     expect(r1).toEqual(2);
     expect(store.select(countBox)).toEqual(3);
   });
@@ -71,7 +61,7 @@ describe('store.dispatch', () => {
   it('should dispatch signal', () => {
     const store = new Store({ count: 1 });
     store.select(countBox);
-    const r1 = store.dispatch(reset(2));
+    const r1 = store.dispatch(logout());
     expect(r1).toEqual({ count: 2 });
     expect(store.select(countBox)).toEqual(2);
   });
@@ -80,7 +70,7 @@ describe('store.dispatch', () => {
     const store = new Store({ count: 1 });
     store.select(countBox);
     const [r1, r2, r3] = await Promise.all(
-      store.dispatch([reset(2), addCount(2), addTwiceAsync(2)]),
+      store.dispatch([logout(), addCount(2), addTwiceAsync(2)]),
     );
     expect(r1.count).toBe(2);
     expect(r2).toEqual(2);

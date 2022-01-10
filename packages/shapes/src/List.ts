@@ -128,6 +128,12 @@ export class List<E> extends Cloneable implements JSONSerializable<readonly E[]>
     return this.reset(data);
   }
 
+  unshift(...items: E[]): this {
+    const data = this.data.slice();
+    data.unshift(...items);
+    return this.reset(data);
+  }
+
   slice(start?: number, end?: number): this {
     return this.reset(this.data.slice(start, end));
   }
@@ -146,14 +152,9 @@ export class List<E> extends Cloneable implements JSONSerializable<readonly E[]>
     return this.reset(data);
   }
 
-  delete(index: number): this {
-    return this.splice(index, 1);
-  }
-
-  unshift(...items: E[]): this {
-    const data = this.data.slice();
-    data.unshift(...items);
-    return this.reset(data);
+  delete(item: E): this {
+    const index = this.data.indexOf(item);
+    return index === -1 ? this : this.splice(index, 1);
   }
 
   set(index: number, value: E): this {
@@ -167,4 +168,4 @@ export class List<E> extends Cloneable implements JSONSerializable<readonly E[]>
   }
 }
 
-export type ListElem<L> = L extends List<infer E> ? E : never;
+export type ListElement<L> = L extends List<infer E> ? E : never;

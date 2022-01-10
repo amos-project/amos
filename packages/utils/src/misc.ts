@@ -3,7 +3,7 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { CtorValue } from './types';
+import { CtorValue, FnValue } from './types';
 
 export function resolveCallerName(depth = 2) {
   try {
@@ -52,4 +52,8 @@ export const ANY: any = void 0;
 
 export function resolveCtorValue<V>(value: CtorValue<V>): V {
   return typeof value === 'function' ? new (value as any)() : value;
+}
+
+export function resolveFnValue<V, A extends any[]>(value: FnValue<V, A>, ...args: A): V {
+  return typeof value === 'function' ? (value as any)(...args) : value;
 }

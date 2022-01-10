@@ -35,9 +35,7 @@ export class OMap<V, K = string> implements StorageMap<IDOf<K>, V> {
   }
 
   takeItem(key: IDOf<K>): V {
-    if (process.env.NODE_ENV === 'development') {
-      threw(!this.hasItem(key), `Cannot get non-existent key ${key}.`);
-    }
+    threw(!this.hasItem(key), `Cannot take non-existent key ${key}.`);
     return this.data[key]!;
   }
 

@@ -3,20 +3,17 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { Subscribe, Unsubscribe } from 'amos-utils';
-import { OMap } from '../../utils/src/OMap';
-import { OSet } from '../../utils/src/OSet';
+import { isJSONSerializable, LRUMap, OMap, OSet, Subscribe, Unsubscribe } from 'amos-utils';
+import { isArray, threw, toString } from '../../utils/src/misc';
 import { Box } from './box';
-import { LRUMap } from '../../utils/src/LRUMap';
 import { SelectorFactory } from './selector';
 import { Dispatch, Dispatchable, Select, Selectable, Snapshot } from './types';
-import { isArray, threw, toString } from '../../utils/src/misc';
 
 export interface StoreOptions {
   cacheSize?: number;
 }
 
-export interface SelectorCache<A extends any[] = any, R = any> extends LRUNode {
+export interface SelectorCache<A extends any[] = any, R = any> {
   factory: SelectorFactory<A, R>;
   args: A;
   value: R;
@@ -45,6 +42,7 @@ export class Store {
     this.listeners = [];
     this.dispatching = void 0;
     this.cache = new LRUMap<SelectorCache>(options.cacheSize ?? Store.DEFAULT_CACHE_SIZE);
+    this.selectorStack = [];
   }
 
   /**
@@ -81,6 +79,51 @@ export class Store {
   }
 
   /**
+   * Expose {@see _dispatch} publicly as a property for callbacks.
+   *
+   * @param tasks
+   */
+  readonly dispatch: Dispatch = (tasks: any) => this._dispatch(tasks);
+
+  /**
+   * expose {@see _select} publicly and callbacks.
+   *
+   * @param selectable
+   */
+  select: Select = (selectable: Selectable) => this._select(selectable);
+
+  /**
+   * Reset internal state, used for HMR.
+   *
+   * The works includes:
+   *
+   * 1. Remove registered boxes
+   * 2. Clean up selector caches
+   * 3. Serialize and clean up state (works only if set serializeState).
+   *
+   * @param serializeState - if true, will serialize state and reload it with new boxes, you
+   *                         should set is only if your box's state shape (include prototype)
+   *                         is changed.
+   */
+  resetInternalState(serializeState: boolean) {
+    if (process.env.NODE_ENV === 'development') {
+      threw(
+        !!this.dispatching || !!this.selectorStack.length,
+        'You cannot call resetInternalState in an action or selector.',
+      );
+    }
+    if (serializeState) {
+      this.preloadedState = Object.assign(
+        this.preloadedState || {},
+        JSON.parse(JSON.stringify(this.state)),
+      );
+      this.state = {};
+    }
+    this.boxes.clear();
+    this.notify();
+  }
+
+  /**
    * Initialize a box, register it and preload its preloaded state.
    *
    * @param box
@@ -88,14 +131,16 @@ export class Store {
    */
   protected ensureBox(box: Box) {
     if (!this.boxes.hasOwnProperty(box.key)) {
-      this.boxes.set(box.key, box);
+      this.boxes.setItem(box.key, box);
     }
     if (this.state.hasOwnProperty(box.key)) {
       return this.state[box.key];
     }
     let boxState = box.initialState;
     if (this.preloadedState.hasOwnProperty(box.key)) {
-      boxState = box.options.preload!(this.preloadedState[box.key], boxState);
+      boxState = isJSONSerializable(box.initialState)
+        ? box.initialState.fromJSON(this.preloadedState[box.key])
+        : this.preloadedState[box.key];
     }
     this.state[box.key] = boxState;
     return boxState;
@@ -112,7 +157,7 @@ export class Store {
       return;
     }
     delete this.state[key];
-    this.ensureBox(this.boxes.take(key));
+    this.ensureBox(this.boxes.takeItem(key));
     this.notify();
   }
 
@@ -123,15 +168,15 @@ export class Store {
    * @protected
    */
   protected _exec(dispatchable: Dispatchable) {
-    switch (dispatchable.$object) {
+    switch (dispatchable.$amos) {
       case 'ACTION':
         // TODO: consider wrap dispatch with some context information
         //  to track the dispatch stack.
         return dispatchable.factory.actor(this.dispatch, this.select, ...dispatchable.args);
       case 'MUTATION':
-        this.ensureBox(dispatchable.factory.box);
-        const key = dispatchable.factory.box.key;
-        const nextState = dispatchable.factory.mutator(this.state[key], ...dispatchable.args);
+        this.ensureBox(dispatchable.box);
+        const key = dispatchable.box.key;
+        const nextState = dispatchable.mutator(this.state[key], ...dispatchable.args);
         if (nextState !== this.state[key]) {
           this.state[key] = nextState;
         }
@@ -141,7 +186,7 @@ export class Store {
           if (!this.boxes.hasOwnProperty(key)) {
             continue;
           }
-          const box = this.boxes.take(key);
+          const box = this.boxes.takeItem(key);
           const fn = box.signals[dispatchable.type];
           if (!fn) {
             continue;
@@ -201,13 +246,6 @@ export class Store {
   }
 
   /**
-   * Expose {@see _dispatch} publicly as a property for callbacks.
-   *
-   * @param tasks
-   */
-  readonly dispatch: Dispatch = (tasks: any) => this._dispatch(tasks);
-
-  /**
    * Select a selectable, and cache its result.
    *
    * A selectable could be:
@@ -221,7 +259,7 @@ export class Store {
    */
   protected _select(selectable: Selectable) {
     // select function
-    if (typeof selectable === 'function' && !('$object' in selectable)) {
+    if (typeof selectable === 'function' && !('$amos' in selectable)) {
       return selectable(this.select);
     }
 
@@ -237,8 +275,8 @@ export class Store {
     }
 
     // select selector or selector factory
-    const args = selectable.$object === 'SELECTOR_FACTORY' ? [] : selectable.args;
-    const factory = selectable.$object === 'SELECTOR_FACTORY' ? selectable : selectable.factory;
+    const args = selectable.$amos === 'SELECTOR_FACTORY' ? [] : selectable.args;
+    const factory = selectable.$amos === 'SELECTOR_FACTORY' ? selectable : selectable.factory;
     const key = factory.cacheKey?.(...args);
     if (!key && key !== '') {
       return factory.compute(this.select, ...args);
@@ -269,43 +307,5 @@ export class Store {
     } finally {
       this.selectorStack.pop();
     }
-  }
-
-  /**
-   * expose {@see _select} publicly and callbacks.
-   *
-   * @param selectable
-   */
-  select: Select = (selectable: Selectable) => this._select(selectable);
-
-  /**
-   * Reset internal state, used for HMR.
-   *
-   * The works includes:
-   *
-   * 1. Remove registered boxes
-   * 2. Clean up selector caches
-   * 3. Serialize and clean up state (works only if set serializeState).
-   *
-   * @param serializeState - if true, will serialize state and reload it with new boxes, you
-   *                         should set is only if your box's state shape (include prototype)
-   *                         is changed.
-   */
-  resetInternalState(serializeState: boolean) {
-    if (process.env.NODE_ENV === 'development') {
-      threw(
-        !!this.dispatching || !!this.selectorStack.length,
-        'You cannot call resetInternalState in an action or selector.',
-      );
-    }
-    if (serializeState) {
-      this.preloadedState = Object.assign(
-        this.preloadedState || {},
-        JSON.parse(JSON.stringify(this.state)),
-      );
-      this.state = {};
-    }
-    this.boxes.clear();
-    this.notify();
   }
 }

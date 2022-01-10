@@ -3,6 +3,8 @@
  * @author junbao <junbao@moego.pet>
  */
 
+import { WellPartial } from './types';
+
 export class Cloneable {
   private _isValid: boolean | undefined;
 
@@ -21,7 +23,7 @@ export class Cloneable {
  * @param obj - the object to be cloned.
  * @param props - the properties to override.
  */
-export function clone<T>(obj: T, props: Partial<T>): T {
+export function clone<T>(obj: T, props: WellPartial<T>): T {
   if (!obj || typeof obj !== 'object') {
     return props as T;
   }

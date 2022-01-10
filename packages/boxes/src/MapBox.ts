@@ -16,7 +16,6 @@ export class MapBox<S extends Map<any, any>> extends Box<S> {
     callbackFn: (value: MapValue<S>, key: MapKey<S>, index: number) => U,
   ) => Selector<[(value: MapValue<S>, key: MapKey<S>, index: number) => U], U[]> =
     this.selector('map');
-
   set: (key: MapKey<S>, value: MapValue<S>) => Mutation<[MapKey<S>, MapValue<S>], S> =
     this.mutation('setItem');
   merge: (
@@ -36,5 +35,5 @@ export function createMapBox<K, V>(
   inferKey: K,
   defaultValue: V,
 ): MapBox<Map<IDOf<K>, V>> {
-  return new MapBox(key, new Map(inferKey as IDOf<K>, defaultValue));
+  return new MapBox(key, new Map(defaultValue));
 }
