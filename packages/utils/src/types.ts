@@ -30,3 +30,5 @@ export type PrimitiveOf<T> = T extends object ? never : T;
 export type WellPartial<T> = T extends object ? Partial<T> : T;
 
 export type Mutable<T> = { -readonly [P in keyof T]: T[P] };
+
+export type AnyFn = (...args: any[]) => any;

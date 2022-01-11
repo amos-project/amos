@@ -9,6 +9,5 @@ export * from './ListMapBox';
 export * from './MapBox';
 export * from './NumberBox';
 export * from './PagedListBox';
-export * from './PagedListMapBox';
 export * from './RecordBox';
 export * from './RecordMapBox';

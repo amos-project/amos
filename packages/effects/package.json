@@ -1,16 +1,18 @@
 {
-  "name": "amos-redux",
+  "name": "amos-effects",
   "version": "0.3.0-beta.1",
-  "description": "Hybrid amos with redux.",
+  "description": "The builtin effects library for amos boxes.",
   "keywords": [
     "amos",
-    "redux",
-    "hybrid"
+    "effects",
+    "io",
+    "http"
   ],
   "author": "acrazing <joking.young@gmail.com>",
   "homepage": "https://github.com/acrazing/amos",
   "license": "MIT",
-  "main": "dist/redux.cjs.js",
+  "main": "dist/amos-effects.cjs.js",
+  "module": "dist/amos-effects.esm.js",
   "files": [
     "dist"
   ],
@@ -25,18 +27,6 @@
     "url": "https://github.com/acrazing/amos/issues"
   },
   "dependencies": {
-    "amos": "^0.3.0-beta.1",
-    "amos-react": "^0.3.0-beta.1",
     "tslib": "^2.3.0"
-  },
-  "peerDependencies": {
-    "@types/react-redux": "*",
-    "react-redux": "*",
-    "redux": "*"
-  },
-  "devDependencies": {
-    "@reduxjs/toolkit": "^1.6.1",
-    "react-redux": "^7.2.4",
-    "redux": "^4.1.0"
   }
 }
