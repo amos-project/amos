@@ -21,10 +21,12 @@ export type Ctor<T, A extends any[] = []> = new (...args: A) => T;
 
 export type ToString<T> = T extends string ? T : T extends { toString(): infer U } ? (U extends string ? U : string) : string;
 
-export type PartialRecord<K extends keyof any, V> = { [P in K]?: V };
+export type PartialRecord<K extends keyof any, V> = { [P in K]+?: V };
 export type PartialRequired<T, K extends keyof T> = Required<Pick<T, K>> & Partial<Omit<T, K>>;
 export type Pair<K, V> = readonly [K, V];
 
 export type PrimitiveOf<T> = T extends object ? never : T;
 
 export type WellPartial<T> = T extends object ? Partial<T> : T;
+
+export type Mutable<T> = { -readonly [P in keyof T]: T[P] };

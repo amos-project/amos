@@ -3,11 +3,18 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { numberBox } from 'amos-testing';
+import { applyMutations, countBox } from 'amos-testing';
 
 describe('NumberBox', function () {
   it('should create NumberBox', function () {
-    numberBox.add(1);
-    numberBox.multiply(2);
+    expect(
+      applyMutations(countBox.initialState, [
+        countBox.add(1),
+        countBox.minus(-1),
+        countBox.multiply(2),
+        countBox.divide(2),
+        countBox.mod(2),
+      ]),
+    ).toEqual([1, 2, 4, 2, 0]);
   });
 });

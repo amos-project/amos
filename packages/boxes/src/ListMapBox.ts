@@ -3,11 +3,23 @@
  * @author junbao <junbao@moego.pet>
  */
 
+import { BoxWithStateMethods } from 'amos-core';
 import { List, ListMap } from 'amos-shapes';
 import { IDOf } from 'amos-utils';
 import { MapBox } from './MapBox';
 
-export class ListMapBox<S extends ListMap<any, any>> extends MapBox<S> {}
+export type ListMapBox<LM extends ListMap<any, any>> = BoxWithStateMethods<
+  LM,
+  never,
+  never,
+  MapBox<LM>
+>;
+
+export const ListMapBox = MapBox.extends({
+  name: 'ListMap',
+  mutations: {},
+  selectors: {},
+});
 
 export function createListMapBox<K, E>(
   key: string,

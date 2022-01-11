@@ -4,7 +4,7 @@
  */
 
 import { resolveCallerName } from 'amos-utils';
-import { Box, implementation, Mutation, MutationFactory } from './box';
+import { Box, BoxState, implementation, Mutation, MutationFactory } from './box';
 import { Selector, SelectorFactory } from './selector';
 
 export type BoxWithStateMethods<
@@ -19,7 +19,7 @@ export type BoxWithStateMethods<
 };
 
 export interface BoxFactory<B extends Box> {
-  new <S, SB extends Box<S>>(key: string, initialState: S): SB;
+  new <SB extends Box>(key: string, initialState: BoxState<SB>): SB;
 
   extends<NB extends Box>(options: BoxFactoryOptions<NB, B>): BoxFactory<NB>;
 }
@@ -49,7 +49,9 @@ export function createBoxFactory<B extends Box, SB extends Box = Box>(
     static extends<NB extends Box>(nextOptions: BoxFactoryOptions<NB, B>): BoxFactory<NB> {
       Object.assign(nextOptions.mutations, options.mutations);
       Object.assign(nextOptions.selectors, options.selectors);
-      nextOptions.name = resolveCallerName();
+      if (process.env.NODE_ENV === 'development') {
+        nextOptions.name ??= resolveCallerName();
+      }
       return createBoxFactory(nextOptions);
     }
   }

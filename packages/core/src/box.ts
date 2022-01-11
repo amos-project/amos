@@ -7,6 +7,7 @@ import {
   clone,
   Ctor,
   FnValue,
+  Mutable,
   NotImplemented,
   resolveCallerName,
   resolveFnValue,
@@ -53,6 +54,11 @@ export class Box<S = any> {
     return this;
   }
 
+  resetInitialState(state: FnValue<S, [S]>): this {
+    (this as Mutable<this>).initialState = resolveFnValue(state, this.initialState);
+    return this;
+  }
+
   /**
    * subscribe a signal
    *
@@ -90,6 +96,8 @@ export class Box<S = any> {
   }
 }
 
+export type BoxState<B extends Box> = B extends Box<infer S> ? S : never;
+
 export function mutation<S, A extends any[]>(
   box: Box<S>,
   mutator: (state: S, ...args: A) => S,
@@ -110,7 +118,7 @@ export function mutation<S, A extends any[]>(
 export function implementation<B extends Box>(
   box: Ctor<B, any[]>,
   mutations: {
-    [P in keyof B]?: B[P] extends (...args: infer A) => B['initialState']
+    [P in keyof B]?: B[P] extends (...args: infer A) => Mutation<infer A, B['initialState']>
       ? (state: B['initialState'], ...args: A) => B['initialState']
       : null;
   },

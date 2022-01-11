@@ -1,6 +1,8 @@
 /*
  * @since 2022-01-05 10:03:21
  * @author junbao <junbao@moego.pet>
+ *
+ * keep atomic boxes
  */
 
 import { BoolBox, NumberBox } from 'amos-boxes';

@@ -3,7 +3,7 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { ID, ToString } from './types';
+import { ID, ToString, WellPartial } from './types';
 
 /**
  * The map api based on the storage api rather than map.
@@ -16,7 +16,7 @@ export interface StorageMap<K extends ID, V> {
   getItem(key: K): V | undefined;
 
   setItem(key: K, value: V): this;
-  mergeItem(key: K, value: Partial<V>): this;
+  mergeItem(key: K, value: WellPartial<V>): this;
 
   removeItem(key: K): this;
   clear(): this;

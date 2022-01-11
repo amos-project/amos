@@ -1,6 +1,8 @@
 /*
  * @since 2022-01-10 19:51:44
  * @author junbao <junbao@moego.pet>
+ *
+ * record box
  */
 
 import { createRecordBox } from 'amos-boxes';

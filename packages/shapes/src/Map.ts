@@ -11,8 +11,10 @@ import {
   JSONState,
   Pair,
   PartialRecord,
+  propsEqual,
   StorageMap,
   ToString,
+  WellPartial,
 } from 'amos-utils';
 
 export class Map<K extends ID, V>
@@ -27,15 +29,17 @@ export class Map<K extends ID, V>
   }
 
   fromJSON(state: JSONState<PartialRecord<K, V>>): this {
-    const that = clone(this, { data: {} } as any);
-    for (const key in state) {
-      if (isJSONSerializable(that.defaultValue)) {
-        that.data[key as unknown as K] = that.defaultValue.fromJSON(state[key]);
-      } else {
-        that.data[key as unknown as K] = clone(that.defaultValue, state[key]);
+    const data: PartialRecord<K, V> = {};
+    if (isJSONSerializable(this.defaultValue)) {
+      for (const key in state) {
+        data[key as unknown as K] = this.defaultValue.fromJSON(state[key]);
+      }
+    } else {
+      for (const key in state) {
+        data[key as unknown as K] = clone(this.defaultValue, state[key] as any);
       }
     }
-    return that;
+    return this.reset(data);
   }
 
   size() {
@@ -58,27 +62,7 @@ export class Map<K extends ID, V>
     if (this.getItem(key) === item) {
       return this;
     }
-    return clone(this, {
-      data: {
-        ...this.data,
-        [key]: item,
-      },
-    } as any);
-  }
-
-  mergeItem(key: K, props: Partial<V>): this {
-    const value = this.getItem(key);
-    for (const key in props) {
-      if (value[key] !== props[key]) {
-        return clone(this, {
-          data: {
-            ...this.data,
-            [key]: clone(value, props),
-          },
-        } as any);
-      }
-    }
-    return this;
+    return this.reset({ ...this.data, [key]: item });
   }
 
   setAll(items: readonly Pair<K, V>[]): this {
@@ -86,39 +70,32 @@ export class Map<K extends ID, V>
     if (items.length === 0) {
       return this;
     }
-    return clone(this, {
-      data: {
-        ...this.data,
-        ...items.reduce((prev, now) => {
-          prev[now[0]] = now[1];
-          return prev;
-        }, {} as Record<K, V>),
-      },
-    } as any);
+    const data = { ...this.data };
+    for (const [key, value] of items) {
+      data[key] = value;
+    }
+    return this.reset(data);
   }
 
-  mergeAll(items: readonly Pair<K, Partial<V>>[]): this {
-    items = items.filter(([key, props]) => {
-      const value = this.getItem(key);
-      for (const p in props) {
-        if (value[p] !== props[p]) {
-          return true;
-        }
-      }
-      return false;
-    });
+  mergeItem(key: K, props: WellPartial<V>): this {
+    const value = this.getItem(key);
+    if (propsEqual<any>(value, props)) {
+      return this;
+    }
+    return this.setItem(key, clone(value, props));
+  }
+
+  mergeAll(items: readonly Pair<K, WellPartial<V>>[]): this {
+    items = items.filter(([key, props]) => !propsEqual(this.getItem(key), props));
     if (items.length === 0) {
       return this;
     }
-    return clone(this, {
-      data: {
-        ...this.data,
-        ...items.reduce((prev, now) => {
-          prev[now[0]] = clone(this.getItem(now[0]), now[1]);
-          return prev;
-        }, {} as Record<K, V>),
-      },
-    } as any);
+
+    const data = { ...this.data };
+    for (const [key, props] of items) {
+      data[key] = clone(this.getItem(key), props);
+    }
+    return this.reset(data);
   }
 
   updateItem(key: K, updater: (v: V) => V): this {
@@ -129,24 +106,26 @@ export class Map<K extends ID, V>
     if (!this.hasItem(key)) {
       return this;
     }
-    const that = clone(this, { data: { ...this.data } } as any);
-    delete that.data[key];
-    return that;
+    const data = { ...this.data };
+    delete data[key];
+    return this.reset(data);
   }
 
   clear(): this {
-    return clone(this, { data: {} } as {});
+    return this.reset({});
   }
 
   map<U>(callbackFn: (value: V, key: ToString<K>, index: number) => U): U[] {
     const result: U[] = [];
     let index = 0;
     for (const key in this.data) {
-      if (this.data.hasOwnProperty(key)) {
-        result.push(callbackFn(this.data[key as K]!, key as ToString<K>, index++));
-      }
+      result.push(callbackFn(this.data[key as K]!, key as ToString<K>, index++));
     }
     return result;
+  }
+
+  reset(data: PartialRecord<K, V>): this {
+    return clone(this, { data } as WellPartial<this>);
   }
 }
 

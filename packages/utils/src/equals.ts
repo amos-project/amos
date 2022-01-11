@@ -3,6 +3,19 @@
  * @author junbao <junbao@moego.pet>
  */
 
+import { WellPartial } from './types';
+
+/** @internal */
+export function shimObjectIs(x: any, y: any) {
+  if (x === y) {
+    return x !== 0 || 1 / x === 1 / y;
+  } else {
+    return x !== x && y !== y;
+  }
+}
+
+export const is: (x: any, y: any) => boolean = Object.is || shimObjectIs;
+
 /**
  * Returns the first argument
  * @param v
@@ -17,24 +30,23 @@ export type EqualFn<T> = (a: T, b: T) => boolean;
  * @param a
  * @param b
  */
-export function shallowEqual<T extends object>(a: T, b: T): boolean {
-  if (a === b) {
+export function shallowEqual<T>(a: T, b: T): boolean {
+  if (is(a, b)) {
     return true;
   }
   const ka = Object.keys(a) as Array<keyof T>;
   if (ka.length !== Object.keys(b).length) {
     return false;
   }
-  for (let i = 0; i < ka.length; i++) {
-    if (!b.hasOwnProperty(ka[i]) || a[ka[i]] !== b[ka[i]]) {
-      return false;
-    }
-  }
-  return true;
+  return ka.every((k) => a[k] === b[k]);
 }
 
-export function strictEqual<T>(a: T, b: T) {
-  return a === b;
+export function propsEqual<T>(a: T, b: WellPartial<T>): boolean {
+  if (is(a, b)) {
+    return true;
+  }
+  const kb = Object.keys(b) as Array<keyof T>;
+  return kb.every((k) => a[k] === b[k]);
 }
 
 /**

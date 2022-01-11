@@ -3,7 +3,7 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { createRecordMapBox } from 'amos-boxes';
+import { createListMapBox, createRecordMapBox } from 'amos-boxes';
 import { Record } from 'amos-shapes';
 import { userMapBox } from 'amos-testing';
 
@@ -31,3 +31,5 @@ export const mediaMapBox = createRecordMapBox('posts.medias', MediaRecord, 'id')
   post: ['postId', postMapBox],
   user: ['userId', userMapBox],
 });
+
+export const postMediaListBox = createListMapBox('posts.medias.postMediaList', 0, 0);

@@ -3,7 +3,14 @@
  * @author junbao <junbao@mymoement.com>
  */
 
-import { clone, Cloneable, JSONSerializable, JSONState, PartialRequired } from 'amos-utils';
+import {
+  clone,
+  Cloneable,
+  JSONSerializable,
+  JSONState,
+  PartialRequired,
+  WellPartial,
+} from 'amos-utils';
 
 export interface IRecord<P extends object> extends JSONSerializable<P>, Cloneable {
   get<K extends keyof P>(key: K): P[K];
@@ -17,7 +24,7 @@ export interface IRecord<P extends object> extends JSONSerializable<P>, Cloneabl
 export type Record<P extends object> = Readonly<P> & IRecord<P>;
 
 export type RecordProps<T> = T extends Record<infer P> ? P : T;
-export type PartialProps<T> = Partial<RecordProps<T>>;
+export type PartialProps<T> = WellPartial<RecordProps<T>>;
 export type PartialRequiredProps<T, K extends keyof RecordProps<T>> = PartialRequired<
   RecordProps<T>,
   K
@@ -39,7 +46,7 @@ export function Record<P extends object>(props: P): RecordConstructor<P> {
     }
 
     fromJSON(data: JSONState<P>) {
-      const that: any = clone(this, {});
+      const that: any = clone(this, {} as WellPartial<this>);
       for (const k in data) {
         if (that[k]?.fromJSON) {
           that[k] = that[k].fromJSON(data[k]);
@@ -58,7 +65,7 @@ export function Record<P extends object>(props: P): RecordConstructor<P> {
       if (this.get(key) === value) {
         return this;
       }
-      return clone(this, { [key]: value } as unknown as Partial<this>);
+      return clone(this, { [key]: value } as unknown as WellPartial<this>);
     }
 
     merge(props: Partial<P>): this {

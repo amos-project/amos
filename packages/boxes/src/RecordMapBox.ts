@@ -3,78 +3,114 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { Box, BoxOptions, SelectorFactory } from 'amos-core';
-import { Record, RecordMap, RecordMapKeyField, RecordProps } from 'amos-shapes';
-import { CtorValue, FnValue, IDKeyof, IDOf, UnionToIntersection } from 'amos-utils';
+import { Box, BoxWithStateMethods, Mutation, SelectorFactory } from 'amos-core';
+import {
+  MapKey,
+  MapPair,
+  MapValue,
+  PartialProps,
+  PartialRequiredProps,
+  Record,
+  RecordMap,
+  RecordMapKeyField,
+  RecordProps,
+} from 'amos-shapes';
+import {
+  CtorValue,
+  FnValue,
+  IDKeyof,
+  Pair,
+  resolveCtorValue,
+  UnionToIntersection,
+} from 'amos-utils';
 import { MapBox } from './MapBox';
 
-export type RelationMap<TBox extends RecordMapBox<any, any, any>> = {
-  [name: string]: [
-    field: keyof RecordProps<TBox['initialState']['defaultValue']>,
-    box?: FnValue<Box<RecordMap<any, any>>>,
-  ];
-};
+export type RelationMap<TBox> = TBox extends Box
+  ? {
+      [name: string]: [
+        field: keyof RecordProps<TBox['initialState']['defaultValue']>,
+        box?: FnValue<Box<RecordMap<any, any>>>,
+      ];
+    }
+  : {};
 
-export type RelationMethodMap<
-  TBox extends RecordMapBox<any, any, any>,
-  TRelationMap extends RelationMap<TBox>,
-> = {
-  $relations: {
-    [P in keyof TRelationMap as `${Capitalize<`${P & string}`>}`]: TRelationMap[P] extends [
-      infer K,
-      FnValue<Box<RecordMap<infer E, any>>>,
-    ]
-      ? K extends keyof RecordProps<TBox['initialState']['defaultValue']>
-        ? SelectorFactory<[key: RecordProps<TBox['initialState']['defaultValue']>[K]], E>
-        : never
-      : never;
-  } & UnionToIntersection<
-    {
-      [P in keyof TRelationMap]: TRelationMap[P] extends [
-        infer K,
-        FnValue<Box<RecordMap<infer E, any>> & { $relations: infer TRelationMap2 }>,
-      ]
-        ? K extends keyof RecordProps<TBox['initialState']['defaultValue']>
-          ? {
-              [P2 in keyof TRelationMap2 as `${Capitalize<P & string>}${P2 &
-                string}`]: TRelationMap2[P2] extends SelectorFactory<[infer KT], infer U>
-                ? SelectorFactory<[key: RecordProps<TBox['initialState']['defaultValue']>[K]], U>
-                : {};
-            }
-          : {}
-        : {};
-    }[keyof TRelationMap]
-  >;
-};
+export type RelationMethodMap<TBox, TRelationMap extends RelationMap<TBox>> = TBox extends Box
+  ? {
+      $relations: {
+        [P in keyof TRelationMap as `${Capitalize<`${P & string}`>}`]: TRelationMap[P] extends [
+          infer K,
+          FnValue<Box<RecordMap<infer E, any>>>,
+        ]
+          ? K extends keyof RecordProps<TBox['initialState']['defaultValue']>
+            ? SelectorFactory<[key: RecordProps<TBox['initialState']['defaultValue']>[K]], E>
+            : never
+          : never;
+      } & UnionToIntersection<
+        {
+          [P in keyof TRelationMap]: TRelationMap[P] extends [
+            infer K,
+            FnValue<Box<RecordMap<infer E, any>> & { $relations: infer TRelationMap2 }>,
+          ]
+            ? K extends keyof RecordProps<TBox['initialState']['defaultValue']>
+              ? {
+                  [P2 in keyof TRelationMap2 as `${Capitalize<P & string>}${P2 &
+                    string}`]: TRelationMap2[P2] extends SelectorFactory<[infer KT], infer U>
+                    ? SelectorFactory<
+                        [key: RecordProps<TBox['initialState']['defaultValue']>[K]],
+                        U
+                      >
+                    : {};
+                }
+              : {}
+            : {};
+        }[keyof TRelationMap]
+      >;
+    }
+  : {
+      $relations: {};
+    };
 
-export type RelationMethods<
-  TBox extends RecordMapBox<any, any, any>,
-  TRelationMap extends RelationMap<TBox>,
-> = RelationMethodMap<TBox, TRelationMap> & {
+export type RelationMethods<TBox, TRelationMap extends RelationMap<TBox>> = RelationMethodMap<
+  TBox,
+  TRelationMap
+> & {
   [K in keyof RelationMethodMap<TBox, TRelationMap>['$relations'] as `get${K &
     string}`]: RelationMethodMap<TBox, TRelationMap>['$relations'][K];
 };
 
-export class RecordMapBox<S extends RecordMap<any, any, any>> extends MapBox<
-  RecordMapKeyField<any>
-> {
-  relations<TRelationMap extends RelationMap<this>>(
+export type RecordMapBox<RM extends RecordMap<any, any>> = BoxWithStateMethods<
+  RM,
+  never,
+  never,
+  MapBox<RM>
+> & {
+  relations<TThis, TRelationMap extends RelationMap<TThis>>(
+    this: TThis,
     relationMap: TRelationMap,
-  ): this & RelationMethods<this, TRelationMap> {
-    const that: this & RelationMethods<this, TRelationMap> = this as any;
-    return that;
-  }
-}
+  ): TThis & RelationMethods<TThis, TRelationMap>;
 
-export function createRecordMapBox<R extends Record<any>, KF extends keyof RecordProps<R>>(
+  setItem(key: MapKey<RM>, value: MapValue<RM>): Mutation<[], RM>;
+  setItem(value: MapValue<RM>): Mutation<[], RM>;
+  setAll(items: readonly MapValue<RM>[]): Mutation<[], RM>;
+  setAll(items: readonly MapPair<RM>[]): Mutation<[], RM>;
+  mergeItem(props: PartialRequiredProps<MapValue<RM>, RecordMapKeyField<RM>>): Mutation<[], RM>;
+  mergeItem(key: MapKey<RM>, props: PartialProps<MapValue<RM>>): Mutation<[], RM>;
+  mergeAll(
+    items: readonly PartialRequiredProps<MapValue<RM>, RecordMapKeyField<RM>>[],
+  ): Mutation<[], RM>;
+  mergeAll(items: readonly Pair<MapKey<RM>, PartialProps<MapValue<RM>>>[]): Mutation<[], RM>;
+};
+
+export const RecordMapBox = MapBox.extends({
+  mutations: {},
+  selectors: {},
+  name: 'RecordMapBox',
+});
+
+export function createRecordMapBox<R extends Record<any>, KF extends IDKeyof<RecordProps<R>>>(
   key: string,
   defaultValue: CtorValue<R>,
   keyField: KF,
-) {
-  defaultValue = typeof defaultValue === 'function' ? new defaultValue() : defaultValue;
-  return new RecordMapBox<RecordProps<R>, KF, R, RecordMap<RecordProps<any>, any, any>>(
-    key,
-    new RecordMap(defaultValue, keyField),
-    options,
-  );
+): RecordMapBox<RecordMap<R, KF>> {
+  return new RecordMapBox(key, new RecordMap(resolveCtorValue(defaultValue), keyField));
 }
