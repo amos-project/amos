@@ -3,10 +3,11 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { applyMutations, postMapBox, PostRecord, toJS } from 'amos-testing';
+import { applyMutations, postMapBox, PostRecord, select, toJS } from 'amos-testing';
 
 describe('RecordMapBox', function () {
   it('should create RecordMapBox', function () {
+    expect(select(postMapBox.size())).toEqual(0);
     expect(
       toJS(
         applyMutations(postMapBox.initialState, [

@@ -7,6 +7,8 @@ import { applyMutations, countBox } from 'amos-testing';
 
 describe('NumberBox', function () {
   it('should create NumberBox', function () {
+    // @ts-expect-error
+    countBox.add('2');
     expect(
       applyMutations(countBox.initialState, [
         countBox.add(1),

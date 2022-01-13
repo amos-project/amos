@@ -3,17 +3,31 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { BoxWithStateMethods, createBoxFactory } from 'amos-core';
+import { BoxFactoryStatic, createBoxFactory, ShapedBox } from 'amos-core';
 import { Map } from 'amos-shapes';
 import { IDOf } from 'amos-utils';
 
-export type MapBox<M extends Map<any, any>> = BoxWithStateMethods<
-  M,
-  'setItem' | 'setAll' | 'mergeItem' | 'mergeAll' | 'updateItem' | 'removeItem' | 'clear' | 'reset',
-  'map' | 'getItem' | 'size' | 'keys' | 'hasItem'
->;
+export interface MapBox<M extends Map<any, any> = any>
+  extends ShapedBox<
+    M,
+    | 'setItem'
+    | 'setAll'
+    | 'mergeItem'
+    | 'mergeAll'
+    | 'updateItem'
+    | 'removeItem'
+    | 'clear'
+    | 'reset',
+    'map' | 'getItem' | 'size' | 'keys' | 'hasItem'
+  > {
+  reduce(): this;
+}
 
-export const MapBox = createBoxFactory<MapBox<any>>({
+export interface MapBoxFactory extends BoxFactoryStatic<MapBox> {
+  new <M extends Map<any, any>>(key: string, initialState: M): MapBox<M>;
+}
+
+export const MapBox: MapBoxFactory = createBoxFactory<MapBox>({
   name: 'MapBox',
   mutations: {
     setItem: null,

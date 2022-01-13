@@ -3,45 +3,50 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { BoxWithStateMethods, createBoxFactory } from 'amos-core';
+import { BoxFactoryStatic, createBoxFactory, ShapedBox } from 'amos-core';
 import { List } from 'amos-shapes';
 
-export type ListBox<L extends List<any>> = BoxWithStateMethods<
-  L,
-  | 'concat'
-  | 'copyWithin'
-  | 'fill'
-  | 'filterThis'
-  | 'mapThis'
-  | 'pop'
-  | 'push'
-  | 'reverse'
-  | 'shift'
-  | 'unshift'
-  | 'slice'
-  | 'sort'
-  | 'splice'
-  | 'delete'
-  | 'set'
-  | 'reset',
-  | 'some'
-  | 'reduce'
-  | 'reduceRight'
-  | 'findIndex'
-  | 'flat'
-  | 'includes'
-  | 'indexOf'
-  | 'join'
-  | 'lastIndexOf'
-  | 'map'
-  | 'find'
-  | 'filter'
-  | 'get'
-  | 'size'
-  | 'every'
->;
+export interface ListBox<L extends List<any>>
+  extends ShapedBox<
+    L,
+    | 'concat'
+    | 'copyWithin'
+    | 'fill'
+    | 'filterThis'
+    | 'mapThis'
+    | 'pop'
+    | 'push'
+    | 'reverse'
+    | 'shift'
+    | 'unshift'
+    | 'slice'
+    | 'sort'
+    | 'splice'
+    | 'delete'
+    | 'set'
+    | 'reset',
+    | 'some'
+    | 'reduce'
+    | 'reduceRight'
+    | 'findIndex'
+    | 'flat'
+    | 'includes'
+    | 'indexOf'
+    | 'join'
+    | 'lastIndexOf'
+    | 'map'
+    | 'find'
+    | 'filter'
+    | 'get'
+    | 'size'
+    | 'every'
+  > {}
 
-export const ListBox = createBoxFactory<ListBox<any>>({
+export interface ListBoxFactory extends BoxFactoryStatic<ListBox<any>> {
+  new <L extends List<any>>(key: string, initialState: L): ListBox<L>;
+}
+
+export const ListBox: ListBoxFactory = createBoxFactory<ListBox<any>>({
   name: 'ListBox',
   mutations: {
     concat: null,

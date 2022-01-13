@@ -3,7 +3,7 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { Box, BoxWithStateMethods, Mutation, SelectorFactory } from 'amos-core';
+import { Box, BoxFactoryStatic, Mutation, SelectorFactory, ShapedBox } from 'amos-core';
 import {
   MapKey,
   MapPair,
@@ -78,33 +78,52 @@ export type RelationMethods<TBox, TRelationMap extends RelationMap<TBox>> = Rela
     string}`]: RelationMethodMap<TBox, TRelationMap>['$relations'][K];
 };
 
-export type RecordMapBox<RM extends RecordMap<any, any>> = BoxWithStateMethods<
-  RM,
-  never,
-  never,
-  MapBox<RM>
-> & {
-  relations<TThis, TRelationMap extends RelationMap<TThis>>(
-    this: TThis,
+export interface RecordMapBox<RM extends RecordMap<any, any> = RecordMap<any, any>>
+  extends ShapedBox<
+    RM,
+    never,
+    never,
+    Omit<MapBox<RM>, 'setItem' | 'setAll' | 'mergeItem' | 'mergeAll'>
+  > {
+  relations<TRelationMap extends RelationMap<this>>(
     relationMap: TRelationMap,
-  ): TThis & RelationMethods<TThis, TRelationMap>;
+  ): this & RelationMethods<this, TRelationMap>;
 
-  setItem(key: MapKey<RM>, value: MapValue<RM>): Mutation<[], RM>;
-  setItem(value: MapValue<RM>): Mutation<[], RM>;
-  setAll(items: readonly MapValue<RM>[]): Mutation<[], RM>;
-  setAll(items: readonly MapPair<RM>[]): Mutation<[], RM>;
-  mergeItem(props: PartialRequiredProps<MapValue<RM>, RecordMapKeyField<RM>>): Mutation<[], RM>;
-  mergeItem(key: MapKey<RM>, props: PartialProps<MapValue<RM>>): Mutation<[], RM>;
+  setItem(
+    key: MapKey<RM>,
+    value: MapValue<RM>,
+  ): Mutation<[key: MapKey<RM>, value: MapValue<RM>], RM>;
+  setItem(value: MapValue<RM>): Mutation<[value: MapValue<RM>], RM>;
+  setAll(items: readonly MapPair<RM>[]): Mutation<[items: readonly MapPair<RM>[]], RM>;
+  setAll(items: readonly MapValue<RM>[]): Mutation<[items: readonly MapValue<RM>[]], RM>;
+  mergeItem(
+    props: PartialRequiredProps<MapValue<RM>, RecordMapKeyField<RM>>,
+  ): Mutation<[props: PartialRequiredProps<MapValue<RM>, RecordMapKeyField<RM>>], RM>;
+  mergeItem(
+    key: MapKey<RM>,
+    props: PartialProps<MapValue<RM>>,
+  ): Mutation<[key: MapKey<RM>, props: PartialProps<MapValue<RM>>], RM>;
   mergeAll(
     items: readonly PartialRequiredProps<MapValue<RM>, RecordMapKeyField<RM>>[],
-  ): Mutation<[], RM>;
-  mergeAll(items: readonly Pair<MapKey<RM>, PartialProps<MapValue<RM>>>[]): Mutation<[], RM>;
-};
+  ): Mutation<[items: readonly PartialRequiredProps<MapValue<RM>, RecordMapKeyField<RM>>[]], RM>;
+  mergeAll(
+    items: readonly Pair<MapKey<RM>, PartialProps<MapValue<RM>>>[],
+  ): Mutation<[items: readonly Pair<MapKey<RM>, PartialProps<MapValue<RM>>>[]], RM>;
+}
 
-export const RecordMapBox = MapBox.extends({
+export interface RecordMapBoxFactory extends BoxFactoryStatic<RecordMapBox> {
+  new <RM extends RecordMap<any, any>>(key: string, initialState: RM): RecordMapBox<RM>;
+}
+
+export const RecordMapBox: RecordMapBoxFactory = MapBox.extends<RecordMapBox<any>>({
+  name: 'RecordMapBox',
   mutations: {},
   selectors: {},
-  name: 'RecordMapBox',
+  methods: {
+    relations(relationMap: RelationMap<any>) {
+      return this as any;
+    },
+  },
 });
 
 export function createRecordMapBox<R extends Record<any>, KF extends IDKeyof<RecordProps<R>>>(

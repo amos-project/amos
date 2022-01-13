@@ -48,14 +48,18 @@ export class Box<S = any> {
   /**
    * Update the options of the box.
    * @param options
+   * TThis is TS2344: Type 'RecordMapBox<any>' does not satisfy the constraint 'Box<any>'. The
+   *   types returned by 'resetInitialState(...)' are incompatible between these types.
+   *   Property 'relations' is missing in type 'MapBox<any>' but required in type
+   *   'RecordMapBox<any>'.
    */
-  config(options: Partial<BoxOptions<S>>): this {
+  config<TThis extends Box<S>>(this: TThis, options: Partial<BoxOptions<S>>): TThis {
     Object.assign(this.options, options);
     return this;
   }
 
-  resetInitialState(state: FnValue<S, [S]>): this {
-    (this as Mutable<this>).initialState = resolveFnValue(state, this.initialState);
+  resetInitialState<TThis extends Box<S>>(this: TThis, state: FnValue<S, [S]>): TThis {
+    (this as Mutable<TThis>).initialState = resolveFnValue(state, this.initialState);
     return this;
   }
 
@@ -65,7 +69,11 @@ export class Box<S = any> {
    * @param signal
    * @param handler
    */
-  subscribe<D>(signal: SignalFactory<any, D>, handler: (state: S, data: D) => S): this {
+  subscribe<TThis extends Box<S>, D>(
+    this: TThis,
+    signal: SignalFactory<any, D>,
+    handler: (state: S, data: D) => S,
+  ): TThis {
     this.signals[signal.type] = handler;
     return this;
   }
@@ -114,19 +122,22 @@ export function mutation<S, A extends any[]>(
  * @param box
  * @param mutations
  * @param selectors
+ * @param methods
+ * TODO: implement selectors
  */
 export function implementation<B extends Box>(
   box: Ctor<B, any[]>,
   mutations: {
-    [P in keyof B]?: B[P] extends (...args: infer A) => Mutation<infer A, B['initialState']>
-      ? (state: B['initialState'], ...args: A) => B['initialState']
+    [P in keyof B]?: B[P] extends (...args: infer A) => Mutation<infer A, BoxState<B>>
+      ? (state: BoxState<B>, ...args: A) => BoxState<B>
       : null;
   },
   selectors: {
     [P in keyof B]?: B[P] extends (...args: infer A) => infer R
-      ? (state: B['initialState'], ...args: A) => R
+      ? (state: BoxState<B>, ...args: A) => R
       : null;
   },
+  methods?: Partial<B>,
 ) {
   for (const k in mutations) {
     const mutator =
@@ -137,7 +148,7 @@ export function implementation<B extends Box>(
       return createAmosObject('MUTATION', { k, args, mutator, box: this });
     };
   }
-  Object.assign(Box.prototype, mutations, selectors);
+  Object.assign(Box.prototype, mutations, selectors, methods);
 }
 
 implementation(

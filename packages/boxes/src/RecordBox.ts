@@ -3,11 +3,11 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { BoxWithStateMethods, createBoxFactory, Mutation, Selector } from 'amos-core';
+import { ShapedBox, createBoxFactory, Mutation, Selector } from 'amos-core';
 import { Record, RecordProps } from 'amos-shapes';
 import { CtorValue, resolveCtorValue } from 'amos-utils';
 
-export type RecordBox<R extends Record<any>> = BoxWithStateMethods<R, 'merge', 'isValid'> & {
+export interface RecordBox<R extends Record<any>> extends ShapedBox<R, 'merge', 'isValid'> {
   /** @see {Record#get} */
   get<K extends keyof RecordProps<R>>(key: K): Selector<[K], R[K]>;
 
@@ -18,7 +18,7 @@ export type RecordBox<R extends Record<any>> = BoxWithStateMethods<R, 'merge', '
     key: K,
     updater: (value: R[K], record: R) => R[K],
   ): Mutation<[K, (value: R[K], record: R) => R[K]], R>;
-};
+}
 
 export const RecordBox = createBoxFactory<RecordBox<any>>({
   name: 'RecordBox',

@@ -3,19 +3,33 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { BoxWithStateMethods } from 'amos-core';
-import { List, ListMap } from 'amos-shapes';
-import { IDOf } from 'amos-utils';
+import { BoxFactory, Mutation, ShapedBox } from 'amos-core';
+import { List, ListElement, ListMap, MapKey, MapPair, MapValue } from 'amos-shapes';
+import { IDOf, Pair } from 'amos-utils';
 import { MapBox } from './MapBox';
 
-export type ListMapBox<LM extends ListMap<any, any>> = BoxWithStateMethods<
-  LM,
-  never,
-  never,
-  MapBox<LM>
->;
+export interface ListMapBox<LM extends ListMap<any, any>>
+  extends ShapedBox<LM, never, never, Omit<MapBox<LM>, 'setItem' | 'setAll'>> {
+  setItem(
+    key: MapKey<LM>,
+    value: MapValue<LM>,
+  ): Mutation<[key: MapKey<LM>, value: MapValue<LM>], LM>;
+  setItem(
+    key: MapKey<LM>,
+    items: readonly ListElement<MapValue<LM>>[],
+  ): Mutation<[key: MapKey<LM>, items: readonly ListElement<MapValue<LM>>[]], LM>;
 
-export const ListMapBox = MapBox.extends({
+  setAll(items: readonly MapPair<LM>[]): Mutation<[items: readonly MapPair<LM>[]], LM>;
+  setAll(
+    items: readonly Pair<MapKey<LM>, readonly ListElement<MapValue<LM>>[]>[],
+  ): Mutation<[items: readonly Pair<MapKey<LM>, readonly ListElement<MapValue<LM>>[]>[]], LM>;
+}
+
+export interface ListMapBoxFactory extends BoxFactory<ListMapBox<any>> {
+  new <LM extends ListMap<any, any>>(key: string, initialState: LM): ListMapBox<LM>;
+}
+
+export const ListMapBox: ListMapBoxFactory = MapBox.extends<ListMapBox<any>>({
   name: 'ListMap',
   mutations: {},
   selectors: {},

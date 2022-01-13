@@ -5,7 +5,7 @@
 
 import { dispatch, select } from 'amos-testing';
 import { Mutation } from './box';
-import { BoxWithStateMethods, createBoxFactory } from './createBoxFactory';
+import { ShapedBox, createBoxFactory } from './createBoxFactory';
 import { Selector } from './selector';
 
 class Foo<T> {
@@ -30,7 +30,7 @@ class Foo<T> {
   }
 }
 
-type FooBox<F extends Foo<any>> = BoxWithStateMethods<F, 'set', 'get'> & {
+type FooBox<F extends Foo<any>> = ShapedBox<F, 'set', 'get'> & {
   /** @see {Foo#setField} */
   setField<K extends keyof F['data']>(key: K, value: F['data'][K]): Mutation<[K, F['data'][K]], F>;
   /** @see {Foo#getField} */
@@ -72,7 +72,7 @@ class Bar<T, U> extends Foo<T> {
   }
 }
 
-type BarBox<B extends Bar<any, any>> = BoxWithStateMethods<B, 'setBar', 'getBar', FooBox<B>> & {
+type BarBox<B extends Bar<any, any>> = ShapedBox<B, 'setBar', 'getBar', FooBox<B>> & {
   /** @see {Bar#setBarField} */
   setBarField<K extends keyof B['bar']>(key: K, value: B['bar'][K]): Mutation<[K, B['bar'][K]], B>;
   /** @see {Bar#getBarField} */

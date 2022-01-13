@@ -7,18 +7,24 @@ import { dispatch, exampleBox, select } from 'amos-testing';
 
 describe('RecordBox', function () {
   it('should create RecordBox', function () {
-    select(exampleBox).resolveType();
-    select(exampleBox.get('link')).substr(1);
-    select(exampleBox).isValid().valueOf();
-    dispatch(exampleBox.set('link', 'https://github.com/'));
-    dispatch(exampleBox.update('count', (c) => c + 1));
-    dispatch(exampleBox.merge({ title: 'hello', content: 'world' }));
-    expect(select(exampleBox).toJSON()).toEqual({
-      title: 'hello',
-      content: 'world',
-      link: 'https://github.com/',
-      count: 1,
-    });
-    expect(select(exampleBox).resolveType()).toBe('http');
+    expect([
+      select(exampleBox.isValid()),
+      dispatch(exampleBox.set('title', 'Hello world')).title,
+      dispatch(exampleBox.set('count', 1)).count,
+      dispatch(exampleBox.merge({ content: 'First', count: 2 })).count,
+      dispatch(exampleBox.update('count', (count, record) => count * record.count)).count,
+      select(exampleBox.get('count')),
+      select(exampleBox.isValid()),
+      select(exampleBox).toJSON(),
+    ]).toEqual([
+      false,
+      'Hello world',
+      1,
+      2,
+      4,
+      4,
+      true,
+      { title: 'Hello world', count: 4, link: '', content: 'First' },
+    ]);
   });
 });

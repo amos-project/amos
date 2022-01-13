@@ -3,65 +3,93 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { resolveCallerName } from 'amos-utils';
 import { Box, BoxState, implementation, Mutation, MutationFactory } from './box';
 import { Selector, SelectorFactory } from './selector';
 
-export type BoxWithStateMethods<
-  S,
-  KM extends keyof S,
-  KS extends keyof S,
-  SB extends Box = Box<S>,
-> = SB & {
-  [P in keyof S & KM]: S[P] extends (...args: infer A) => S ? MutationFactory<A, S> : never;
+// hijack for TS2312: An interface can only extend an object type or intersection of object types
+// with statically known members.
+export interface ShapedBoxMeta<KM, KS> {
+  shapeMeta: {
+    selectors: KS;
+    mutations: KM;
+  };
+}
+
+export type ShapedBox<S, KM extends keyof S, KS extends keyof S, SB extends Box = Box<S>> = SB & {
+  [P in KM]: S[P] extends (...args: infer A) => S ? MutationFactory<A, S> : never;
 } & {
-  [P in keyof S & KS]: S[P] extends (...args: infer A) => infer R ? SelectorFactory<A, R> : never;
+  [P in KS]: S[P] extends (...args: infer A) => infer R ? SelectorFactory<A, R> : never;
 };
 
-export interface BoxFactory<B extends Box> {
-  new <SB extends Box>(key: string, initialState: BoxState<SB>): SB;
-
+export interface BoxFactoryStatic<B extends Box> {
   extends<NB extends Box>(options: BoxFactoryOptions<NB, B>): BoxFactory<NB>;
 }
 
+export interface BoxFactory<B extends Box> extends BoxFactoryStatic<B> {
+  new (key: string, initialState: BoxState<B>): B;
+}
+
+export interface BoxFactoryWithDefaultInitialState<B extends Box> extends BoxFactoryStatic<B> {
+  new (key: string, initialState?: BoxState<B>): B;
+}
+
 export interface BoxFactoryOptions<B extends Box, SB extends Box = Box> {
+  name: string;
   mutations: {
     [P in keyof B as B[P] extends (...args: any[]) => Mutation
       ? P extends keyof SB
         ? never
         : P
-      : never]: null;
+      : never]: B[P] extends (...args: infer A) => Mutation
+      ? null | ((state: BoxState<B>, ...args: A) => BoxState<B>)
+      : never;
   };
   selectors: {
     [P in keyof B as B[P] extends (...args: any[]) => Selector
       ? P extends keyof SB
         ? never
         : P
-      : never]: null;
+      : never]: B[P] extends (...args: infer A) => Selector<infer A, infer O>
+      ? null | ((state: BoxState<B>, ...args: A) => O)
+      : never;
   };
-  name?: string;
+  methods?: Partial<B>;
+}
+
+export interface BoxFactoryWithDefaultInitialStateOptions<B extends Box, SB extends Box = Box>
+  extends BoxFactoryOptions<B, SB> {
+  defaultInitialState: BoxState<B>;
 }
 
 export function createBoxFactory<B extends Box, SB extends Box = Box>(
   options: BoxFactoryOptions<B, SB>,
+): BoxFactory<B>;
+export function createBoxFactory<B extends Box, SB extends Box = Box>(
+  options: BoxFactoryWithDefaultInitialStateOptions<B, SB>,
+): BoxFactoryWithDefaultInitialState<B>;
+export function createBoxFactory<B extends Box, SB extends Box = Box>(
+  options: BoxFactoryOptions<B, SB>,
 ): BoxFactory<B> {
   class EnhancedBox extends Box {
+    constructor(
+      key: string,
+      initialState = (options as BoxFactoryWithDefaultInitialStateOptions<B, SB>)
+        .defaultInitialState,
+    ) {
+      super(key, initialState);
+    }
+
     static extends<NB extends Box>(nextOptions: BoxFactoryOptions<NB, B>): BoxFactory<NB> {
       Object.assign(nextOptions.mutations, options.mutations);
       Object.assign(nextOptions.selectors, options.selectors);
-      if (process.env.NODE_ENV === 'development') {
-        nextOptions.name ??= resolveCallerName();
-      }
+      nextOptions.methods = Object.assign(nextOptions.methods || {}, options.methods) as any;
       return createBoxFactory(nextOptions);
     }
   }
 
-  if (process.env.NODE_ENV === 'development') {
-    options.name ??= resolveCallerName();
-    Object.defineProperty(EnhancedBox, 'name', { value: options.name || '' });
-  }
+  Object.defineProperty(EnhancedBox, 'name', { value: options.name });
 
-  implementation<EnhancedBox>(EnhancedBox, options.mutations, options.selectors);
+  implementation<EnhancedBox>(EnhancedBox, options.mutations, options.selectors, options.methods);
 
   return EnhancedBox as any;
 }
