@@ -8,5 +8,5 @@ import { userMapBox } from 'amos-testing';
 import { selectUserId } from './session.selectors';
 
 export const selectUser = selector((select, userId: number = select(selectUserId())) => {
-  return select(userMapBox.get(userId));
+  return select(userMapBox.getItem(userId));
 });

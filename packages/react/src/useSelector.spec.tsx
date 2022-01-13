@@ -3,17 +3,9 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { createStore, MapSelector, Select, Selectable, selector, Snapshot, Store } from 'amos';
-import {
-  addTwiceAsync,
-  countBox,
-  incrCount,
-  setUserName,
-  selectCount,
-  selectDoubleCount,
-  selectMultipleCount,
-} from 'amos-testing';
 import { act, renderHook, RenderHookResult } from '@testing-library/react-hooks';
+import { createStore, MapSelector, Select, Selectable, selector, Snapshot, Store } from 'amos';
+import { countBox } from 'amos-testing';
 import React, { FC } from 'react';
 import { Provider, useDispatch, useStore } from './context';
 import { useSelector } from './useSelector';

@@ -16,6 +16,6 @@ export const addTodo = action(
   ) => {
     await sleep();
     const id = Math.random();
-    dispatch([todoMapBox.merge(id, input), userTodoListBox.unshiftList(userId, id)]);
+    dispatch([todoMapBox.mergeItem(id, input), userTodoListBox.unshiftList(userId, id)]);
   },
 );

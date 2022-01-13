@@ -12,14 +12,14 @@ import { LOGOUT } from './session.signals';
 export const login = action(async (dispatch, select, userId: number) => {
   await sleep();
   const id = Math.random();
-  dispatch([sessionMapBox.merge(id, { userId }), sessionIdBox.setState(id)]);
+  dispatch([sessionMapBox.mergeItem(id, { userId }), sessionIdBox.setState(id)]);
 });
 
 export const logout = action(async (dispatch, select) => {
   await sleep();
   const session = select(selectSession());
   dispatch([
-    sessionMapBox.delete(session.id),
+    sessionMapBox.removeItem(session.id),
     sessionIdBox.resetState(),
     LOGOUT({ userId: session.userId }),
   ]);

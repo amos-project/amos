@@ -5,7 +5,30 @@
 
 import { ID, isArray, Pair } from 'amos-utils';
 import { List, ListElement } from './List';
-import { Map } from './Map';
+import { DelegateMapValueMutations, implementMapDelegations, Map } from './Map';
+
+export interface ListMap<K extends ID, L extends List<any>>
+  extends DelegateMapValueMutations<
+    K,
+    L,
+    | 'concat'
+    | 'copyWithin'
+    | 'fill'
+    | 'filterThis'
+    | 'mapThis'
+    | 'pop'
+    | 'push'
+    | 'reverse'
+    | 'shift'
+    | 'unshift'
+    | 'slice'
+    | 'sort'
+    | 'splice'
+    | 'delete'
+    | 'set'
+    | 'reset',
+    'List'
+  > {}
 
 export class ListMap<K extends ID, L extends List<any>> extends Map<K, L> {
   override setItem(key: K, value: L): this;
@@ -23,3 +46,26 @@ export class ListMap<K extends ID, L extends List<any>> extends Map<K, L> {
     return super.setAll(items);
   }
 }
+
+implementMapDelegations(
+  ListMap,
+  {
+    concat: null,
+    copyWithin: null,
+    fill: null,
+    filterThis: null,
+    mapThis: null,
+    pop: null,
+    push: null,
+    reverse: null,
+    shift: null,
+    unshift: null,
+    slice: null,
+    sort: null,
+    splice: null,
+    delete: null,
+    set: null,
+    reset: null,
+  },
+  'List',
+);

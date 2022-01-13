@@ -9,7 +9,27 @@ import { IDOf, Pair } from 'amos-utils';
 import { MapBox } from './MapBox';
 
 export interface ListMapBox<LM extends ListMap<any, any>>
-  extends ShapedBox<LM, never, never, Omit<MapBox<LM>, 'setItem' | 'setAll'>> {
+  extends ShapedBox<
+    LM,
+    | 'concatList'
+    | 'copyWithinList'
+    | 'fillList'
+    | 'filterThisList'
+    | 'mapThisList'
+    | 'popList'
+    | 'pushList'
+    | 'reverseList'
+    | 'shiftList'
+    | 'unshiftList'
+    | 'sliceList'
+    | 'sortList'
+    | 'spliceList'
+    | 'deleteList'
+    | 'setList'
+    | 'resetList',
+    never,
+    Omit<MapBox<LM>, 'setItem' | 'setAll'>
+  > {
   setItem(
     key: MapKey<LM>,
     value: MapValue<LM>,
@@ -31,7 +51,24 @@ export interface ListMapBoxFactory extends BoxFactory<ListMapBox<any>> {
 
 export const ListMapBox: ListMapBoxFactory = MapBox.extends<ListMapBox<any>>({
   name: 'ListMap',
-  mutations: {},
+  mutations: {
+    concatList: null,
+    copyWithinList: null,
+    fillList: null,
+    filterThisList: null,
+    mapThisList: null,
+    popList: null,
+    pushList: null,
+    reverseList: null,
+    shiftList: null,
+    unshiftList: null,
+    sliceList: null,
+    sortList: null,
+    spliceList: null,
+    deleteList: null,
+    setList: null,
+    resetList: null,
+  },
   selectors: {},
 });
 

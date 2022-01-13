@@ -5,6 +5,8 @@
 
 import {
   clone,
+  Ctor,
+  FnParams,
   ID,
   isJSONSerializable,
   JSONSerializable,
@@ -132,3 +134,22 @@ export class Map<K extends ID, V>
 export type MapKey<T> = T extends Map<infer K, infer V> ? K : never;
 export type MapValue<T> = T extends Map<infer K, infer V> ? V : never;
 export type MapPair<T> = T extends Map<infer K, infer V> ? Pair<K, V> : never;
+
+export type DelegateMapValueMutations<K extends ID, V, M extends keyof V, S extends string> = {
+  [P in M as `${P & string}${S}`]: <TThis>(this: TThis, key: K, ...args: FnParams<V[P]>) => TThis;
+} & {
+  delegateMapValueMutations: { suffix: S; methods: Record<M, null> };
+};
+
+export function implementMapDelegations<K extends ID, V, M extends keyof V, S extends string>(
+  ctor: Ctor<DelegateMapValueMutations<K, V, M, S>, any[]>,
+  mutations: Record<M, null>,
+  mutationSuffix: S,
+) {
+  ctor.prototype.delegateMapValueMutations = { suffix: mutationSuffix, methods: mutations };
+  for (const k in mutations) {
+    ctor.prototype[k + mutationSuffix] = function (key: any, ...args: any[]) {
+      return this.setItem(key, this.getItem(key)[k](...args));
+    };
+  }
+}

@@ -3,15 +3,14 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { applyMutations, postMediaListBox, toJS } from 'amos-testing';
+import { dispatch, postMediaListBox, select, toJS } from 'amos-testing';
 
 describe('ListMapBox', function () {
   it('should create ListMapBox', function () {
-    expect(
-      applyMutations(postMediaListBox.initialState, [
-        postMediaListBox.setItem(0, [1]),
-        postMediaListBox.setAll([[1, [2, 3]]]),
-      ]).map(toJS),
-    ).toEqual([{ 0: [1] }, { 0: [1], 1: [2, 3] }]);
+    dispatch(postMediaListBox.setItem(0, [1]));
+    dispatch(postMediaListBox.setAll([[1, [2, 3]]]));
+    dispatch(postMediaListBox.unshiftList(1, 4));
+    dispatch(postMediaListBox.unshiftList(2, 5));
+    expect(toJS(select(postMediaListBox))).toEqual([{ 0: [1] }, { 0: [1], 1: [5, 2, 3], 2: [5] }]);
   });
 });

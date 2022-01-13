@@ -3,7 +3,7 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { arrayEqual, identity, shallowEqual, strictEqual } from './equals';
+import { arrayEqual, identity, is, shallowEqual } from './equals';
 import { isArray, values } from './misc';
 
 describe('utils', () => {
@@ -25,10 +25,10 @@ describe('utils', () => {
   });
 
   it('should strict compare', () => {
-    expect(strictEqual(Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER)).toBe(true);
-    expect(strictEqual(NaN, NaN)).toBe(false);
-    expect(strictEqual({}, {})).toBe(false);
-    expect(strictEqual('abc', 'abc')).toBe(true);
+    expect(is(Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER)).toBe(true);
+    expect(is(NaN, NaN)).toBe(false);
+    expect(is({}, {})).toBe(false);
+    expect(is('abc', 'abc')).toBe(true);
   });
 
   it('should compare array', () => {

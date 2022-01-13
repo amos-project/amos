@@ -5,7 +5,7 @@
 
 export type ID = number | string;
 export type IDOf<T> = T & ID;
-export type IDKeyof<T> = { [P in keyof T]-?: T[P] extends ID ? P : never }[keyof T];
+export type IDKeyof<T, K = ID> = { [P in keyof T]-?: T[P] extends K ? P : never }[keyof T];
 
 export type Subscribe = () => void;
 export type Unsubscribe = () => void;
@@ -32,3 +32,6 @@ export type WellPartial<T> = T extends object ? Partial<T> : T;
 export type Mutable<T> = { -readonly [P in keyof T]: T[P] };
 
 export type AnyFn = (...args: any[]) => any;
+
+export type FnParams<T> = T extends (...args: infer A) => infer R ? A : never;
+export type FnReturns<T> = T extends (...args: infer A) => infer R ? R : never;

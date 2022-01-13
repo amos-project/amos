@@ -12,6 +12,7 @@ describe('AmosListDict', () => {
   it('should create ListMap', () => {
     // default list map
     const foo = new ListMap<number, List<number>>(new List(0));
+    foo.setList(1, 2, 3);
     foo.setItem(0, [0]);
     foo.getItem(0);
     foo.getItem(0).get(0).toExponential();
