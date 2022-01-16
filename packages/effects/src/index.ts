@@ -3,5 +3,5 @@
  * @author junbao <junbao@mymoement.com>
  */
 
-export * from './HttpAction';
-export * from './PagedListAction';
+export * from './createAsyncActionFactory';
+export * from './createPagedListActionFactory';

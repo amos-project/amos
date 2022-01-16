@@ -3,7 +3,7 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { BoxFactoryStatic, createBoxFactory, ShapedBox } from 'amos-core';
+import { Box, BoxFactoryStatic, createBoxFactory, ShapedBox } from 'amos-core';
 import { Map } from 'amos-shapes';
 import { IDOf } from 'amos-utils';
 
@@ -17,11 +17,12 @@ export interface MapBox<M extends Map<any, any> = any>
     | 'updateItem'
     | 'removeItem'
     | 'clear'
+    | 'searchUpdateOnce'
     | 'reset',
-    'map' | 'getItem' | 'size' | 'keys' | 'hasItem'
-  > {
-  reduce(): this;
-}
+    'map' | 'getItem' | 'size' | 'keys' | 'hasItem',
+    Box<M>,
+    Map<any, any>
+  > {}
 
 export interface MapBoxFactory extends BoxFactoryStatic<MapBox> {
   new <M extends Map<any, any>>(key: string, initialState: M): MapBox<M>;

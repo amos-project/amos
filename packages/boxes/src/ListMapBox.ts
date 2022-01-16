@@ -11,24 +11,25 @@ import { MapBox } from './MapBox';
 export interface ListMapBox<LM extends ListMap<any, any>>
   extends ShapedBox<
     LM,
-    | 'concatList'
-    | 'copyWithinList'
-    | 'fillList'
-    | 'filterThisList'
-    | 'mapThisList'
-    | 'popList'
-    | 'pushList'
-    | 'reverseList'
-    | 'shiftList'
-    | 'unshiftList'
-    | 'sliceList'
-    | 'sortList'
-    | 'spliceList'
-    | 'deleteList'
-    | 'setList'
-    | 'resetList',
+    | 'concatAt'
+    | 'copyWithinAt'
+    | 'fillAt'
+    | 'filterThisAt'
+    | 'mapThisAt'
+    | 'popAt'
+    | 'pushAt'
+    | 'reverseAt'
+    | 'shiftAt'
+    | 'unshiftAt'
+    | 'sliceAt'
+    | 'sortAt'
+    | 'spliceAt'
+    | 'deleteAt'
+    | 'setAt'
+    | 'resetAt',
     never,
-    Omit<MapBox<LM>, 'setItem' | 'setAll'>
+    Omit<MapBox<LM>, 'setItem' | 'setAll'>,
+    ListMap<any, any>
   > {
   setItem(
     key: MapKey<LM>,
@@ -52,22 +53,22 @@ export interface ListMapBoxFactory extends BoxFactory<ListMapBox<any>> {
 export const ListMapBox: ListMapBoxFactory = MapBox.extends<ListMapBox<any>>({
   name: 'ListMap',
   mutations: {
-    concatList: null,
-    copyWithinList: null,
-    fillList: null,
-    filterThisList: null,
-    mapThisList: null,
-    popList: null,
-    pushList: null,
-    reverseList: null,
-    shiftList: null,
-    unshiftList: null,
-    sliceList: null,
-    sortList: null,
-    spliceList: null,
-    deleteList: null,
-    setList: null,
-    resetList: null,
+    concatAt: null,
+    copyWithinAt: null,
+    fillAt: null,
+    filterThisAt: null,
+    mapThisAt: null,
+    popAt: null,
+    pushAt: null,
+    reverseAt: null,
+    shiftAt: null,
+    unshiftAt: null,
+    sliceAt: null,
+    sortAt: null,
+    spliceAt: null,
+    deleteAt: null,
+    setAt: null,
+    resetAt: null,
   },
   selectors: {},
 });

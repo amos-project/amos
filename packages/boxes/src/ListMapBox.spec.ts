@@ -9,8 +9,8 @@ describe('ListMapBox', function () {
   it('should create ListMapBox', function () {
     dispatch(postMediaListBox.setItem(0, [1]));
     dispatch(postMediaListBox.setAll([[1, [2, 3]]]));
-    dispatch(postMediaListBox.unshiftList(1, 4));
-    dispatch(postMediaListBox.unshiftList(2, 5));
+    dispatch(postMediaListBox.unshiftAt(1, 4));
+    dispatch(postMediaListBox.unshiftAt(2, 5));
     expect(toJS(select(postMediaListBox))).toEqual([{ 0: [1] }, { 0: [1], 1: [5, 2, 3], 2: [5] }]);
   });
 });

@@ -57,3 +57,8 @@ export function resolveCtorValue<V>(value: CtorValue<V>): V {
 export function resolveFnValue<V, A extends any[]>(value: FnValue<V, A>, ...args: A): V {
   return typeof value === 'function' ? (value as any)(...args) : value;
 }
+
+export function removeElement<T>(input: T[], item: T) {
+  const index = input.indexOf(item);
+  return index > -1 ? input.splice(index, 1) : input;
+}

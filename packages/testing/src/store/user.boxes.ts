@@ -6,7 +6,15 @@
 import { createListBox, createRecordMapBox } from 'amos-boxes';
 import { Record } from 'amos-shapes';
 
-export class UserRecord extends Record({
+export interface UserModel {
+  id: number;
+  firstName: string;
+  lastName: string;
+  fatherId: number;
+  motherId: number;
+}
+
+export class UserRecord extends Record<UserModel>({
   id: 0,
   firstName: '',
   lastName: '',

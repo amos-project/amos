@@ -126,6 +126,16 @@ export class Map<K extends ID, V>
     return result;
   }
 
+  searchUpdateOnce(callbackFn: (value: V, key: ToString<K>) => V): this {
+    for (const key in this.data) {
+      const value = callbackFn(this.data[key as K]!, key as ToString<K>);
+      if (value !== this.data[key as K]) {
+        return this.reset({ ...this.data, [key]: value });
+      }
+    }
+    return this;
+  }
+
   reset(data: PartialRecord<K, V>): this {
     return clone(this, { data } as WellPartial<this>);
   }
@@ -135,20 +145,23 @@ export type MapKey<T> = T extends Map<infer K, infer V> ? K : never;
 export type MapValue<T> = T extends Map<infer K, infer V> ? V : never;
 export type MapPair<T> = T extends Map<infer K, infer V> ? Pair<K, V> : never;
 
-export type DelegateMapValueMutations<K extends ID, V, M extends keyof V, S extends string> = {
-  [P in M as `${P & string}${S}`]: <TThis>(this: TThis, key: K, ...args: FnParams<V[P]>) => TThis;
+export type DelegateMapValueMutations<K extends ID, V, M extends keyof V, KLimiter = V> = {
+  [P in keyof KLimiter & M as `${P & string}At`]: <TThis>(
+    this: TThis,
+    key: K,
+    ...args: FnParams<V[P]>
+  ) => TThis;
 } & {
-  delegateMapValueMutations: { suffix: S; methods: Record<M, null> };
+  delegateMapValueMutations: Record<M, null>;
 };
 
 export function implementMapDelegations<K extends ID, V, M extends keyof V, S extends string>(
   ctor: Ctor<DelegateMapValueMutations<K, V, M, S>, any[]>,
   mutations: Record<M, null>,
-  mutationSuffix: S,
 ) {
-  ctor.prototype.delegateMapValueMutations = { suffix: mutationSuffix, methods: mutations };
+  ctor.prototype.delegateMapValueMutations = mutations;
   for (const k in mutations) {
-    ctor.prototype[k + mutationSuffix] = function (key: any, ...args: any[]) {
+    ctor.prototype[k + 'At'] = function (key: any, ...args: any[]) {
       return this.setItem(key, this.getItem(key)[k](...args));
     };
   }

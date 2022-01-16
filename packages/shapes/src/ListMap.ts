@@ -27,7 +27,7 @@ export interface ListMap<K extends ID, L extends List<any>>
     | 'delete'
     | 'set'
     | 'reset',
-    'List'
+    List<any>
   > {}
 
 export class ListMap<K extends ID, L extends List<any>> extends Map<K, L> {
@@ -47,25 +47,21 @@ export class ListMap<K extends ID, L extends List<any>> extends Map<K, L> {
   }
 }
 
-implementMapDelegations(
-  ListMap,
-  {
-    concat: null,
-    copyWithin: null,
-    fill: null,
-    filterThis: null,
-    mapThis: null,
-    pop: null,
-    push: null,
-    reverse: null,
-    shift: null,
-    unshift: null,
-    slice: null,
-    sort: null,
-    splice: null,
-    delete: null,
-    set: null,
-    reset: null,
-  },
-  'List',
-);
+implementMapDelegations(ListMap, {
+  concat: null,
+  copyWithin: null,
+  fill: null,
+  filterThis: null,
+  mapThis: null,
+  pop: null,
+  push: null,
+  reverse: null,
+  shift: null,
+  unshift: null,
+  slice: null,
+  sort: null,
+  splice: null,
+  delete: null,
+  set: null,
+  reset: null,
+});

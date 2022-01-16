@@ -3,12 +3,12 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { IDKeyof, JSONState, Pair, PartialRecord } from 'amos-utils';
+import { IDOf, JSONState, Pair, PartialRecord } from 'amos-utils';
 import { Map } from './Map';
 import { PartialProps, PartialRequiredProps, Record, RecordProps } from './Record';
 
-export class RecordMap<R extends Record<any>, KF extends IDKeyof<RecordProps<R>>> extends Map<
-  R[KF],
+export class RecordMap<R extends Record<any>, KF extends keyof RecordProps<R>> extends Map<
+  IDOf<R[KF]>,
   R
 > {
   constructor(readonly defaultValue: R, readonly keyField: KF) {

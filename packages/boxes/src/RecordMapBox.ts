@@ -83,7 +83,8 @@ export interface RecordMapBox<RM extends RecordMap<any, any> = RecordMap<any, an
     RM,
     never,
     never,
-    Omit<MapBox<RM>, 'setItem' | 'setAll' | 'mergeItem' | 'mergeAll'>
+    Omit<MapBox<RM>, 'setItem' | 'setAll' | 'mergeItem' | 'mergeAll'>,
+    RecordMap<any, any>
   > {
   relations<TRelationMap extends RelationMap<this>>(
     relationMap: TRelationMap,

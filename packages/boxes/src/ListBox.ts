@@ -3,7 +3,7 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { BoxFactoryStatic, createBoxFactory, ShapedBox } from 'amos-core';
+import { Box, BoxFactoryStatic, createBoxFactory, ShapedBox } from 'amos-core';
 import { List } from 'amos-shapes';
 
 export interface ListBox<L extends List<any>>
@@ -39,7 +39,9 @@ export interface ListBox<L extends List<any>>
     | 'filter'
     | 'get'
     | 'size'
-    | 'every'
+    | 'every',
+    Box<L>,
+    List<any>
   > {}
 
 export interface ListBoxFactory extends BoxFactoryStatic<ListBox<any>> {
