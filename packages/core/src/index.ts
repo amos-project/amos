@@ -11,4 +11,3 @@ export * from './selector';
 export * from './signal';
 export * from './store';
 export * from './types';
-export * from './internals';

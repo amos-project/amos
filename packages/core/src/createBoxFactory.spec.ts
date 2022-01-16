@@ -38,6 +38,7 @@ type FooBox<F extends Foo<any>> = ShapedBox<F, 'set', 'get'> & {
 };
 
 const FooBox = createBoxFactory<FooBox<Foo<any>>>({
+  name: 'FooBox',
   mutations: { set: null, setField: null },
   selectors: { get: null, getField: null },
 });
@@ -79,7 +80,8 @@ type BarBox<B extends Bar<any, any>> = ShapedBox<B, 'setBar', 'getBar', FooBox<B
   getBarField<K extends keyof B['bar']>(key: K): Selector<[K], B['bar'][K]>;
 };
 
-const BarBox = FooBox.extends<BarBox<any>>({
+const BarBox = FooBox.extends<BarBox<Bar<any, any>>>({
+  name: 'BarBox',
   mutations: { setBarField: null, setBar: null },
   selectors: { getBarField: null, getBar: null },
 });

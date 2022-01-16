@@ -18,3 +18,4 @@ export * from './store/user.selectors';
 export * from './connect';
 export * from './entry';
 export * from './utils';
+export * from './store/post.actions';

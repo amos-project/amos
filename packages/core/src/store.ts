@@ -3,8 +3,17 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { isJSONSerializable, LRUMap, OMap, OSet, Subscribe, Unsubscribe } from 'amos-utils';
-import { isArray, threw, toString } from '../../utils/src/misc';
+import {
+  isArray,
+  isJSONSerializable,
+  LRUMap,
+  OMap,
+  OSet,
+  Subscribe,
+  threw,
+  toString,
+  Unsubscribe,
+} from 'amos-utils';
 import { Box } from './box';
 import { SelectorFactory } from './selector';
 import { Dispatch, Dispatchable, Select, Selectable, Snapshot } from './types';

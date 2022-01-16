@@ -4,7 +4,7 @@
  */
 
 import Mock = jest.Mock;
-import { applyMutation, Mutation } from 'amos-core';
+import { Mutation } from 'amos-core';
 import { JSONState } from 'amos-utils';
 
 export function sleep(timeout: number = 0): Promise<void> {
@@ -17,10 +17,10 @@ export function expectCalled(fn: (...args: any[]) => any, count = 1) {
 }
 
 export function applyMutations<S>(state: S, mutations: Mutation<any, S>[]) {
-  return mutations.map((mutation: Mutation<any, S>) => {
-    state = applyMutation(state, mutation);
-    return state;
+  mutations.forEach((mutation: Mutation<any, S>) => {
+    mutation.mutator.apply(mutation.box, [state, ...mutation.args]);
   });
+  return state;
 }
 
 export function toJS<T>(v: T): JSONState<T> {

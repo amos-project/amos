@@ -3,24 +3,17 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { selectCurrentUser } from 'amos-testing';
-import { strictEqual } from '../../utils/src/equals';
+import { selectUser } from 'amos-testing';
 
 describe('selector', () => {
   it('should create selector factory', () => {
-    expect(selectCurrentUser).toBe(expect.any(Function));
-    expect({ ...selectCurrentUser }).toEqual({
-      $object: 'selector_factory',
-      type: 'CURRENT_USER',
-      cacheStrategy: false,
-      equalFn: strictEqual,
-    });
+    expect(selectUser).toBe(expect.any(Function));
   });
   it('should create selector', () => {
-    expect(selectCurrentUser()).toEqual({
-      $object: 'selector',
+    expect(selectUser()).toEqual(<ReturnType<typeof selectUser>>{
+      $amos: 'SELECTOR',
       args: [],
-      factory: selectCurrentUser,
+      factory: selectUser,
     });
   });
 });

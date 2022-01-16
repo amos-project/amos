@@ -3,8 +3,7 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { applyEnhancers } from '../../utils/src/enhancer';
-import { identity } from '../../utils/src/equals';
+import { applyEnhancers, identity } from 'amos-utils';
 import { AmosObject } from './types';
 
 /**

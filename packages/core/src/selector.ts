@@ -3,10 +3,8 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { applyEnhancers } from '../../utils/src/enhancer';
-import { strictEqual } from '../../utils/src/equals';
+import { applyEnhancers, is, resolveCallerName } from 'amos-utils';
 import { AmosObject, Select } from './types';
-import { resolveCallerName } from '../../utils/src/misc';
 
 /**
  * Selector is created by {@see SelectorFactory}, it is used for select some state
@@ -120,7 +118,7 @@ export function selector<A extends any[], R>(
     (...args: A): Selector<A, R> => ({ $amos: 'SELECTOR', args, factory }),
     {
       ...options,
-      equal: options.equal || strictEqual,
+      equal: options.equal || is,
     },
     {
       $amos: 'SELECTOR_FACTORY',

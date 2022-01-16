@@ -39,6 +39,7 @@ export const MapBox: MapBoxFactory = createBoxFactory<MapBox>({
     clear: null,
     removeItem: null,
     updateItem: null,
+    searchUpdateOnce: null,
   },
   selectors: { map: null, getItem: null, size: null, keys: null, hasItem: null },
 });

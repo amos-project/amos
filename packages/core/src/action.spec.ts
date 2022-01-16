@@ -3,22 +3,24 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { addTwiceAsync } from 'amos-testing';
+import { addPost } from 'amos-testing';
 import { Action } from './action';
 
 describe('action', () => {
   it('should create action factory', () => {
-    expect(addTwiceAsync).toBeInstanceOf(Function);
-
-    const props = { ...addTwiceAsync };
+    const props = { ...addPost };
     expect(props).toEqual<typeof props>({
-      $object: 'ACTION_FACTORY',
+      $amos: 'ACTION_FACTORY',
       type: 'addTwiceAsync',
       key: expect.any(Function),
       actor: expect.any(Function),
     });
 
-    const action = addTwiceAsync(2);
-    expect(action).toEqual<Action>({ $object: 'ACTION', args: [2], factory: addTwiceAsync });
+    const action = addPost({ title: 'Hello world!', content: 'First article.' });
+    expect(action).toEqual<Action>({
+      $amos: 'ACTION',
+      args: [{ title: 'Hello world!', content: 'First article.' }],
+      factory: addPost,
+    });
   });
 });

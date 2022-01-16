@@ -3,11 +3,12 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { action, Mutation, Select } from 'amos-core';
+import { action, ActionFactory, ActionOptions, Mutation, Select } from 'amos-core';
 
 export interface AsyncActionOptions<A extends any[], R> {
   mutations: (select: Select, result: R, ...args: A) => Mutation | Mutation[];
   optimistic?: boolean;
+  actionOptions?: ActionOptions<A, Promise<R>>;
 }
 
 export function createAsyncActionFactory<
@@ -15,7 +16,7 @@ export function createAsyncActionFactory<
   R,
   TOptions extends AsyncActionOptions<A, R>,
 >(transformer: (options: TOptions, ...args: A) => Promise<R>) {
-  return (options: TOptions) => {
+  return (options: TOptions): ActionFactory<A, Promise<R>> => {
     return action(async (dispatch, select, ...args: A) => {
       if (options.optimistic) {
         // TODO: implement optimistic actions
@@ -23,6 +24,6 @@ export function createAsyncActionFactory<
       const r = await transformer(options, ...args);
       dispatch(options.mutations(select, r, ...args) as Mutation[]);
       return r;
-    });
+    }, options.actionOptions);
   };
 }

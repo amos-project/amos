@@ -80,13 +80,13 @@ export function action<A extends any[], R>(
   }
   let factory: ActionFactory<A, R> = Object.assign(
     (...args: A): Action<A, R> => ({
-      $object: 'ACTION',
+      $amos: 'ACTION',
       args,
       factory,
     }),
     options,
     {
-      $object: 'ACTION_FACTORY' as const,
+      $amos: 'ACTION_FACTORY' as const,
       actor,
     },
   );
