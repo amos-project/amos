@@ -7,42 +7,9 @@ import { applyEnhancers, resolveCallerName } from 'amos-utils';
 import { AmosObject, Dispatch, Select } from './types';
 
 export interface ActionOptions<A extends any[], R = any> {
-  /**
-   * The key for avoid duplicate async dispatch.
-   *
-   * If not set, the dispatch will always be executed, else the duplicated
-   * dispatch will be ignored.
-   *
-   * @example
-   * const getUserWithKey = action(async (dispatch, select, userId: number) => {
-   *   await fetchUserSomewhere(userId);
-   * }, {
-   *   key: (select, userId) => userId,
-   * });
-   *
-   * const getUserWithoutKey = action(async (dispatch, select, userId: number) => {
-   *   await fetchUserSomewhere(userId);
-   * });
-   *
-   * // the following dispatch will only be dispatched once (the second one is ignored).
-   * store.dispatch(getUserWithKey(1));
-   * store.dispatch(getUserWithKey(1));
-   *
-   * // and the everyone of the following dispatch will be dispatched.
-   * store.dispatch(getUserWithKey(1));
-   * // different key
-   * await store.dispatch(getUserWithKey(2));
-   * // the upon one is finished
-   * store.dispatch(getUserWithKey(2));
-   * store.dispatch(getUser(1));
-   * // without key
-   * store.dispatch(getUser(1));
-   *
-   * @param select
-   * @param args
-   */
-  key?: (select: Select, ...args: A) => string | number;
   type?: string;
+  conflictPolicy?: 'takeAlways' | 'takeFirst' | 'takeLatest';
+  conflictKey?: (select: Select, ...args: A) => string | number;
 }
 
 export interface ActionFactory<A extends any[] = any, R = any>
