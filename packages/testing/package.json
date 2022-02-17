@@ -2,6 +2,7 @@
   "name": "amos-testing",
   "version": "0.3.0-beta.1",
   "description": "Testing utilities for amos.",
+  "private": true,
   "keywords": [
     "amos",
     "testing"

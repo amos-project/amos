@@ -1,18 +1,17 @@
 {
-  "name": "amos-effects",
+  "name": "amos-io",
   "version": "0.3.0-beta.1",
-  "description": "The builtin effects library for amos boxes.",
+  "description": "The builtin io library for amos.",
   "keywords": [
     "amos",
-    "effects",
     "io",
     "http"
   ],
   "author": "acrazing <joking.young@gmail.com>",
   "homepage": "https://github.com/acrazing/amos",
   "license": "MIT",
-  "main": "dist/amos-effects.cjs.js",
-  "module": "dist/amos-effects.esm.js",
+  "main": "dist/amos-io.cjs.js",
+  "module": "dist/amos-io.esm.js",
   "files": [
     "dist"
   ],

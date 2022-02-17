@@ -1,34 +1,55 @@
 # `amos`
 
-An out-of-the-box state management library designed for your large-scale projects.
+`Amos` is a out-of-the-box state management library designed for large scale projects.
 
-This is the common entry package includes the following packages.
+The `amos` is the all in one package for all the builtin modules of amos. It includes several
+entrypoints, each entrypoint contains one or more packages. The entrypoints are:
 
-- `amos-core`
-- `amos-shapes`
-- `amos-boxes`
-- `amos-utils`
-- `amos-persist`
-- `amos-devtools`
+| entrypoint   | included packages                                                                                                                                |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `amos`       | <ul><li>amos-core</li><li>amos-boxes</li><li>amos-shapes</li><li>amos-io</li><li>amos-persist</li><li>amos-devtools</li><li>amos-utils</li></ul> |
+| `amos/react` | <ul><li>amos-react</li></ul>                                                                                                                     |
+| `amos/redux` | <ul><li>amos-redux</li></ul>                                                                                                                     |
 
-However, the following packages are not included:
+## Install
 
-- `amos-react`
-- `amos-redux`
-
-## Usage
-
+```bash
+npm i -S amos
+# or via yarn
+yarn add amos
 ```
-import { createStore, createBox } from 'amos';
 
-const countBox = createNumberBox(0);
+## Quick start
+
+```typescript jsx
+import { NumberBox, createStore } from 'amos';
+import { Provider, useSelector, useDispatch } from 'amos/react';
+import * as React from 'react';
+import * as ReactDOM from 'react-dom';
+
+const countBox = new NumberBox('count');
 
 const store = createStore();
 
-store.subscribe(() => {
-  const count = store.select(countBox);
-  console.log(count); // => 1
-});
+const Counter = () => {
+  const [count] = useSelector(countBox);
+  const dispatch = useDispatch();
+  const handleClick = () => dispatch(countBox.add(1));
+  return (
+    <div>
+      Click count: {count}.&nbsp;
+      <button onClick={handleClick}>Click me</button>
+    </div>
+  );
+};
 
-store.dispatch(countBox.incr());
+const App = () => {
+  return (
+    <Provider store={store}>
+      <Counter />
+    </Provider>
+  );
+};
+
+ReactDOM.render(<App />, document.querySelector('#root'));
 ```

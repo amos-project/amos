@@ -4,6 +4,9 @@
  */
 
 export * from 'amos-core';
-export * from 'amos-shapes';
 export * from 'amos-boxes';
+export * from 'amos-shapes';
+export * from 'amos-io';
+export * from 'amos-persist';
+export * from 'amos-devtools';
 export * from 'amos-utils';
