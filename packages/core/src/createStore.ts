@@ -3,18 +3,17 @@
  * @author junbao <junbao@mymoement.com>
  */
 
-import { applyEnhancers } from 'amos-utils';
+import { withCache } from './enhancers/withCache';
+import { withTransaction } from './enhancers/withTransaction';
 import { Store, StoreOptions } from './store';
-import { Snapshot } from './types';
 
-export type StoreEnhancer = (StoreClass: typeof Store) => typeof Store;
+export type StoreEnhancer = (
+  next: (options: StoreOptions) => Store,
+) => (options: StoreOptions) => Store;
 
-export function createStore(
-  preloadedState: Snapshot = {},
-  options: StoreOptions = {},
-  ...enhancers: StoreEnhancer[]
-): Store {
-  const store = new (applyEnhancers(Store, enhancers))(preloadedState, options).init();
+export function createStore(options: StoreOptions = {}, ...enhancers: StoreEnhancer[]): Store {
+  enhancers.unshift(withTransaction(), withCache());
+  // TODO
   store.init();
   return store;
 }

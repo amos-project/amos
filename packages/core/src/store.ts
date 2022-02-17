@@ -6,6 +6,7 @@
 import {
   isArray,
   isJSONSerializable,
+  JSONState,
   LRUMap,
   OMap,
   OSet,
@@ -19,7 +20,8 @@ import { SelectorFactory } from './selector';
 import { Dispatch, Dispatchable, Select, Selectable, Snapshot } from './types';
 
 export interface StoreOptions {
-  cacheSize?: number;
+  preloadedState?: Snapshot;
+  getPreloadedState?: <S>(box: Box<S>) => JSONState<S>;
 }
 
 export interface SelectorCache<A extends any[] = any, R = any> {
