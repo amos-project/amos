@@ -10,7 +10,9 @@
   "author": "acrazing <joking.young@gmail.com>",
   "homepage": "https://github.com/acrazing/amos",
   "license": "MIT",
-  "main": "dist/redux.cjs.js",
+  "main": "dist/amos-persist.cjs.js",
+  "module": "dist/amos-persist.esm.js",
+  "types": "dist/amos-persist.d.ts",
   "files": [
     "dist"
   ],

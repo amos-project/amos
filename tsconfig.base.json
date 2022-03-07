@@ -8,8 +8,6 @@
     "declaration": true,
     "declarationMap": false,
     "sourceMap": true,
-    "outDir": "dist",
-    "rootDir": "src",
     "removeComments": false,
     "noEmit": false,
     "importHelpers": true,
@@ -34,6 +32,5 @@
     "allowUnreachableCode": false,
     "stripInternal": true,
     "allowUnusedLabels": false
-  },
-  "include": ["src"]
+  }
 }

@@ -12,6 +12,7 @@
   "license": "MIT",
   "main": "dist/amos-shapes.cjs.js",
   "module": "dist/amos-shapes.esm.js",
+  "types": "dist/amos-shapes.d.ts",
   "files": [
     "dist"
   ],

@@ -10,9 +10,9 @@
   "author": "acrazing <joking.young@gmail.com>",
   "homepage": "https://github.com/acrazing/amos",
   "license": "MIT",
-  "main": "dist/react.cjs.js",
-  "module": "dist/react.es.js",
-  "types": "dist/react.d.ts",
+  "main": "dist/amos-react.cjs.js",
+  "module": "dist/amos-react.esm.js",
+  "types": "dist/amos-react.d.ts",
   "files": [
     "dist"
   ],
@@ -25,6 +25,10 @@
   },
   "bugs": {
     "url": "https://github.com/acrazing/amos/issues"
+  },
+  "devDependencies": {
+    "@types/react": "^17.0.39",
+    "@types/react-dom": "^17.0.13"
   },
   "dependencies": {
     "amos": "^0.3.0-beta.1",

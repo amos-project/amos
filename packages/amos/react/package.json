@@ -1,4 +1,5 @@
 {
   "main": "react.cjs.js",
-  "module": "react.esm.js"
+  "module": "react.esm.js",
+  "types": "react.d.ts"
 }

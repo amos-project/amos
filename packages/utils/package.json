@@ -11,6 +11,7 @@
   "license": "MIT",
   "main": "dist/amos-utils.cjs.js",
   "module": "dist/amos-utils.esm.js",
+  "types": "dist/amos-utils.d.ts",
   "files": [
     "dist"
   ],
@@ -19,7 +20,8 @@
     "url": "git+https://github.com/acrazing/amos.git"
   },
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "build": "bash ../../scripts/build.sh utils"
   },
   "bugs": {
     "url": "https://github.com/acrazing/amos/issues"

@@ -4,5 +4,6 @@
     "rootDir": ".",
     "outDir": "."
   },
-  "include": ["lib", "react", "redux"]
+  "include": ["lib", "react", "redux"],
+  "exclude": []
 }

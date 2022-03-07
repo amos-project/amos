@@ -11,6 +11,7 @@
   "license": "MIT",
   "main": "dist/amos-boxes.cjs.js",
   "module": "dist/amos-boxes.esm.js",
+  "types": "dist/amos-boxes.d.ts",
   "files": [
     "dist"
   ],

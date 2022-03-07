@@ -12,6 +12,7 @@
   "license": "MIT",
   "main": "dist/amos-io.cjs.js",
   "module": "dist/amos-io.esm.js",
+  "types": "dist/amos-io.d.ts",
   "files": [
     "dist"
   ],

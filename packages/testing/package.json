@@ -10,7 +10,9 @@
   "author": "acrazing <joking.young@gmail.com>",
   "homepage": "https://github.com/acrazing/amos",
   "license": "MIT",
-  "main": "dist/testing.cjs.js",
+  "main": "dist/amos-testing.cjs.js",
+  "module": "dist/amos-testing.esm.js",
+  "types": "dist/amos-testing.d.ts",
   "files": [
     "dist"
   ],
@@ -19,7 +21,8 @@
     "url": "git+https://github.com/acrazing/amos.git"
   },
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "build": "tsc"
   },
   "bugs": {
     "url": "https://github.com/acrazing/amos/issues"

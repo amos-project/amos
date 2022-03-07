@@ -9,7 +9,9 @@
   "author": "acrazing <joking.young@gmail.com>",
   "homepage": "https://github.com/acrazing/amos",
   "license": "MIT",
-  "main": "dist/devtools.cjs.js",
+  "main": "dist/amos-devtools.cjs.js",
+  "module": "dist/amos-devtools.esm.js",
+  "types": "dist/amos-devtools.d.ts",
   "files": [
     "dist"
   ],

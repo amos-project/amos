@@ -10,6 +10,7 @@
   "license": "MIT",
   "main": "dist/amos-core.cjs.js",
   "module": "dist/amos-core.esm.js",
+  "types": "dist/amos-core.d.ts",
   "files": [
     "dist"
   ],
