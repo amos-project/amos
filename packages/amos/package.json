@@ -24,7 +24,8 @@
     "url": "git+https://github.com/acrazing/amos.git"
   },
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "build": "bash ./scripts/build.sh"
   },
   "bugs": {
     "url": "https://github.com/acrazing/amos/issues"

@@ -8,8 +8,9 @@ import { AmosObject, Dispatch, Select } from './types';
 
 export interface ActionOptions<A extends any[], R = any> {
   type?: string;
-  conflictPolicy?: 'takeAlways' | 'takeFirst' | 'takeLatest';
+  conflictPolicy?: 'always' | 'first' | 'latest';
   conflictKey?: (select: Select, ...args: A) => string | number;
+  rollback?: (select: Select, reason: unknown, ...args: A) => void;
 }
 
 export interface ActionFactory<A extends any[] = any, R = any>

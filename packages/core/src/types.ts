@@ -5,7 +5,7 @@
 
 import { Action } from './action';
 import { Box, Mutation } from './box';
-import { FunctionSelector, Selector, SelectorFactory } from './selector';
+import { Selector, SelectorFactory } from './selector';
 import { Signal } from './signal';
 
 export interface AmosObject<T extends string> {
@@ -30,7 +30,7 @@ export type Snapshot = Record<string, unknown>;
  */
 export type Dispatchable<R = any> = Mutation<any, R> | Action<any, R> | Signal<R>;
 
-export interface AmosDispatch {
+export interface Dispatch {
   <R>(task: Dispatchable<R>): R;
   <R1>(tasks: readonly [Dispatchable<R1>]): [R1];
   <R1, R2>(tasks: readonly [Dispatchable<R1>, Dispatchable<R2>]): [R1, R2];
@@ -44,9 +44,7 @@ export interface AmosDispatch {
   <R>(tasks: readonly Dispatchable<R>[]): R[];
 }
 
-export interface Dispatch extends AmosDispatch {}
-
-export type Selectable<R = any> = SelectorFactory<[], R> | Box<R> | Selector<any, R> | FunctionSelector<R>;
+export type Selectable<R = any> = SelectorFactory<[], R> | Box<R> | Selector<any, R>;
 
 export interface Select {
   <A extends Selectable>(selectable: A): A extends Selectable<infer R> ? R : never;

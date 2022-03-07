@@ -9,5 +9,5 @@ import { override } from 'amos-utils';
 export const withCache: () => StoreEnhancer = () => (next) => (options) =>
   override(next(options), 'select', (original) => (selectable: any) => {
     // TODO
-    return original(selectable);
+    return original(selectable) as any;
   });

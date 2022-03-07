@@ -12,7 +12,6 @@ describe('action', () => {
     expect(props).toEqual<typeof props>({
       $amos: 'ACTION_FACTORY',
       type: 'addTwiceAsync',
-      key: expect.any(Function),
       actor: expect.any(Function),
     });
 

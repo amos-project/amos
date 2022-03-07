@@ -4,7 +4,8 @@
  */
 
 import { applyEnhancers, identity } from 'amos-utils';
-import { AmosObject } from './types';
+import { Box } from './box';
+import { AmosObject, createAmosObject } from './types';
 
 /**
  * An `Signal` is a dispatchable object, which will notify all the subscribed
@@ -15,8 +16,8 @@ import { AmosObject } from './types';
  * The return value of `dispatch(signal)` is the data of the signal.
  */
 export interface Signal<D extends any = any> extends AmosObject<'SIGNAL'> {
-  type: string;
   data: D;
+  factory: SignalFactory<any[], D>;
 }
 
 export interface SignalOptions<D> {}
@@ -30,6 +31,8 @@ export interface SignalFactory<A extends any[] = any, D = any>
     SignalOptions<D> {
   type: string;
   (...args: A): Signal<D>;
+  /** @internal */
+  listeners: Map<Box, (state: any, data: D) => any>;
 }
 
 export type SignalEnhancer = <A extends any[], D>(
@@ -74,15 +77,16 @@ export function signal(type: string, creator: any, options?: any): SignalFactory
   }
   creator ??= identity;
   let factory: SignalFactory = Object.assign(
-    (...args: any[]): Signal => ({
-      $amos: 'SIGNAL',
-      type,
-      data: creator(...args),
-    }),
+    (...args: any[]): Signal =>
+      createAmosObject('SIGNAL', {
+        data: creator(...args),
+        factory,
+      }),
     options,
     {
       $amos: 'SIGNAL_FACTORY' as const,
       type,
+      listeners: new Set(),
     },
   );
   factory = applyEnhancers(factory, signalEnhancers);

@@ -29,7 +29,6 @@ export type MutationFactory<A extends any[], S> = (this: Box<S>, ...args: A) => 
 export interface BoxOptions<S> {}
 
 export class Box<S = any> {
-  readonly signals: Record<string, (state: S, data: any) => S> = {};
   readonly options: BoxOptions<S>;
 
   /**
@@ -74,7 +73,7 @@ export class Box<S = any> {
     signal: SignalFactory<any, D>,
     handler: (state: S, data: D) => S,
   ): TThis {
-    this.signals[signal.type] = handler;
+    signal.listeners.set(this, handler);
     return this;
   }
 

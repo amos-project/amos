@@ -18,20 +18,6 @@ export interface Selector<A extends any[] = any, R = any> extends AmosObject<'SE
 }
 
 /**
- * A function is also selectable.
- *
- * Please note that the selection result of a function will not be cached.
- * If used in {@see import('amos-react').useSelector}, it will always be
- * recomputed when the state of the store changes. Therefore, you MUST
- * ensure that the calculation is lightweight and the result of the
- * calculation is strict equal when the state has not changed.
- */
-export interface FunctionSelector<R> {
-  type?: string;
-  (select: Select): R;
-}
-
-/**
  * The options for a {@see SelectorFactory}.
  *
  * It could be extended by plugins.

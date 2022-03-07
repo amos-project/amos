@@ -1,9 +1,9 @@
 # `amos`
 
-`Amos` is a out-of-the-box state management library designed for large scale projects.
+`Amos` is an out-of-the-box state management library designed for large scale projects.
 
-The `amos` is the all in one package for all the builtin modules of amos. It includes several
-entrypoints, each entrypoint contains one or more packages. The entrypoints are:
+The `amos` is the all-in-one package for all the builtin modules of amos. It includes several
+entrypoint, each entrypoint contains one or more packages. The entrypoint are:
 
 | entrypoint   | included packages                                                                                                                                |
 | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |

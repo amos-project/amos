@@ -14,6 +14,7 @@ export const withTransaction: () => StoreEnhancer = () => (next) => (options) =>
   override(
     next(options),
     'dispatch',
-    (original) => (tasks: any) =>
-      Array.isArray(tasks) ? original(transaction(tasks)) : original(tasks),
+    (original) =>
+      (tasks: any): any =>
+        Array.isArray(tasks) ? original(transaction(tasks)) : original(tasks),
   );

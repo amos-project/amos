@@ -4,7 +4,7 @@
  */
 
 import { ActionFactory } from 'amos-core';
-import { AsyncActionOptions, createAsyncActionFactory } from 'amos-effects';
+import { AsyncActionOptions, createAsyncActionFactory } from 'amos-io';
 import { HttpEndpoints, mockServer } from './HttpEndpoints';
 
 export interface HttpActionOptions<K extends keyof HttpEndpoints>
