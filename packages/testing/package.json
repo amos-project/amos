@@ -21,8 +21,8 @@
     "url": "git+https://github.com/acrazing/amos.git"
   },
   "scripts": {
-    "test": "jest",
-    "build": "tsc"
+    "test": "true",
+    "build": "rm -rf dist && tsc"
   },
   "bugs": {
     "url": "https://github.com/acrazing/amos/issues"

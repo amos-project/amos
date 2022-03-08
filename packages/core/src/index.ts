@@ -5,9 +5,8 @@
 
 export * from './action';
 export * from './box';
-export * from './createStore';
 export * from './createBoxFactory';
+export * from './createStore';
 export * from './selector';
 export * from './signal';
-export * from './store';
 export * from './types';

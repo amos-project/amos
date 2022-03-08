@@ -8,7 +8,7 @@ import { AmosObject, Select } from './types';
 
 /**
  * Selector is created by {@see SelectorFactory}, it is used for select some state
- * in the {@see import('./store').Store}.
+ * in the {@see import('./createStore').Store}.
  *
  * You do not need to care about the data structure of a Selector.
  */

@@ -20,8 +20,8 @@
     "url": "git+https://github.com/acrazing/amos.git"
   },
   "scripts": {
-    "test": "jest",
-    "build": "bash ../../scripts/build.sh utils"
+    "test": "true",
+    "build": "rollup --config ../../rollup.config.js"
   },
   "bugs": {
     "url": "https://github.com/acrazing/amos/issues"

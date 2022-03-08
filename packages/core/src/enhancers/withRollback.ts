@@ -3,7 +3,7 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { override } from '../../../utils/src';
+import { override } from 'amos-utils';
 import { StoreEnhancer } from '../createStore';
 
 export const withRollback = (): StoreEnhancer => (next) => (options) =>

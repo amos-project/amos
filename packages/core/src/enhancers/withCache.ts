@@ -3,8 +3,8 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { StoreEnhancer } from 'amos-core';
 import { override } from 'amos-utils';
+import { StoreEnhancer } from '../createStore';
 
 export const withCache: () => StoreEnhancer = () => (next) => (options) =>
   override(next(options), 'select', (original) => (selectable: any) => {

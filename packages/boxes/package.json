@@ -20,13 +20,16 @@
     "url": "git+https://github.com/acrazing/amos.git"
   },
   "scripts": {
-    "test": "jest"
+    "test": "true",
+    "build": "rollup --config ../../rollup.config.js"
   },
   "bugs": {
     "url": "https://github.com/acrazing/amos/issues"
   },
   "dependencies": {
-    "tslib": "^2.3.0",
-    "amos-core": "0.3.0-beta.1"
+    "amos-core": "^0.3.0-beta.1",
+    "amos-shapes": "^0.3.0-beta.1",
+    "amos-utils": "^0.3.0-beta.1",
+    "tslib": "^2.3.0"
   }
 }

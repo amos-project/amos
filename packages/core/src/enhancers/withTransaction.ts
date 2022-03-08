@@ -3,8 +3,10 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { action, Dispatchable, StoreEnhancer } from 'amos-core';
 import { override } from 'amos-utils';
+import { action } from '../action';
+import { StoreEnhancer } from '../createStore';
+import { Dispatchable } from '../types';
 
 const transaction = action((dispatch, select, dispatchableList: Dispatchable[]) =>
   dispatchableList.map((d) => dispatch(d)),

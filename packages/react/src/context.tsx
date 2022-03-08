@@ -3,7 +3,8 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { Dispatch, Store, threw } from 'amos';
+import { Dispatch, Store } from 'amos-core';
+import { threw } from 'amos-utils';
 import React, { createContext, ReactNode, useContext } from 'react';
 
 export const __Context = createContext<Store | null>(null);

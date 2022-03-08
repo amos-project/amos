@@ -9,10 +9,16 @@ import sourceMaps from 'rollup-plugin-sourcemaps';
 import { terser } from 'rollup-plugin-terser';
 import typescript from 'rollup-plugin-typescript2';
 import replace from '@rollup/plugin-replace';
+import fs from 'fs';
+import dts from 'rollup-plugin-dts';
+import del from 'rollup-plugin-delete';
+import path from 'path';
 
-const packageJson = require('./package.json');
+const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf-8'));
 
-const deps = Object.keys(packageJson.dependencies).concat(Object.keys(packageJson.devDependencies));
+const deps = Object.keys(packageJson.dependencies || {}).concat(
+  Object.keys(packageJson.devDependencies || {}),
+);
 
 const name = packageJson.name.split('/').pop();
 const top = name.replace(/(?:^|-)(.)/g, ($0, $1) => $1.toUpperCase());
@@ -34,6 +40,7 @@ const options = (format) => ({
         compilerOptions: { module: 'esnext', declaration: format === 'esm' },
         exclude: ['src/**/*.spec.ts', 'src/**/*.spec.tsx'],
       },
+      cacheRoot: path.join(__dirname, 'node_modules', '.cache', 'rpt2'),
     }),
     replace({
       __VERSION__: packageJson.version,
@@ -41,7 +48,16 @@ const options = (format) => ({
     commonjs(),
     resolve({ preferBuiltins: true }),
     sourceMaps(),
-  ],
+    format === 'cjs' ? del({ targets: 'dist/*' }) : void 0,
+  ].filter(Boolean),
 });
 
-export default [options('cjs'), options('esm'), options('umd')];
+export default [
+  options('cjs'),
+  options('esm'),
+  {
+    input: `dist/index.d.ts`,
+    output: [{ file: `dist/${name}.d.ts`, format: 'es' }],
+    plugins: [dts(), del({ targets: 'dist/**/*.d.ts', ignore: name + '.d.ts', hook: 'buildEnd' })],
+  },
+];
