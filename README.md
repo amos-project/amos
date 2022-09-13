@@ -198,7 +198,7 @@ section. We will explain this function in detail here.
 
 The first parameter is the `key` of the `box`, it **MUST** be a string and
 unique in your project's boxes, it is used internally, so it can be a string
-in any format, the only thing you should care about it is **KEEP IT UNIQUE**.
+in any format, the only thing you should care about is **KEEP IT UNIQUE**.
 
 The second one is the initial state of the box, please note it is **NOT** a
 factory to create initial state, because the state **SHOULD BE IMMUTABLE**.
@@ -232,7 +232,7 @@ methods or properties it provides, except when you need to subscribe to [signals
 
 ### Mutations
 
-A `Mutation` is an object which while mutate a `box`'s state when it is dispatched.
+A `Mutation` is an object which will mutate a `box`'s state when it is dispatched.
 
 You can create a `MutationFactory` by calling [`mutation()`](#mutation):
 
@@ -253,7 +253,7 @@ The `Mutation` is dispatchable, which means you can use it as the parameter of
 [`store.dispatch()`](#storedispatch). When it is dispatched, the following things will
 happen:
 
-- the `mutator` will be called with two parameter which are the state of the `box` and
+- the `mutator` will be called with two parameters which are the state of the `box` and
   the parameter passed in when the `MutationFactory` is called.
 - the state of the `box` will be set as the return value of the `mutator`.
 - the return value of the `store.dispatch()` will be the parameter passed in when the
@@ -285,22 +285,22 @@ const result = await store.dispatch(addCountAsync(2));
 
 The [`action()`](#action) accepts one parameter called `actor`, and returns an
 `ActionFactory`. The `actor` is a function which will be called when you dispatch
-the `Action`. The `ActionFactory` is a function, which will returns an `Action`.
+the `Action`. The `ActionFactory` is a function, which will return an `Action`.
 
 The `Action` is dispatchable, when you dispatch it, the `actor` will be called
 with the following parameters: `dispatch`, `select` and the parameters passed in
 when the `ActionFactory` is called. The `dispatch` and `select` are the
-[`store.dispatch`](#storedispatch) and [`store.select`](#storeselect), which are
+[`store.dispatch`](#storedispatch) and [`store.select`](#storeselect), which
 allow you to dispatch some dispatchable things and select states. The return
 value of `store.dispatch(action)` is the return value of `actor`.
 
 ### Signals
 
-An `SignalFactory` is a function to create an `Signal`, and could be subscribed by
-a `box`. An `Signal` is an object, which while trigger the subscribed `boxes`
+A `SignalFactory` is a function to create an `Signal`, and could be subscribed by
+a `box`. A `Signal` is an object, which will trigger the subscribed `boxes`
 to mutate these states when you dispatch it.
 
-You can create an `SignalFactory` by calling [`signal()`](#signal), and subscribe its
+You can create a `SignalFactory` by calling [`signal()`](#signal), and subscribe its
 `Signals` by calling [`box.subscribe()`](#boxsubscribe):
 
 ```typescript
@@ -321,7 +321,7 @@ you call `SignalFactory`, its return value will be used as the second parameter 
 subscribers and the return value of [`store.dispatch()`](#storedispatch) when you
 dispatch it.
 
-**Please note that an signal will only be dispatched to the boxes which is invoked
+**Please note that a signal will only be dispatched to the boxes which is invoked
 already(`select(box)` and `dispatch(mutation)` will invoke the relative `box`
 automatically).**
 
@@ -370,7 +370,7 @@ brings more additional benefits. For example:
 ```typescript
 import { selector } from 'amos';
 
-const selectMultipleCount = select((select, multiplier: number) => {
+const selectMultipleCount = selector((select, multiplier: number) => {
   return select(countBox) * multiplier;
 });
 
@@ -454,8 +454,8 @@ object, and returns a new `ComponentType`.
 `Connect` and `react-redux`'s `connect` are basically the same, but we
 simplified some of its features. Specifically, they have these differences:
 
-1. It always inject `dispatch` to the HOC
-2. It does not support `mapActions`
+1. It always injects `dispatch` to the HOC.
+2. It does not support `mapActions`.
 3. The `mapProps`'s first parameter is [`store.select`](#storeselect)
    rather than the state.
 4. It will not copy static props from the wrapped component to the new component.
@@ -488,7 +488,7 @@ export const ConnectedCount = connect((select) => ({
 
 Please note that `connect` cannot use as decorator with typescript for the reason
 of the ECMAScript specification. The following code is ok with `babel`, but will
-emit some types error with `TypeScript`:
+emit some type errors with `TypeScript`:
 
 ```typescript jsx
 import { connect } from 'amos';
@@ -521,11 +521,11 @@ export class SomeComponent extends Component {
 ### Transactions
 
 Every call of [`store.dispatch(dispatchable)`](#storedispatch) will notify all
-the subscribers which is registered by [`store.subscribe()`](#storesubscribe).
+the subscribers which are registered by [`store.subscribe()`](#storesubscribe).
 Which means if you call `store.dispatch` twice synchronously, the subscribers
 will be called twice yet. Something will make the thing different:
 
-1. call `store.dispatch` with a `dispatchable` array::
+1. call `store.dispatch` with a `dispatchable` array:
 
    ```typescript jsx
    store.dispatch([increment(), increment()]);
@@ -542,9 +542,9 @@ will be called twice yet. Something will make the thing different:
    store.dispatch(incrementTwice());
    ```
 
-Both of the two action will only notice the subscribers once. **Please
-note the `2nd` one needs two be `synchronous`, which means the
-asynchronous dispatches is separated, you MUST call the `dispatch()`
+Both of the two actions will only notice the subscribers once. **Please
+note the `2nd` one needs to be `synchronous`, which means the
+asynchronous dispatches are separated, you MUST call the `dispatch()`
 in the `1th` form in your asynchronous actions.** For example:
 
 ```typescript jsx
@@ -569,7 +569,7 @@ const exampleAction = action(async (dispatch) => {
 
 When you use [`useSelector`](#useselector) in your component, the component
 should update if the state of boxes updated. the `useSelector` will caches
-the last parameters and state snapshots and the result of it. if a `dispatch`
+the last parameters and state snapshots and the result of it. If a `dispatch`
 mutated the state which is not depended by the selectors, the component will
 not rerender. It is fantastic!
 
@@ -604,9 +604,9 @@ function ShowCount() {
 TODO
 
 In addition, [`selector()`](#selector) accepts the second parameter called `deps`,
-which is a function also. the `deps` should accepts parameters same to the `fn`, and
-returns an array as the cache key, it will be called in `useSelector` to check the
-selector should or should not be rerun. For example:
+which is a function also. The `deps` should accepts parameters same to the `fn`, and
+returns an array as the cache key, it will be called in `useSelector` to check if the
+selector should be rerun. For example:
 
 ```typescript jsx
 const selectFactorialCount = selector(
@@ -712,7 +712,7 @@ function signal<A extends any[], D>(creator: (...args: A) => D): (...args: A) =>
 export interface Signal<D> {}
 ```
 
-**Signal** is `dispatchable**.`
+**Signal** is `dispatchable`.
 
 ### selector()
 
