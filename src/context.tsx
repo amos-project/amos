@@ -32,7 +32,7 @@ export interface ProviderProps {
 export const Provider = ({ store, children }: ProviderProps) => {
   const [state, setState] = useState<ContextState>({ store });
   useEffect(() => {
-    state.store !== state.store && setState({ store });
+    state.store !== store && setState({ store });
   }, [store]);
   return <__Context.Provider value={state}>{children}</__Context.Provider>;
 };
