@@ -12,11 +12,7 @@
   "endOfLine": "lf",
   "overrides": [
     {
-      "files": [
-        "types.ts",
-        "index.ts",
-        "*.types.ts"
-      ],
+      "files": ["types.ts", "index.ts", "*.types.ts"],
       "options": {
         "printWidth": 1000
       }

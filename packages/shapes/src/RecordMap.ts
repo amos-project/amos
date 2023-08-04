@@ -11,7 +11,10 @@ export class RecordMap<R extends Record<any>, KF extends keyof RecordProps<R>> e
   IDOf<R[KF]>,
   R
 > {
-  constructor(readonly defaultValue: R, readonly keyField: KF) {
+  constructor(
+    readonly defaultValue: R,
+    readonly keyField: KF,
+  ) {
     super(defaultValue);
   }
 

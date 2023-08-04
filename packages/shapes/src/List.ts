@@ -8,7 +8,10 @@ import { clone, Cloneable, JSONSerializable, JSONState } from 'amos-utils';
 export class List<E> extends Cloneable implements JSONSerializable<readonly E[]> {
   protected readonly data: readonly E[] = [];
 
-  constructor(protected readonly defaultElement: E, isValid: boolean = false) {
+  constructor(
+    protected readonly defaultElement: E,
+    isValid: boolean = false,
+  ) {
     super(isValid);
   }
 

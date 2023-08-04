@@ -37,7 +37,10 @@ export class Box<S = any> {
    * @param key - the unique key of the box, it should be unique in your system
    * @param initialState - the initial state of the box, it should not be a function
    */
-  constructor(readonly key: string, readonly initialState: S) {
+  constructor(
+    readonly key: string,
+    readonly initialState: S,
+  ) {
     if (process.env.NODE_ENV === 'development') {
       threw(typeof initialState === 'function', 'initialState should not be a function.');
     }

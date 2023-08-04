@@ -50,7 +50,10 @@ function createFooBox<T>(key: string, data: T): FooBox<Foo<T>> {
 const fooBox = createFooBox('unit.boxFactory.foo', { foo: 'bar', bar: 1 });
 
 class Bar<T, U> extends Foo<T> {
-  constructor(data: T, public bar: U) {
+  constructor(
+    data: T,
+    public bar: U,
+  ) {
     super(data);
   }
 
