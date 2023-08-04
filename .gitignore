@@ -17,6 +17,3 @@ local-*
 .idea/
 .vscode/
 
-.docusaurus
-.cache-loader
-build/
