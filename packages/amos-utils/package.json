@@ -1,0 +1,23 @@
+{
+  "name": "amos-utils",
+  "version": "0.3.0-beta.1",
+  "author": "acrazing <joking.young@gmail.com>",
+  "homepage": "https://github.com/amos-project/amos",
+  "license": "MIT",
+  "types": "esm/index.d.ts",
+  "main": "lib/index.js",
+  "module": "esm/index.js",
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/amos-project/amos.git"
+  },
+  "bugs": {
+    "url": "https://github.com/amos-project/amos/issues"
+  },
+  "dependencies": {
+    "tslib": "^2.6.1"
+  }
+}

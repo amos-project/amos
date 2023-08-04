@@ -1,0 +1,29 @@
+{
+  "name": "amos-boxes",
+  "version": "0.3.0-beta.1",
+  "description": "The amos box factories built on amos-shapes and other well-known shapes.",
+  "author": "acrazing <joking.young@gmail.com>",
+  "homepage": "https://github.com/amos-project/amos",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "module": "esm/index.js",
+  "types": "esm/index.d.ts",
+  "files": [
+    "src",
+    "esm",
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/amos-project/amos.git"
+  },
+  "bugs": {
+    "url": "https://github.com/amos-project/amos/issues"
+  },
+  "dependencies": {
+    "amos-core": "^0.3.0-beta.1",
+    "amos-shapes": "^0.3.0-beta.1",
+    "amos-utils": "^0.3.0-beta.1",
+    "tslib": "^2.6.1"
+  }
+}

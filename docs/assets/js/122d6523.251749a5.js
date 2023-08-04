@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkamos_website=self.webpackChunkamos_website||[]).push([[608],{617:s=>{s.exports=JSON.parse('{"label":"hello","permalink":"/amos/blog/tags/hello","allTagsPath":"/amos/blog/tags","count":2}')}}]);

@@ -1,0 +1,26 @@
+{
+  "name": "amos-io",
+  "version": "0.3.0-beta.1",
+  "description": "The builtin io library for amos.",
+  "author": "acrazing <joking.young@gmail.com>",
+  "homepage": "https://github.com/amos-project/amos",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "module": "esm/index.js",
+  "types": "esm/index.d.ts",
+  "files": [
+    "src",
+    "esm",
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/amos-project/amos.git"
+  },
+  "bugs": {
+    "url": "https://github.com/amos-project/amos/issues"
+  },
+  "dependencies": {
+    "tslib": "^2.6.1"
+  }
+}

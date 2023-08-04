@@ -22,34 +22,29 @@ yarn add amos
 ## Quick start
 
 ```typescript jsx
-import { NumberBox, createStore } from 'amos';
-import { Provider, useSelector, useDispatch } from 'amos/react';
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+import { createStore, NumberBox } from 'amos';
+import { Provider, useDispatch, useSelector } from 'amos-react';
+import { createRoot } from 'react-dom/client';
 
 const countBox = new NumberBox('count');
 
-const store = createStore();
-
-const Counter = () => {
-  const [count] = useSelector(countBox);
+function Count() {
   const dispatch = useDispatch();
-  const handleClick = () => dispatch(countBox.add(1));
+  const [count] = useSelector(countBox);
+
   return (
     <div>
-      Click count: {count}.&nbsp;
-      <button onClick={handleClick}>Click me</button>
+      <span>Click count: {count}</span>
+      <button onClick={() => dispatch(countBox.add(1))}>Click me</button>
     </div>
   );
-};
+}
 
-const App = () => {
-  return (
-    <Provider store={store}>
-      <Counter />
-    </Provider>
-  );
-};
+const store = createStore();
 
-ReactDOM.render(<App />, document.querySelector('#root'));
+createRoot(document.getElementById('root')!).render(
+  <Provider store={store}>
+    <Count />
+  </Provider>,
+);
 ```

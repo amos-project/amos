@@ -1,9 +1,0 @@
-{
-  "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    "rootDir": ".",
-    "outDir": "."
-  },
-  "include": ["lib", "react", "redux"],
-  "exclude": []
-}

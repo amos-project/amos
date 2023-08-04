@@ -4,15 +4,24 @@
   "useTabs": false,
   "semi": true,
   "singleQuote": true,
+  "quoteProps": "as-needed",
   "jsxSingleQuote": false,
   "trailingComma": "all",
   "bracketSpacing": true,
-  "jsxBracketSameLine": false,
+  "bracketSameLine": false,
   "arrowParens": "always",
+  "proseWrap": "always",
+  "htmlWhitespaceSensitivity": "ignore",
   "endOfLine": "lf",
+  "embeddedLanguageFormatting": "auto",
+  "singleAttributePerLine": false,
   "overrides": [
     {
-      "files": ["types.ts", "index.ts", "*.types.ts"],
+      "files": [
+        "types.ts",
+        "index.ts",
+        "*.types.ts"
+      ],
       "options": {
         "printWidth": 1000
       }
