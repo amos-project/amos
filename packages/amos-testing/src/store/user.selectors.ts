@@ -4,8 +4,8 @@
  */
 
 import { selector } from 'amos-core';
-import { userMapBox } from 'amos-testing';
 import { selectUserId } from './session.selectors';
+import { userMapBox } from './user.boxes';
 
 export const selectUser = selector((select, userId: number = select(selectUserId())) => {
   return select(userMapBox.getItem(userId));

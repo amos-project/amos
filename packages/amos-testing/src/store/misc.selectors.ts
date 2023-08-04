@@ -6,7 +6,7 @@
  */
 
 import { selector } from 'amos-core';
-import { countBox } from 'amos-testing';
+import { countBox } from './misc.boxes';
 
 export const selectCount = selector((select) => select(countBox));
 export const selectDoubleCount = selector((select) => select(countBox) * 2);

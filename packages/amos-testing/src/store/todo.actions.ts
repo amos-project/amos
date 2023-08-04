@@ -4,8 +4,9 @@
  */
 
 import { action } from 'amos-core';
-import { sleep, todoMapBox, TodoModel, userTodoListBox } from 'amos-testing';
 import { selectUserId } from './session.selectors';
+import { todoMapBox, TodoModel, userTodoListBox } from './todo.boxes';
+import { sleep } from '../utils';
 
 export const addTodo = action(
   async (

@@ -4,10 +4,10 @@
  */
 
 import { action } from 'amos-core';
-import { sleep } from 'amos-testing';
 import { sessionIdBox, sessionMapBox } from './session.boxes';
 import { selectSession } from './session.selectors';
 import { LOGOUT } from './session.signals';
+import { sleep } from '../utils';
 
 export const login = action(async (dispatch, select, userId: number) => {
   await sleep();

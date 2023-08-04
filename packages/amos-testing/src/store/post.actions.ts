@@ -3,15 +3,10 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import {
-  mediaMapBox,
-  postMapBox,
-  postMediaListBox,
-  selectUserId,
-  userPostListBox,
-} from 'amos-testing';
 import { createHttpAction } from '../createHttpAction';
 import { createPagedListAction } from '../createPagedListAction';
+import { mediaMapBox, postMapBox, postMediaListBox, userPostListBox } from './post.boxes';
+import { selectUserId } from './session.selectors';
 
 export const getUserPostList = createPagedListAction({});
 

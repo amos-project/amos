@@ -4,8 +4,8 @@
  */
 
 import { selector } from 'amos-core';
-import { userTodoListBox } from 'amos-testing';
 import { selectUserId } from './session.selectors';
+import { userTodoListBox } from './todo.boxes';
 
 export const selectTodoList = selector((select, userId: number = select(selectUserId())) => {
   return select(userTodoListBox.getItem(userId));

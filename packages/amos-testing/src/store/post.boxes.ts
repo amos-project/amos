@@ -5,7 +5,7 @@
 
 import { createListMapBox, createPagedListMapBox, createRecordMapBox } from 'amos-boxes';
 import { Record } from 'amos-shapes';
-import { userMapBox } from 'amos-testing';
+import { userMapBox } from './user.boxes';
 
 export interface PostModel {
   id: number;

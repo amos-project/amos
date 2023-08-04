@@ -5,8 +5,8 @@
 
 import { createListMapBox, createRecordMapBox } from 'amos-boxes';
 import { Record } from 'amos-shapes';
-import { userMapBox } from 'amos-testing';
 import { createStrictEnum, EnumValues } from 'amos-utils';
+import { userMapBox } from './user.boxes';
 
 export const TodoStatus = createStrictEnum({
   created: [1, { group: 'TODO' }],

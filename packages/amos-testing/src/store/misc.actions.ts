@@ -6,7 +6,8 @@
  */
 
 import { action } from 'amos-core';
-import { countBox, sleep } from 'amos-testing';
+import { countBox } from './misc.boxes';
+import { sleep } from '../utils';
 
 export const addTwiceAsync = action(async (dispatch, select, value: number) => {
   await sleep(1);
