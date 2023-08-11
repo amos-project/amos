@@ -65,6 +65,16 @@ ReactDOM.render(
 );
 ```
 
+## TodoMVC Example
+
+In this example, we will be creating a TodoMVC application using the `amos` state management library and `React`. The TodoMVC application will include features for adding, deleting, and completing todos.
+
+Here is a code snippet of the TodoMVC component:
+
+```typescript jsx
+// TodoMVC component code goes here
+```
+
 ## Examples
 
 ### TodoMVC
@@ -815,4 +825,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-```
