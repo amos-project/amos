@@ -67,6 +67,10 @@ ReactDOM.render(
 
 ## Examples
 
+### Blog App
+
+This is an example blog application built with `amos` and `react`. It includes features such as multiple accounts, blogs, and comments. You can find the source code in the [examples/blog-app](https://github.com/amos-project/amos/tree/main/examples/blog-app) directory.
+
 ### TodoMVC
 
 [![Edit Amos - TodoMVC](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/new-bush-40rzm?fontsize=14&hidenavigation=1&theme=dark)
@@ -815,4 +819,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-```
