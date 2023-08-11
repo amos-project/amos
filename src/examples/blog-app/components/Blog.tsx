@@ -45,4 +45,4 @@ const Blog = () => {
   );
 };
 
-export
+export default Blog;
