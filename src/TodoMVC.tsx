@@ -39,4 +39,4 @@ const TodoMVC: React.FC = () => {
   );
 };
 
-export
+export default TodoMVC;
