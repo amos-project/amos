@@ -4,6 +4,9 @@
  */
 
 import { Dispatch, Select } from './store';
+import { config } from './utils';
+
+export interface ActionOptions<R = any, A extends any[] = any> {}
 
 /**
  * An `Action` is a dispatchable function. It could do anything synchronously or
@@ -32,6 +35,8 @@ export interface Action<R = any, A extends any[] = any> {
 export interface ActionFactory<A extends any[], R> {
   type: string | undefined;
   (...args: A): Action<R, A>;
+  options: ActionOptions<R, A>;
+  config(options: ActionOptions<R, A>): this;
 }
 
 /**
@@ -51,5 +56,7 @@ export function action<A extends any[], R>(
 ): ActionFactory<A, R> {
   return Object.assign((...args: A): Action<R, A> => ({ object: 'action', type, args, actor }), {
     type,
+    options: {},
+    config,
   });
 }

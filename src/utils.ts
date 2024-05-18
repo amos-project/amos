@@ -114,3 +114,7 @@ export function values<T extends object>(o: T): T[keyof T][] {
 
 /** @internal */
 export const isArray: (args: any) => args is any[] | readonly any[] = Array.isArray;
+
+export function config<T extends object>(this: T, options: object): T {
+  return Object.assign(this, { options });
+}
