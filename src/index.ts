@@ -4,7 +4,7 @@
  */
 
 export { JSONState, Mutation, Box } from './box';
-export { Action, ActionFactory, action } from './action';
+export { Action, ActionOptions, ActionFactory, action } from './action';
 export { Signal, SignalFactory, signal } from './signal';
 export { Selector, SelectorFactory, selector } from './selector';
 export {
