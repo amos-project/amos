@@ -24,6 +24,8 @@ export interface Action<R = any, A extends any[] = any> {
   type: string | undefined;
   args: A[];
   actor: (dispatch: Dispatch, select: Select, ...args: A) => R;
+  // bad design, should hold ActionFactory in next version.
+  options: ActionOptions<R, A>;
 }
 
 /**
@@ -34,8 +36,11 @@ export interface Action<R = any, A extends any[] = any> {
  */
 export interface ActionFactory<A extends any[], R> {
   type: string | undefined;
+
   (...args: A): Action<R, A>;
+
   options: ActionOptions<R, A>;
+
   config(options: ActionOptions<R, A>): this;
 }
 
@@ -54,9 +59,19 @@ export function action<A extends any[], R>(
   actor: (dispatch: Dispatch, select: Select, ...args: A) => R,
   type?: string,
 ): ActionFactory<A, R> {
-  return Object.assign((...args: A): Action<R, A> => ({ object: 'action', type, args, actor }), {
-    type,
-    options: {},
-    config,
-  });
+  const factory: ActionFactory<A, R> = Object.assign(
+    (...args: A): Action<R, A> => ({
+      object: 'action',
+      type,
+      args,
+      actor,
+      options: factory.options,
+    }),
+    {
+      type,
+      options: {},
+      config,
+    },
+  );
+  return factory;
 }

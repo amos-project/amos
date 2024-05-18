@@ -20,7 +20,12 @@ export const addGreet = action(
 describe('action', () => {
   it('should create action', () => {
     const { actor, ...other } = addGreet('hello world');
-    expect(other).toEqual({ type: 'ADD_GREET', args: ['hello world'], object: 'action' });
+    expect(other).toEqual({
+      type: 'ADD_GREET',
+      args: ['hello world'],
+      object: 'action',
+      options: {},
+    });
     expect(typeof actor).toBe('function');
   });
 });
