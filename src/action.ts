@@ -6,7 +6,7 @@
 import { Dispatch, Select } from './store';
 import { config } from './utils';
 
-export interface ActionOptions<R = any, A extends any[] = any> {}
+export interface ActionOptions<R = any, A extends any[] = any[]> {}
 
 /**
  * An `Action` is a dispatchable function. It could do anything synchronously or
@@ -19,10 +19,10 @@ export interface ActionOptions<R = any, A extends any[] = any> {}
  *
  * @stable
  */
-export interface Action<R = any, A extends any[] = any> {
+export interface Action<R = any, A extends any[] = any[]> {
   object: 'action';
   type: string | undefined;
-  args: A[];
+  args: A;
   actor: (dispatch: Dispatch, select: Select, ...args: A) => R;
   // bad design, should hold ActionFactory in next version.
   options: ActionOptions<R, A>;
