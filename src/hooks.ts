@@ -3,7 +3,7 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { useContext, useDebugValue, useEffect, useReducer, useRef } from 'react';
+import { useContext, useDebugValue, useLayoutEffect, useReducer, useRef } from 'react';
 import { __Context } from './context';
 import { Selector } from './selector';
 import { Dispatch, Selectable, Snapshot, Store } from './store';
@@ -162,7 +162,7 @@ export function useSelector<Rs extends Selectable[]>(...selectors: Rs): MapSelec
     lastSelector.current = defaultSelectorRef;
     lastStore.current?.disposer();
   }
-  useEffect(() => {
+  useLayoutEffect(() => {
     lastStore.current = {
       store,
       updated: false,
