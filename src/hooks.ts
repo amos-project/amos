@@ -161,6 +161,8 @@ export function useSelector<Rs extends Selectable[]>(...selectors: Rs): MapSelec
   if (lastStore.current?.store !== store) {
     lastSelector.current = defaultSelectorRef;
     lastStore.current?.disposer();
+  }
+  useEffect(() => {
     lastStore.current = {
       store,
       updated: false,
@@ -200,15 +202,15 @@ export function useSelector<Rs extends Selectable[]>(...selectors: Rs): MapSelec
         }
       }),
     };
-  }
-  useEffect(() => () => lastStore.current?.disposer(), []);
-  if (lastStore.current.error) {
+    return () => lastStore.current?.disposer();
+  }, [store]);
+  if (lastStore.current?.error) {
     const error = lastStore.current.error;
     lastStore.current.error = void 0;
     throw error;
   }
   let selectedState: any;
-  if (lastStore.current.updated) {
+  if (lastStore.current?.updated) {
     lastStore.current.updated = false;
     selectedState = lastSelector.current.results;
   } else {
