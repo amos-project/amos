@@ -3,11 +3,18 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { useContext, useDebugValue, useLayoutEffect, useReducer, useRef } from 'react';
+import { useContext, useDebugValue, useLayoutEffect, useEffect, useReducer, useRef } from 'react';
 import { __Context } from './context';
 import { Selector } from './selector';
 import { Dispatch, Selectable, Snapshot, Store } from './store';
 import { arrayEqual, strictEqual } from './utils';
+
+export const useIsomorphicLayoutEffect =
+  typeof window !== 'undefined' &&
+  typeof window.document !== 'undefined' &&
+  typeof window.document.createElement !== 'undefined'
+    ? useLayoutEffect
+    : useEffect;
 
 /**
  * use context's store
@@ -158,11 +165,58 @@ export function useSelector<Rs extends Selectable[]>(...selectors: Rs): MapSelec
   const store = useStore();
   const lastSelector = useRef<SelectorRef>(defaultSelectorRef);
   const lastStore = useRef<StoreRef>();
+  const lastState = useRef<unknown[]>([]);
+
   if (lastStore.current?.store !== store) {
     lastSelector.current = defaultSelectorRef;
-    lastStore.current?.disposer();
   }
-  useLayoutEffect(() => {
+
+  if (lastStore.current?.error) {
+    const error = lastStore.current.error;
+    lastStore.current.error = void 0;
+    throw error;
+  }
+
+  const resolveState = () => {
+    if (lastStore.current?.updated) {
+      lastStore.current.updated = false;
+      return lastSelector.current.results;
+    } else {
+      if (lastSelector.current === defaultSelectorRef) {
+        lastSelector.current = { selectors: [], deps: [], snapshots: [], results: [] };
+      }
+      // updates from outside
+      const { selectors: oldSelectors, deps, snapshots, results } = lastSelector.current;
+      for (let i = 0; i < selectors.length; i++) {
+        const old = oldSelectors[i];
+        const newly = selectors[i];
+        if (typeof newly === 'object') {
+          results[i] = store.select(newly);
+          oldSelectors[i] = newly;
+        } else {
+          const newDeps = selectorChanged(old, newly, snapshots[i], store, deps[i]);
+          if (newDeps) {
+            snapshots[i] = void 0;
+            const newSnapshot: Snapshot = {};
+            results[i] = store.select(newly, newSnapshot);
+            deps[i] = newDeps === true ? void 0 : newDeps;
+            snapshots[i] = newSnapshot;
+            oldSelectors[i] = newly;
+          }
+        }
+      }
+      results.length = selectors.length;
+      return results;
+    }
+  };
+
+  let selectedState: any = resolveState();
+
+  useIsomorphicLayoutEffect(() => {
+    lastState.current = [...selectedState];
+  });
+
+  useIsomorphicLayoutEffect(() => {
     lastStore.current = {
       store,
       updated: false,
@@ -202,44 +256,15 @@ export function useSelector<Rs extends Selectable[]>(...selectors: Rs): MapSelec
         }
       }),
     };
+
+    // if something change between render and the effect. eg. dispatch when render
+    if (!arrayEqual(lastState.current, resolveState())) {
+      update();
+    }
+
     return () => lastStore.current?.disposer();
   }, [store]);
-  if (lastStore.current?.error) {
-    const error = lastStore.current.error;
-    lastStore.current.error = void 0;
-    throw error;
-  }
-  let selectedState: any;
-  if (lastStore.current?.updated) {
-    lastStore.current.updated = false;
-    selectedState = lastSelector.current.results;
-  } else {
-    if (lastSelector.current === defaultSelectorRef) {
-      lastSelector.current = { selectors: [], deps: [], snapshots: [], results: [] };
-    }
-    // updates from outside
-    const { selectors: oldSelectors, deps, snapshots, results } = lastSelector.current;
-    for (let i = 0; i < selectors.length; i++) {
-      const old = oldSelectors[i];
-      const newly = selectors[i];
-      if (typeof newly === 'object') {
-        results[i] = store.select(newly);
-        oldSelectors[i] = newly;
-      } else {
-        const newDeps = selectorChanged(old, newly, snapshots[i], store, deps[i]);
-        if (newDeps) {
-          snapshots[i] = void 0;
-          const newSnapshot: Snapshot = {};
-          results[i] = store.select(newly, newSnapshot);
-          deps[i] = newDeps === true ? void 0 : newDeps;
-          snapshots[i] = newSnapshot;
-          oldSelectors[i] = newly;
-        }
-      }
-    }
-    results.length = selectors.length;
-    selectedState = results;
-  }
+
   // TODO: print friendly with selector names
   useDebugValue(selectedState, (value: any[]) => {
     return value.reduce((map, value, index) => {
