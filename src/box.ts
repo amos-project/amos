@@ -79,6 +79,7 @@ export class Box<S = any> {
   readonly initialState: S;
   readonly listeners: Record<string, (state: S, data: any) => S>;
   readonly preload: (preloadedState: JSONState<S>, state: S) => S;
+  static keyRecord: Record<string, string> = {};
 
   /**
    * Create a box.
@@ -102,6 +103,16 @@ export class Box<S = any> {
     this.initialState = initialState;
     this.preload = preload;
     this.listeners = {};
+
+    if (process.env.NODE_ENV === 'development') {
+      if (!Box.keyRecord) return; // set to Box.keyRecord = null to disable the key check
+      if (Box.keyRecord[key]) {
+        console.warn(
+          '[Amos] Box key "' + key + '" is already used, please make sure the key is unique.',
+        );
+      }
+      Box.keyRecord[key] = key;
+    }
   }
 
   /**
