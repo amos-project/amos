@@ -1357,80 +1357,76 @@ __metadata:
   languageName: node
   linkType: hard
 
-"amos-boxes@npm:0.3.0-beta.15, amos-boxes@npm:^0.3.0-beta.1, amos-boxes@workspace:packages/amos-boxes":
+"amos-boxes@npm:0.3.0-beta.17, amos-boxes@workspace:packages/amos-boxes":
   version: 0.0.0-use.local
   resolution: "amos-boxes@workspace:packages/amos-boxes"
   dependencies:
-    amos-core: "npm:0.3.0-beta.15"
-    amos-shapes: "npm:0.3.0-beta.15"
-    amos-utils: "npm:0.3.0-beta.15"
+    amos-core: "npm:0.3.0-beta.17"
+    amos-shapes: "npm:0.3.0-beta.17"
+    amos-utils: "npm:0.3.0-beta.17"
     tslib: "npm:^2.8.0"
   languageName: unknown
   linkType: soft
 
-"amos-core@npm:0.3.0-beta.15, amos-core@npm:^0.3.0-beta.1, amos-core@npm:^0.3.0-beta.15, amos-core@workspace:packages/amos-core":
+"amos-core@npm:0.3.0-beta.17, amos-core@workspace:packages/amos-core":
   version: 0.0.0-use.local
   resolution: "amos-core@workspace:packages/amos-core"
   dependencies:
-    amos-utils: "npm:0.3.0-beta.15"
+    amos-utils: "npm:0.3.0-beta.17"
     tslib: "npm:^2.8.0"
   languageName: unknown
   linkType: soft
 
-"amos-devtools@npm:0.3.0-beta.15, amos-devtools@workspace:packages/amos-devtools":
+"amos-devtools@npm:0.3.0-beta.17, amos-devtools@workspace:packages/amos-devtools":
   version: 0.0.0-use.local
   resolution: "amos-devtools@workspace:packages/amos-devtools"
   dependencies:
-    amos-core: "npm:^0.3.0-beta.1"
-    amos-utils: "npm:^0.3.0-beta.1"
+    amos-core: "npm:0.3.0-beta.17"
+    amos-utils: "npm:0.3.0-beta.17"
     tslib: "npm:^2.8.0"
   languageName: unknown
   linkType: soft
 
-"amos-io@npm:0.3.0-beta.15, amos-io@workspace:packages/amos-io":
+"amos-io@npm:0.3.0-beta.17, amos-io@workspace:packages/amos-io":
   version: 0.0.0-use.local
   resolution: "amos-io@workspace:packages/amos-io"
   dependencies:
-    amos-boxes: "npm:^0.3.0-beta.1"
-    amos-core: "npm:^0.3.0-beta.1"
-    amos-shapes: "npm:^0.3.0-beta.1"
-    amos-utils: "npm:^0.3.0-beta.1"
+    amos-boxes: "npm:0.3.0-beta.17"
+    amos-core: "npm:0.3.0-beta.17"
+    amos-shapes: "npm:0.3.0-beta.17"
+    amos-utils: "npm:0.3.0-beta.17"
     tslib: "npm:^2.8.0"
   languageName: unknown
   linkType: soft
 
-"amos-persist@npm:0.3.0-beta.15, amos-persist@workspace:packages/amos-persist":
+"amos-persist@npm:0.3.0-beta.17, amos-persist@workspace:packages/amos-persist":
   version: 0.0.0-use.local
   resolution: "amos-persist@workspace:packages/amos-persist"
   dependencies:
-    amos-core: "npm:^0.3.0-beta.1"
-    amos-utils: "npm:^0.3.0-beta.1"
+    amos-core: "npm:0.3.0-beta.17"
+    amos-utils: "npm:0.3.0-beta.17"
     tslib: "npm:^2.8.0"
-  peerDependencies:
-    "@types/react": "*"
-    amos-react: ^0.3.0-beta.1
-    react: "*"
   languageName: unknown
   linkType: soft
 
-"amos-react@npm:0.3.0-beta.15, amos-react@workspace:packages/amos-react":
+"amos-react@npm:0.3.0-beta.17, amos-react@workspace:packages/amos-react":
   version: 0.0.0-use.local
   resolution: "amos-react@workspace:packages/amos-react"
   dependencies:
     "@types/react": "npm:^18.3.11"
-    amos-core: "npm:^0.3.0-beta.15"
-    amos-utils: "npm:^0.3.0-beta.15"
+    amos-core: "npm:0.3.0-beta.17"
+    amos-utils: "npm:0.3.0-beta.17"
     tslib: "npm:^2.8.0"
   peerDependencies:
     react: ^18.3.1
   languageName: unknown
   linkType: soft
 
-"amos-shapes@npm:0.3.0-beta.15, amos-shapes@npm:^0.3.0-beta.1, amos-shapes@workspace:packages/amos-shapes":
+"amos-shapes@npm:0.3.0-beta.17, amos-shapes@workspace:packages/amos-shapes":
   version: 0.0.0-use.local
   resolution: "amos-shapes@workspace:packages/amos-shapes"
   dependencies:
-    amos-utils: "npm:0.3.0-beta.15"
+    amos-utils: "npm:0.3.0-beta.17"
     tslib: "npm:^2.8.0"
   languageName: unknown
   linkType: soft
@@ -1439,16 +1435,16 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "amos-testing@workspace:packages/amos-testing"
   dependencies:
-    amos-boxes: "npm:0.3.0-beta.15"
-    amos-core: "npm:0.3.0-beta.15"
-    amos-io: "npm:0.3.0-beta.15"
-    amos-shapes: "npm:0.3.0-beta.15"
-    amos-utils: "npm:0.3.0-beta.15"
+    amos-boxes: "npm:0.3.0-beta.17"
+    amos-core: "npm:0.3.0-beta.17"
+    amos-io: "npm:0.3.0-beta.17"
+    amos-shapes: "npm:0.3.0-beta.17"
+    amos-utils: "npm:0.3.0-beta.17"
     tslib: "npm:^2.8.0"
   languageName: unknown
   linkType: soft
 
-"amos-utils@npm:0.3.0-beta.15, amos-utils@npm:^0.3.0-beta.1, amos-utils@npm:^0.3.0-beta.15, amos-utils@workspace:packages/amos-utils":
+"amos-utils@npm:0.3.0-beta.17, amos-utils@workspace:packages/amos-utils":
   version: 0.0.0-use.local
   resolution: "amos-utils@workspace:packages/amos-utils"
   dependencies:
@@ -1460,14 +1456,14 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "amos@workspace:packages/amos"
   dependencies:
-    amos-boxes: "npm:0.3.0-beta.15"
-    amos-core: "npm:0.3.0-beta.15"
-    amos-devtools: "npm:0.3.0-beta.15"
-    amos-io: "npm:0.3.0-beta.15"
-    amos-persist: "npm:0.3.0-beta.15"
-    amos-react: "npm:0.3.0-beta.15"
-    amos-shapes: "npm:0.3.0-beta.15"
-    amos-utils: "npm:0.3.0-beta.15"
+    amos-boxes: "npm:0.3.0-beta.17"
+    amos-core: "npm:0.3.0-beta.17"
+    amos-devtools: "npm:0.3.0-beta.17"
+    amos-io: "npm:0.3.0-beta.17"
+    amos-persist: "npm:0.3.0-beta.17"
+    amos-react: "npm:0.3.0-beta.17"
+    amos-shapes: "npm:0.3.0-beta.17"
+    amos-utils: "npm:0.3.0-beta.17"
     tslib: "npm:^2.8.0"
   languageName: unknown
   linkType: soft
