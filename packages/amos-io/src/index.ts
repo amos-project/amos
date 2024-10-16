@@ -5,3 +5,4 @@
 
 export * from './createAsyncActionFactory';
 export * from './createPagedListActionFactory';
+export * from './PagedListBox';

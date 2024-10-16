@@ -1,6 +1,6 @@
 {
   "name": "amos",
-  "version": "0.3.0-beta.1",
+  "version": "0.3.0-beta.4",
   "description": "An out-of-the-box state management library designed for your large-scale projects.",
   "keywords": [
     "amos",
@@ -12,28 +12,12 @@
   "author": "acrazing <joking.young@gmail.com>",
   "homepage": "https://github.com/amos-project/amos",
   "license": "MIT",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
   "files": [
-    "src",
-    "esm",
-    "lib"
+    "dist"
   ],
-  "exports": {
-    ".": {
-      "import": "./esm/index.js",
-      "require": "./lib/index.js",
-      "types": "./lib/index.d.ts"
-    },
-    "./react": {
-      "import": "./esm/react.js",
-      "require": "./lib/react.js",
-      "types": "./lib/react.d.ts"
-    },
-    "./redux": {
-      "import": "./esm/redux.js",
-      "require": "./lib/redux.js",
-      "types": "./lib/redux.d.ts"
-    }
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/amos-project/amos.git"
@@ -42,14 +26,14 @@
     "url": "https://github.com/amos-project/amos/issues"
   },
   "dependencies": {
-    "tslib": "^2.8.0",
-    "amos-boxes": "0.3.0-beta.1",
-    "amos-core": "0.3.0-beta.1",
-    "amos-devtools": "0.3.0-beta.1",
-    "amos-io": "0.3.0-beta.1",
-    "amos-persist": "0.3.0-beta.1",
-    "amos-react": "0.3.0-beta.1",
-    "amos-shapes": "0.3.0-beta.1",
-    "amos-utils": "0.3.0-beta.1"
+    "amos-boxes": "0.3.0-beta.4",
+    "amos-core": "0.3.0-beta.4",
+    "amos-devtools": "0.3.0-beta.4",
+    "amos-io": "0.3.0-beta.4",
+    "amos-persist": "0.3.0-beta.4",
+    "amos-react": "0.3.0-beta.4",
+    "amos-shapes": "0.3.0-beta.4",
+    "amos-utils": "0.3.0-beta.4",
+    "tslib": "^2.8.0"
   }
 }

@@ -3,10 +3,10 @@
     "target": "es2020",
     "module": "esnext",
     "lib": ["es2022"],
-    "incremental": true,
-    "tsBuildInfoFile": ".cache/ts.json",
     "allowJs": false,
     "jsx": "react",
+    "rootDir": ".",
+    "outDir": "dist",
     "declaration": true,
     "emitDeclarationOnly": true,
     "declarationMap": false,
@@ -34,16 +34,14 @@
     "stripInternal": true,
     "allowUnusedLabels": false,
     "baseUrl": "packages",
-    "rootDir": ".",
     "importsNotUsedAsValues": "remove",
     "preserveValueImports": false,
     "paths": {
       "amos-*": ["amos-*/src"]
     },
     "skipLibCheck": true,
-    "noImplicitOverride": true,
-    "outDir": "dist"
+    "noImplicitOverride": true
   },
   "include": ["packages", "scripts"],
-  "exclude": ["lib", "esm", "dist", "node_modules"]
+  "exclude": ["dist", "node_modules"]
 }

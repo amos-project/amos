@@ -14,8 +14,8 @@ import {
   RecordObject,
 } from 'amos-shapes';
 import { ANY, clone, ID, IDOf, WellPartial } from 'amos-utils';
-import { createRecordBox, RecordBox } from './RecordBox';
-import { RecordMapBox } from './RecordMapBox';
+import { createRecordBox, RecordBox } from 'amos-boxes';
+import { RecordMapBox } from 'amos-boxes';
 
 export interface PagedListModel<E extends ID, NT extends ID = E, OT extends ID = number> {
   data: List<E>;

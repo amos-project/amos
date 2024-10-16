@@ -3,8 +3,9 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { createListMapBox, createPagedListMapBox, createRecordMapBox } from 'amos-boxes';
+import { createListMapBox, createRecordMapBox } from 'amos-boxes';
 import { Record } from 'amos-shapes';
+import { createPagedListMapBox } from 'amos-io';
 
 export interface PostModel {
   id: number;
