@@ -3,8 +3,9 @@
  * @author junbao <junbao@mymoement.com>
  */
 
-import { useDispatch, useSelector } from 'amos-react';
 import { FC, ReactElement, useEffect } from 'react';
+import { useSelector } from './useSelector';
+import { useDispatch } from './context';
 
 export interface PersistGateProps {
   children: ReactElement | null;

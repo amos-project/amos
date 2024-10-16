@@ -29,7 +29,6 @@ export const version = autorun(
     ] as const,
   async ({ update }) => {
     const root = await fs.readJSON('package.json');
-    const pkgs = await fs.readdir('packages');
     const [major, minor, patch, , beta] = root.version.split(/[.-]/g);
     let version: string;
     switch (update) {
@@ -50,6 +49,7 @@ export const version = autorun(
     }
     root.version = version;
     await fs.outputJSON('package.json', root, { spaces: 2 });
+    const pkgs = await fs.readdir('packages');
     for (const p of pkgs) {
       const pjFile = `packages/${p}/package.json`;
       const pj = await fs.readJSON(pjFile);

@@ -5,3 +5,4 @@
 
 export { __Context, Consumer, Provider, ProviderProps, useDispatch, useStore } from './context';
 export { useSelector } from './useSelector';
+export * from './PersistGate';

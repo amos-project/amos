@@ -17,3 +17,5 @@ coverage/
 *.swp
 .*.swp
 *.tgz
+
+.rollup.cache/
