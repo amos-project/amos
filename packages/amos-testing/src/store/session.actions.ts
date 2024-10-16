@@ -19,7 +19,7 @@ export const logout = action(async (dispatch, select) => {
   await sleep();
   const session = select(selectSession());
   dispatch([
-    sessionMapBox.removeItem(session.id),
+    sessionMapBox.delete(session.id),
     sessionIdBox.resetState(),
     LOGOUT({ userId: session.userId }),
   ]);

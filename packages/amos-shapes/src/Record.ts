@@ -6,19 +6,18 @@
 import {
   clone,
   Cloneable,
+  fromJS,
   JSONSerializable,
   JSONState,
   PartialRequired,
   WellPartial,
 } from 'amos-utils';
 
-export interface IRecord<P extends object> extends JSONSerializable<P>, Cloneable {
+export interface IRecord<P extends object> extends Cloneable, JSONSerializable<P> {
   get<K extends keyof P>(key: K): P[K];
   set<K extends keyof P>(key: K, value: P[K]): this;
   merge(props: Partial<P>): this;
   update<K extends keyof P>(key: K, updater: (value: P[K]) => P[K]): this;
-  toJSON(): P;
-  fromJSON(props: JSONState<P>): this;
 }
 
 export type Record<P extends object> = Readonly<P> & IRecord<P>;
@@ -45,14 +44,10 @@ export function Record<P extends object>(props: P): RecordConstructor<P> {
       return { ...this } as unknown as P;
     }
 
-    fromJSON(data: JSONState<P>) {
-      const that: any = clone(this, {} as WellPartial<this>);
+    fromJS(data: JSONState<P>) {
+      const that: any = clone(this, props as any);
       for (const k in data) {
-        if (that[k]?.fromJSON) {
-          that[k] = that[k].fromJSON(data[k]);
-        } else {
-          that[k] = data[k];
-        }
+        that[k] = fromJS(that[k], data[k]);
       }
       return that;
     }

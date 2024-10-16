@@ -10,7 +10,7 @@ import * as G from 'glob';
 import * as assert from 'assert';
 import * as child_process from 'child_process';
 
-const updatePkgJson = (file, version) => {
+const updatePkgJson = (file: string, version: string) => {
   const pkgJson = fs.readJsonSync(file);
   pkgJson.version = version;
   for (const d in ['devDependencies', 'peerDependencies', 'optionalDependencies', 'dependencies']) {
@@ -23,7 +23,7 @@ const updatePkgJson = (file, version) => {
   fs.writeJsonSync(file, pkgJson, { spaces: 2 });
 };
 
-async function version({ level, tag }) {
+async function version({ level, tag }: { level: string; tag: string }) {
   if (tag !== 'latest') {
     // allow latest build for drop tag suffix
     assert.equal(level, 'build', 'level must be build when tag is not latest');
@@ -102,13 +102,13 @@ yargs
         .positional('tag', {
           type: 'string',
           desc: 'The tag to use for the version',
-          demand: true,
+          demandOption: true,
         })
         .positional('level', {
           type: 'string',
           choices: ['major', 'minor', 'patch', 'build'],
           desc: 'The version part to update',
-          demand: true,
+          demandOption: true,
         }),
     version,
   )

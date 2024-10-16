@@ -34,11 +34,10 @@ export const Jessica = Jerry.set('id', 4).set('firstName', 'Jessica').set('fathe
 export const Morty = Jerry.merge({ id: 5, firstName: 'Morty' });
 export const users = [Rick, Beth, Jerry, Jessica, Morty];
 
-export const userMapBox = createRecordMapBox('user.userMap', new UserRecord(), 'id')
-  .resetInitialState((state) => state.setAll(users))
-  .relations({
-    father: ['fatherId'],
-    mother: ['motherId'],
-  });
+export const userMapBox = createRecordMapBox(
+  'user.userMap',
+  new UserRecord(),
+  'id',
+).setInitialState((state) => state.setAll(users));
 
 export const onlineUserListBox = createListBox('users.onlineList', 0);

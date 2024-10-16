@@ -6,7 +6,6 @@
 import { createListMapBox, createRecordMapBox } from 'amos-boxes';
 import { Record } from 'amos-shapes';
 import { createStrictEnum, EnumValues } from 'amos-utils';
-import { userMapBox } from './user.boxes';
 
 export const TodoStatus = createStrictEnum({
   created: [1, { group: 'TODO' }],
@@ -47,8 +46,6 @@ export class TodoRecord extends Record<TodoModel>({
   }
 }
 
-export const todoMapBox = createRecordMapBox('todos', TodoRecord, 'id').relations({
-  user: ['userId', userMapBox],
-});
+export const todoMapBox = createRecordMapBox('todos', TodoRecord, 'id');
 
 export const userTodoListBox = createListMapBox('todos.userList', 0, 0);

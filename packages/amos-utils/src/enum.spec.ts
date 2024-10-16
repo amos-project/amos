@@ -6,8 +6,8 @@
 import { TodoStatus } from 'amos-testing';
 import { EnumKeys, EnumLabels, EnumValues } from './enum';
 
-describe('Enum', function () {
-  it('should createEnum', function () {
+describe('Enum', () => {
+  it('should createEnum', () => {
     // @ts-expect-error
     TodoStatus.created === 5;
     expect([

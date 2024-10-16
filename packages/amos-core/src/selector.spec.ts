@@ -4,6 +4,7 @@
  */
 
 import { selectUser } from 'amos-testing';
+import { $amos } from './types';
 
 describe('selector', () => {
   it('should create selector factory', () => {
@@ -11,7 +12,8 @@ describe('selector', () => {
   });
   it('should create selector', () => {
     expect(selectUser()).toEqual(<ReturnType<typeof selectUser>>{
-      $amos: 'SELECTOR',
+      [$amos]: 'SELECTOR',
+      id: '',
       args: [],
       factory: selectUser,
     });

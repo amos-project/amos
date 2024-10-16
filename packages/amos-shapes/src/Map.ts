@@ -5,24 +5,23 @@
 
 import {
   clone,
-  Ctor,
-  FnParams,
+  Constructor,
+  fromJS,
+  FuncParams,
   ID,
-  isJSONSerializable,
   JSONSerializable,
   JSONState,
+  MustNever,
+  nullObject,
   Pair,
   PartialRecord,
-  propsEqual,
-  StorageMap,
+  shallowContainEqual,
   ToString,
   WellPartial,
 } from 'amos-utils';
 
-export class Map<K extends ID, V>
-  implements JSONSerializable<PartialRecord<K, V>>, StorageMap<K, V>
-{
-  readonly data: PartialRecord<K, V> = {};
+export class Map<K extends ID, V> implements JSONSerializable<PartialRecord<K, V>> {
+  protected readonly data: PartialRecord<K, V> = nullObject();
 
   constructor(readonly defaultValue: V) {}
 
@@ -30,16 +29,10 @@ export class Map<K extends ID, V>
     return this.data;
   }
 
-  fromJSON(state: JSONState<PartialRecord<K, V>>): this {
-    const data: PartialRecord<K, V> = {};
-    if (isJSONSerializable(this.defaultValue)) {
-      for (const key in state) {
-        data[key as unknown as K] = this.defaultValue.fromJSON(state[key]);
-      }
-    } else {
-      for (const key in state) {
-        data[key as unknown as K] = clone(this.defaultValue, state[key] as any);
-      }
+  fromJS(state: JSONState<PartialRecord<K, V>>): this {
+    const data: any = nullObject<Record<K, V>>();
+    for (const k in state) {
+      data[k] = fromJS(this.defaultValue, state[k]);
     }
     return this.reset(data);
   }
@@ -48,67 +41,69 @@ export class Map<K extends ID, V>
     return Object.keys(this.data).length;
   }
 
-  keys(): ToString<K>[] {
-    return Object.keys(this.data) as ToString<K>[];
+  has(key: K): boolean {
+    return key in this.data;
   }
 
-  hasItem(key: K): boolean {
-    return this.data.hasOwnProperty(key);
+  get(key: K): V | undefined {
+    return this.data[key];
   }
 
-  getItem(key: K): V {
-    return this.data[key] ?? this.defaultValue;
+  getOrDefault(key: K): V {
+    return this.has(key) ? this.get(key)! : this.defaultValue;
   }
 
-  setItem(key: K, item: V): this {
-    if (this.getItem(key) === item) {
+  set(key: K, item: V): this {
+    if (this.get(key) === item) {
       return this;
     }
-    return this.reset({ ...this.data, [key]: item });
+    return this.reset(nullObject(this.data, { [key]: item } as any));
   }
 
-  setAll(items: readonly Pair<K, V>[]): this {
-    items = items.filter(([key, value]) => this.getItem(key) !== value);
-    if (items.length === 0) {
+  setAll(items: PartialRecord<K, V>): this;
+  setAll(items: readonly Pair<K, V>[]): this;
+  setAll(items: readonly Pair<K, V>[] | PartialRecord<K, V>): this {
+    const data = Array.isArray(items) ? items : Object.entries(items);
+    const up = data.filter(([k, v]) => v !== this.get(k));
+    if (up.length === 0) {
       return this;
     }
-    const data = { ...this.data };
-    for (const [key, value] of items) {
-      data[key] = value;
-    }
-    return this.reset(data);
+    return this.reset(nullObject(this.data, items) as any);
   }
 
   mergeItem(key: K, props: WellPartial<V>): this {
-    const value = this.getItem(key);
-    if (propsEqual<any>(value, props as any)) {
+    const old = this.getOrDefault(key);
+    if (shallowContainEqual(old, props)) {
       return this;
     }
-    return this.setItem(key, clone(value, props));
+    return this.set(key, clone(old, props));
   }
 
-  mergeAll(items: readonly Pair<K, WellPartial<V>>[]): this {
-    items = items.filter(([key, props]) => !propsEqual<any>(this.getItem(key), props as any));
-    if (items.length === 0) {
+  merge(items: readonly Pair<K, WellPartial<V>>[]): this;
+  merge(items: PartialRecord<K, WellPartial<V>>): this;
+  merge(items: readonly Pair<K, WellPartial<V>>[] | PartialRecord<K, WellPartial<V>>): this {
+    const input = Array.isArray(items) ? items : Object.entries(items);
+    const up = input.filter(([k, v]) => shallowContainEqual(this.getOrDefault(k), v));
+    if (up.length === 0) {
       return this;
     }
 
-    const data = { ...this.data };
-    for (const [key, props] of items) {
-      data[key] = clone(this.getItem(key), props);
+    const data: any = nullObject(this.data);
+    for (const [key, props] of up) {
+      data[key] = clone(this.getOrDefault(key), props);
     }
     return this.reset(data);
   }
 
   updateItem(key: K, updater: (v: V) => V): this {
-    return this.setItem(key, updater(this.getItem(key)));
+    return this.set(key, updater(this.getOrDefault(key)));
   }
 
-  removeItem(key: K): this {
-    if (!this.hasItem(key)) {
+  delete(key: K): this {
+    if (!this.has(key)) {
       return this;
     }
-    const data = { ...this.data };
+    const data = nullObject(this.data);
     delete data[key];
     return this.reset(data);
   }
@@ -117,11 +112,18 @@ export class Map<K extends ID, V>
     return this.reset({});
   }
 
+  forEach(callbackFn: (value: V, key: ToString<K>, index: number) => void) {
+    let i = 0;
+    for (const key in this.data) {
+      callbackFn(this.data[key]!, key, i++);
+    }
+  }
+
   map<U>(callbackFn: (value: V, key: ToString<K>, index: number) => U): U[] {
     const result: U[] = [];
     let index = 0;
     for (const key in this.data) {
-      result.push(callbackFn(this.data[key as K]!, key as ToString<K>, index++));
+      result.push(callbackFn(this.data[key]!, key as ToString<K>, index++));
     }
     return result;
   }
@@ -137,26 +139,63 @@ export class Map<K extends ID, V>
   }
 
   reset(data: PartialRecord<K, V>): this {
-    return clone(this, { data } as WellPartial<this>);
+    return clone(this, { data } as any);
+  }
+
+  [Symbol.iterator](): IterableIterator<[K, V]> {
+    return this.entries();
+  }
+
+  /**
+   * Returns an iterable of key, value pairs for every entry in the map.
+   */
+  *entries(): IterableIterator<[K, V]> {
+    for (const k in this.data) {
+      yield [k, this.data[k]!];
+    }
+  }
+
+  /**
+   * Returns an iterable of keys in the map
+   */
+  *keys(): IterableIterator<K> {
+    for (const k in this.data) {
+      yield k;
+    }
+  }
+
+  /**
+   * Returns an iterable of values in the map
+   */
+  *values(): IterableIterator<V> {
+    for (const k in this.data) {
+      yield this.data[k]!;
+    }
   }
 }
 
-export type MapKey<T> = T extends Map<infer K, infer V> ? K : never;
-export type MapValue<T> = T extends Map<infer K, infer V> ? V : never;
+declare type MissedKeys = Exclude<
+  keyof globalThis.Map<any, any>,
+  (typeof Symbol)['toStringTag'] | keyof Map<any, any>
+>;
+declare type CheckMissedKeys = MustNever<MissedKeys>;
+
+export type MapKey<T> = T extends Map<any, any> ? Parameters<T['get']>[0] : never;
+export type MapValue<T> = T extends Map<any, any> ? T['defaultValue'] : never;
 export type MapPair<T> = T extends Map<infer K, infer V> ? Pair<K, V> : never;
 
 export type DelegateMapValueMutations<K extends ID, V, M extends keyof V, KLimiter = V> = {
   [P in keyof KLimiter & M as `${P & string}At`]: <TThis>(
     this: TThis,
     key: K,
-    ...args: FnParams<V[P]>
+    ...args: FuncParams<V[P]>
   ) => TThis;
 } & {
   delegateMapValueMutations: Record<M, null>;
 };
 
 export function implementMapDelegations<K extends ID, V, M extends keyof V, S extends string>(
-  ctor: Ctor<DelegateMapValueMutations<K, V, M, S>, any[]>,
+  ctor: Constructor<DelegateMapValueMutations<K, V, M, S>, any[]>,
   mutations: Record<M, null>,
 ) {
   ctor.prototype.delegateMapValueMutations = mutations;

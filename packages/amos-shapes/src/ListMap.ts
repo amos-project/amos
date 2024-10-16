@@ -3,7 +3,7 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { ID, isArray, Pair } from 'amos-utils';
+import { ID, Pair, PartialRecord } from 'amos-utils';
 import { List, ListElement } from './List';
 import { DelegateMapValueMutations, implementMapDelegations, Map } from './Map';
 
@@ -31,19 +31,26 @@ export interface ListMap<K extends ID, L extends List<any>>
   > {}
 
 export class ListMap<K extends ID, L extends List<any>> extends Map<K, L> {
-  override setItem(key: K, value: L): this;
-  override setItem(key: K, items: readonly ListElement<L>[]): this;
-  override setItem(key: any, value: any): this {
-    return super.setItem(key, isArray(value) ? this.defaultValue.reset(value) : value);
+  constructor(defaultValue: L) {
+    super(defaultValue);
   }
 
-  override setAll(items: readonly Pair<K, L>[]): this;
-  override setAll(items: readonly Pair<K, readonly ListElement<L>[]>[]): this;
-  override setAll(items: any[]): this {
-    if (isArray(items[0][1])) {
-      items.forEach((item) => (item[1] = this.defaultValue.reset(item[1])));
-    }
-    return super.setAll(items);
+  override set(key: K, value: L): this;
+  override set(key: K, items: readonly ListElement<L>[]): this;
+  override set(key: any, value: any): this {
+    return super.set(key, Array.isArray(value) ? this.defaultValue.reset(value) : value);
+  }
+
+  override setAll(items: PartialRecord<K, L | readonly ListElement<L>[]>): this;
+  override setAll(items: readonly Pair<K, L | readonly ListElement<L>[]>[]): this;
+  override setAll(items: any): this {
+    const data = Array.isArray(items) ? items : Object.entries(items);
+    data.forEach((d) => {
+      if (Array.isArray(d[1])) {
+        d[1] = this.defaultValue.reset(d[1]);
+      }
+    });
+    return super.setAll(data);
   }
 }
 

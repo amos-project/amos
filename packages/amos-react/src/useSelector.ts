@@ -3,7 +3,7 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { Box, MapSelector, Selectable, Store } from 'amos-core';
+import { Box, isAmosObject, MapSelector, Selectable, Store } from 'amos-core';
 import { useDebugValue, useEffect, useReducer, useRef } from 'react';
 import { useStore } from './context';
 import { identity } from 'amos-utils';
@@ -18,11 +18,11 @@ function isEqual(selector: Selectable, results: unknown[], index: number, curren
   if (results.length <= index) {
     return false;
   }
-  return '$amos' in selector
-    ? selector.$amos === 'SELECTOR'
-      ? selector.factory.equal!(results[index], current)
-      : selector.equal!(results[index], current)
-    : results[index] === current;
+  return isAmosObject(selector, 'SELECTOR')
+    ? selector.factory.options.equal!(results[index], current)
+    : isAmosObject(selector, 'SELECTOR_FACTORY')
+      ? selector.options.equal!(results[index], current)
+      : results[index] === current;
 }
 
 /**
@@ -114,11 +114,9 @@ export function useSelector<Rs extends Selectable[]>(...selectors: Rs): MapSelec
             let type =
               s instanceof Box
                 ? s.key
-                : '$amos' in s
-                ? s.$amos === 'SELECTOR'
-                  ? s.factory.type
-                  : s.type
-                : s + '';
+                : isAmosObject(s, 'SELECTOR')
+                  ? s.factory.options.type
+                  : s.options.type;
             if (!type) {
               type = `anonymous`;
             }

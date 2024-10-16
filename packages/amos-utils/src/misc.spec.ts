@@ -4,7 +4,7 @@
  */
 
 import { arrayEqual, identity, is, shallowEqual } from './equals';
-import { isArray, values } from './misc';
+import { isArray } from './misc';
 
 describe('utils', () => {
   it('should compare array shallow', () => {
@@ -41,10 +41,6 @@ describe('utils', () => {
     }
 
     testArgs();
-  });
-
-  it('should get values', () => {
-    expect(values(expect)).toEqual(Object.values(expect));
   });
 
   it('should test is array', () => {

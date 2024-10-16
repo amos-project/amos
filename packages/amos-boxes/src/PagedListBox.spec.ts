@@ -7,7 +7,7 @@ import { Rick, select, userPostListBox } from 'amos-testing';
 
 describe('PagedListBox', function () {
   it('should create PagedListBox', function () {
-    select(userPostListBox.getItem(Rick.id)).getPage();
-    select(userPostListBox.getItem(Rick.id)).getAll();
+    select(userPostListBox.getOrDefault(Rick.id)).getPage();
+    select(userPostListBox.getOrDefault(Rick.id)).getAll();
   });
 });

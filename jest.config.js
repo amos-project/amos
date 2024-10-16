@@ -1,5 +1,10 @@
-/** @type {import('ts-jest').JestConfigWithTsJest} */
+/** @type {import('ts-jest').JestConfigWithTsJest} **/
 module.exports = {
-  preset: 'ts-jest',
   testEnvironment: 'node',
+  transform: {
+    '^.+.tsx?$': ['ts-jest', {}],
+  },
+  moduleNameMapper: {
+    '^amos-([^/]+)$': '<rootDir>/packages/amos-$1/src',
+  },
 };

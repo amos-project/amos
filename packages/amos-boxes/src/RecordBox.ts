@@ -5,7 +5,7 @@
 
 import { Box, createBoxFactory, Mutation, Selector, ShapedBox } from 'amos-core';
 import { Record, RecordProps } from 'amos-shapes';
-import { CtorValue, resolveCtorValue } from 'amos-utils';
+import { resolveCtorValue, ValueOrConstructor } from 'amos-utils';
 
 export interface RecordBox<R extends Record<any>>
   extends ShapedBox<R, 'merge', 'isValid', Box<R>, Record<{}>> {
@@ -14,6 +14,7 @@ export interface RecordBox<R extends Record<any>>
 
   /** @see {Record#set} */
   set<K extends keyof RecordProps<R>>(key: K, value: R[K]): Mutation<[K, R[K]], R>;
+
   /** @see {Record#update} */
   update<K extends keyof RecordProps<R>>(
     key: K,
@@ -29,7 +30,7 @@ export const RecordBox = createBoxFactory<RecordBox<any>>({
 
 export function createRecordBox<R extends Record<any>>(
   key: string,
-  initialState: CtorValue<R>,
+  initialState: ValueOrConstructor<R>,
 ): RecordBox<R> {
   return new RecordBox(key, resolveCtorValue(initialState) as any);
 }

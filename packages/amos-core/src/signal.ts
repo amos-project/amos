@@ -3,7 +3,7 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { applyEnhancers, identity } from 'amos-utils';
+import { applyEnhancers, enhancerCollector, identity } from 'amos-utils';
 import { Box } from './box';
 import { AmosObject, createAmosObject } from './types';
 
@@ -15,34 +15,34 @@ import { AmosObject, createAmosObject } from './types';
  *
  * The return value of `dispatch(signal)` is the data of the signal.
  */
-export interface Signal<D extends any = any> extends AmosObject<'SIGNAL'> {
+export interface Signal<D = any> extends AmosObject<'SIGNAL'> {
   data: D;
   factory: SignalFactory<any[], D>;
 }
 
-export interface SignalOptions<D> {}
+export interface SignalOptions<D = any> {}
+
+export type Creator<A extends any[] = any, D = any> = (...args: A) => D;
 
 /**
  * An `SignalFactory` is a function to create an `Signal`, which is created by
  * `signal()` method.
  */
 export interface SignalFactory<A extends any[] = any, D = any>
-  extends AmosObject<'SIGNAL_FACTORY'>,
-    SignalOptions<D> {
-  type: string;
+  extends AmosObject<'SIGNAL_FACTORY'> {
   (...args: A): Signal<D>;
+
+  type: string;
+  creator: Creator<A, D>;
+  options: SignalOptions<D>;
   /** @internal */
   listeners: Map<Box, (state: any, data: D) => any>;
 }
 
-export type SignalEnhancer = <A extends any[], D>(
-  factory: SignalFactory<A, D>,
-) => SignalFactory<A, D>;
-
-const signalEnhancers: SignalEnhancer[] = [];
+export const enhanceSignal = enhancerCollector<[string, Creator, SignalOptions], SignalFactory>();
 
 /**
- * Create an `SignalFactory` which creates an signal, whose value of the data
+ * Create an `SignalFactory` which creates a signal, whose value of the data
  * is the return type of `creator`.
  *
  * @param creator a creator will be called with the same parameters when
@@ -52,7 +52,7 @@ const signalEnhancers: SignalEnhancer[] = [];
  */
 export function signal<A extends any[], D>(
   type: string,
-  creator: (...args: A) => D,
+  creator: Creator<A, D>,
   options?: SignalOptions<D>,
 ): SignalFactory<A, D>;
 /**
@@ -76,23 +76,26 @@ export function signal(type: string, creator: any, options?: any): SignalFactory
     creator = void 0;
   }
   creator ??= identity;
-  let factory: SignalFactory = Object.assign(
-    (...args: any[]): Signal =>
-      createAmosObject('SIGNAL', {
-        data: creator(...args),
-        factory,
-      }),
-    options,
-    {
-      $amos: 'SIGNAL_FACTORY' as const,
-      type,
-      listeners: new Set(),
-    },
+  const factory = applyEnhancers(
+    [type, creator, options],
+    enhanceSignal.enhancers,
+    (type, creator, options) =>
+      createAmosObject(
+        'SIGNAL_FACTORY',
+        Object.assign(
+          (...args: any[]): Signal =>
+            createAmosObject('SIGNAL', {
+              data: creator(...args),
+              factory: factory,
+            }),
+          {
+            type,
+            creator,
+            options,
+            listeners: new Map(),
+          },
+        ),
+      ),
   );
-  factory = applyEnhancers(factory, signalEnhancers);
   return factory;
 }
-
-signal.enhance = (enhancer: SignalEnhancer) => {
-  signalEnhancers.push(enhancer);
-};

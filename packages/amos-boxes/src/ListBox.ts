@@ -38,7 +38,7 @@ export interface ListBox<L extends List<any>>
     | 'find'
     | 'filter'
     | 'get'
-    | 'size'
+    | 'length'
     | 'every',
     Box<L>,
     List<any>
@@ -83,7 +83,7 @@ export const ListBox: ListBoxFactory = createBoxFactory<ListBox<any>>({
     join: null,
     reduce: null,
     reduceRight: null,
-    size: null,
+    length: null,
   },
 });
 

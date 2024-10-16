@@ -7,7 +7,7 @@ import { dispatch, postMediaListBox, select, toJS } from 'amos-testing';
 
 describe('ListMapBox', function () {
   it('should create ListMapBox', function () {
-    dispatch(postMediaListBox.setItem(0, [1]));
+    dispatch(postMediaListBox.set(0, [1]));
     dispatch(postMediaListBox.setAll([[1, [2, 3]]]));
     dispatch(postMediaListBox.unshiftAt(1, 4));
     dispatch(postMediaListBox.unshiftAt(2, 5));

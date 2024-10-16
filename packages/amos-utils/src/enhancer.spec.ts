@@ -5,10 +5,10 @@
 
 import { applyEnhancers, Enhancer } from './enhancer';
 
-describe('enhancer', function () {
-  it('should apply enhancers', function () {
-    const incr: Enhancer<number> = (id) => id + 1;
-    const double: Enhancer<number> = (id) => id * 2;
-    expect(applyEnhancers(1, [incr, double])).toBe(4);
+describe('enhancer', () => {
+  it('should apply enhancers', () => {
+    const incr: Enhancer<[], number> = (next) => () => next() + 1;
+    const double: Enhancer<[], number> = (next) => () => next() * 2;
+    expect(applyEnhancers([], [incr, double], () => 1)).toBe(3);
   });
 });

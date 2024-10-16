@@ -17,7 +17,6 @@ export * from './store/todo.boxes';
 export * from './store/todo.selectors';
 export * from './store/user.boxes';
 export * from './store/user.selectors';
-export * from './connect';
 export * from './entry';
 export * from './utils';
 export * from './store/post.actions';

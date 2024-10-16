@@ -3,7 +3,7 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { CtorValue, FnValue } from './types';
+import { ValueOrConstructor, ValueOrFactory } from './types';
 
 export function resolveCallerName(depth = 2) {
   try {
@@ -22,12 +22,6 @@ export function resolveCallerName(depth = 2) {
   }
 }
 
-export const noop = () => void 0;
-
-export function values<T extends object>(o: T): T[keyof T][] {
-  return Object.keys(o).map((k) => o[k as keyof T]);
-}
-
 export const isArray: (args: any) => args is any[] | readonly any[] = Array.isArray;
 
 export function warning(shouldWarning: boolean, message: string) {
@@ -44,17 +38,13 @@ export function threw(shouldThrow: boolean, message: string): asserts shouldThro
   }
 }
 
-export function toString(obj: unknown) {
-  return Object.prototype.toString.call(obj);
-}
-
 export const ANY: any = void 0;
 
-export function resolveCtorValue<V>(value: CtorValue<V>): V {
+export function resolveCtorValue<V>(value: ValueOrConstructor<V>): V {
   return typeof value === 'function' ? new (value as any)() : value;
 }
 
-export function resolveFnValue<V, A extends any[]>(value: FnValue<V, A>, ...args: A): V {
+export function resolveFnValue<V, A extends any[]>(value: ValueOrFactory<V, A>, ...args: A): V {
   return typeof value === 'function' ? (value as any)(...args) : value;
 }
 
@@ -62,5 +52,3 @@ export function removeElement<T>(input: T[], item: T) {
   const index = input.indexOf(item);
   return index > -1 ? input.splice(index, 1) : input;
 }
-
-export const mergeObject: <T>(src: T, dst: Partial<T>) => T = Object.assign;

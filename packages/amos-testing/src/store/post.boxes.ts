@@ -5,7 +5,6 @@
 
 import { createListMapBox, createPagedListMapBox, createRecordMapBox } from 'amos-boxes';
 import { Record } from 'amos-shapes';
-import { userMapBox } from './user.boxes';
 
 export interface PostModel {
   id: number;
@@ -23,9 +22,7 @@ export class PostRecord extends Record<PostModel>({
   authorId: 0,
 }) {}
 
-export const postMapBox = createRecordMapBox('posts', PostRecord, 'id').relations({
-  author: ['authorId', userMapBox],
-});
+export const postMapBox = createRecordMapBox('posts', PostRecord, 'id');
 
 export const userPostListBox = createPagedListMapBox('posts.userPostList', 0, 0, 0);
 
@@ -45,9 +42,6 @@ export class MediaRecord extends Record<MediaModel>({
   url: '',
 }) {}
 
-export const mediaMapBox = createRecordMapBox('postMedias', MediaRecord, 'id').relations({
-  post: ['postId', postMapBox],
-  user: ['userId', userMapBox],
-});
+export const mediaMapBox = createRecordMapBox('postMedias', MediaRecord, 'id');
 
 export const postMediaListBox = createListMapBox('postMedias.postMediaList', 0, 0);

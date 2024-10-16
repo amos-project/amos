@@ -18,22 +18,22 @@ const createMap = createMapBox('unit.mapBox.create', MK.Foo, Rick);
 
 describe('MapBox', function () {
   it('should create MapBox', function () {
-    newMap.setItem(0, 0);
+    newMap.set(0, 0);
     // @ts-expect-error
-    newMap.setItem(1, 0);
-    strMap.setItem('', 1);
-    numMap.setItem(1, { foo: 'baz', bar: 2 });
+    newMap.set(1, 0);
+    strMap.set('', 1);
+    numMap.set(1, { foo: 'baz', bar: 2 });
     // @ts-expect-error
-    numMap.setItem('', 1);
+    numMap.set('', 1);
     // @ts-expect-error
-    strMap.setItem(1, 0);
-    createMap.setItem(MK.Bar, Morty);
+    strMap.set(1, 0);
+    createMap.set(MK.Bar, Morty);
     strMap.size();
-    strMap.hasItem('1');
-    strMap.getItem('1');
+    strMap.has('1');
+    strMap.getOrDefault('1');
     strMap.keys();
     createMap.map((value, key) => key);
-    strMap.setItem('a', 1);
+    strMap.set('a', 1);
     strMap.setAll([
       ['a', 1],
       ['b', 2],
@@ -41,7 +41,7 @@ describe('MapBox', function () {
     strMap.mergeItem('a', 1);
     createMap.mergeItem(MK.Foo, {});
     createMap.mergeItem(MK.Foo, { firstName: Morty.firstName });
-    createMap.mergeAll([
+    createMap.merge([
       [MK.Bar, Rick],
       [MK.Foo, { firstName: 'z' }],
     ]);

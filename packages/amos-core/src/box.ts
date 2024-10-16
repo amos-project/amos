@@ -5,13 +5,13 @@
 
 import {
   clone,
-  Ctor,
-  FnValue,
+  Constructor,
   Mutable,
   NotImplemented,
   resolveCallerName,
   resolveFnValue,
   threw,
+  ValueOrFactory,
   WellPartial,
 } from 'amos-utils';
 import { SignalFactory } from './signal';
@@ -60,7 +60,7 @@ export class Box<S = any> {
     return this;
   }
 
-  resetInitialState<TThis extends Box<S>>(this: TThis, state: FnValue<S, [S]>): TThis {
+  setInitialState<TThis extends Box<S>>(this: TThis, state: ValueOrFactory<S, [S]>): TThis {
     (this as Mutable<TThis>).initialState = resolveFnValue(state, this.initialState);
     return this;
   }
@@ -85,7 +85,7 @@ export class Box<S = any> {
    *
    * @param nextState - the next state or its transformer
    */
-  setState(nextState: FnValue<S, [S]>): Mutation<[FnValue<S, [S]>], S> {
+  setState(nextState: ValueOrFactory<S, [S]>): Mutation<[ValueOrFactory<S, [S]>], S> {
     throw new NotImplemented();
   }
 
@@ -94,7 +94,7 @@ export class Box<S = any> {
    *
    * @param partialNextState - the partial next state properties or its factory
    */
-  mergeState(partialNextState: FnValue<WellPartial<S>, [S]>): Mutation<[WellPartial<S>], S> {
+  mergeState(partialNextState: ValueOrFactory<WellPartial<S>, [S]>): Mutation<[WellPartial<S>], S> {
     throw new NotImplemented();
   }
 
@@ -128,7 +128,7 @@ export function mutation<S, A extends any[]>(
  * TODO: implement selectors
  */
 export function implementation<B extends Box>(
-  box: Ctor<B, any[]>,
+  box: Constructor<B, any[]>,
   mutations: {
     [P in keyof B]?: B[P] extends (...args: infer A) => Mutation<infer A, BoxState<B>>
       ? (state: BoxState<B>, ...args: A) => BoxState<B>
@@ -156,8 +156,8 @@ export function implementation<B extends Box>(
 implementation(
   Box,
   {
-    setState: <S>(state: S, nextState: FnValue<S, [S]>) => resolveFnValue(nextState, state),
-    mergeState: <S>(state: S, partialNextState: FnValue<WellPartial<S>, [S]>) => {
+    setState: <S>(state: S, nextState: ValueOrFactory<S, [S]>) => resolveFnValue(nextState, state),
+    mergeState: <S>(state: S, partialNextState: ValueOrFactory<WellPartial<S>, [S]>) => {
       return clone(state, resolveFnValue(partialNextState, state));
     },
     resetState: function () {

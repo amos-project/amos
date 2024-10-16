@@ -8,5 +8,5 @@ import { selectUserId } from './session.selectors';
 import { userMapBox } from './user.boxes';
 
 export const selectUser = selector((select, userId: number = select(selectUserId())) => {
-  return select(userMapBox.getItem(userId));
+  return select(userMapBox.getOrDefault(userId));
 });

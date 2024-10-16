@@ -16,15 +16,17 @@ export interface ShapedBoxMeta<KM, KS> {
 }
 
 export type ShapedBox<
-  S,
-  KM extends keyof S,
-  KS extends keyof S,
-  SB extends Box = Box<S>,
-  KLimiter = S /* tricky for WebStorm go to definitions to shape method, if TypeScript allows P in keyof S & KM, this should be removed */,
-> = SB & {
-  [P in keyof KLimiter & KM]: S[P] extends (...args: infer A) => S ? MutationFactory<A, S> : never;
+  TShape,
+  TMutationKeys extends keyof TShape,
+  TSelectorKeys extends keyof TShape,
+  TBox extends Box = Box<TShape>,
+  KLimiter = TShape /* tricky for WebStorm go to definitions to shape method, if TypeScript allows P in keyof S & KM, this should be removed */,
+> = TBox & {
+  [P in keyof KLimiter & TMutationKeys]: TShape[P] extends (...args: infer A) => TShape
+    ? MutationFactory<A, TShape>
+    : never;
 } & {
-  [P in keyof KLimiter & KS]: S[P] extends (...args: infer A) => infer R
+  [P in keyof KLimiter & TSelectorKeys]: TShape[P] extends (...args: infer A) => infer R
     ? SelectorFactory<A, R>
     : never;
 };

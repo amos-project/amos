@@ -4,8 +4,8 @@
  */
 
 import { BoxFactory, Mutation, ShapedBox } from 'amos-core';
-import { List, ListElement, ListMap, MapKey, MapPair, MapValue } from 'amos-shapes';
-import { IDOf, Pair } from 'amos-utils';
+import { List, ListElement, ListMap, MapKey, MapValue } from 'amos-shapes';
+import { IDOf, OmitKeys, Pair, PartialRecord } from 'amos-utils';
 import { MapBox } from './MapBox';
 
 export interface ListMapBox<LM extends ListMap<any, any>>
@@ -28,22 +28,29 @@ export interface ListMapBox<LM extends ListMap<any, any>>
     | 'setAt'
     | 'resetAt',
     never,
-    Omit<MapBox<LM>, 'setItem' | 'setAll'>,
+    OmitKeys<MapBox<LM>, 'set' | 'setAll'>,
     ListMap<any, any>
   > {
-  setItem(
-    key: MapKey<LM>,
-    value: MapValue<LM>,
-  ): Mutation<[key: MapKey<LM>, value: MapValue<LM>], LM>;
-  setItem(
+  /** {@link ListMap#set} */
+  set(key: MapKey<LM>, value: MapValue<LM>): Mutation<[key: MapKey<LM>, value: MapValue<LM>], LM>;
+  set(
     key: MapKey<LM>,
     items: readonly ListElement<MapValue<LM>>[],
   ): Mutation<[key: MapKey<LM>, items: readonly ListElement<MapValue<LM>>[]], LM>;
 
-  setAll(items: readonly MapPair<LM>[]): Mutation<[items: readonly MapPair<LM>[]], LM>;
+  /** {@link ListMap#setAll} */
   setAll(
-    items: readonly Pair<MapKey<LM>, readonly ListElement<MapValue<LM>>[]>[],
-  ): Mutation<[items: readonly Pair<MapKey<LM>, readonly ListElement<MapValue<LM>>[]>[]], LM>;
+    items: PartialRecord<MapKey<LM>, NoInfer<MapValue<LM> | readonly ListElement<MapValue<LM>>[]>>,
+  ): Mutation<
+    [items: PartialRecord<MapKey<LM>, MapValue<LM> | readonly ListElement<MapValue<LM>>[]>],
+    LM
+  >;
+  setAll(
+    items: readonly Pair<MapKey<LM>, MapValue<LM> | readonly ListElement<MapValue<LM>>[]>[],
+  ): Mutation<
+    [items: readonly Pair<MapKey<LM>, MapValue<LM> | readonly ListElement<MapValue<LM>>[]>[]],
+    LM
+  >;
 }
 
 export interface ListMapBoxFactory extends BoxFactory<ListMapBox<any>> {

@@ -3,26 +3,15 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { applyEnhancers, is, resolveCallerName } from 'amos-utils';
-import { AmosObject, Select } from './types';
-
-/**
- * Selector is created by {@see SelectorFactory}, it is used for select some state
- * in the {@see import('./createStore').Store}.
- *
- * You do not need to care about the data structure of a Selector.
- */
-export interface Selector<A extends any[] = any, R = any> extends AmosObject<'SELECTOR'> {
-  args: A;
-  factory: SelectorFactory<A, R>;
-}
+import { applyEnhancers, enhancerCollector, is, resolveCallerName } from 'amos-utils';
+import { AmosObject, createAmosObject, Select } from './types';
 
 /**
  * The options for a {@see SelectorFactory}.
  *
  * It could be extended by plugins.
  */
-export interface SelectorOptions<A extends any[], R> {
+export interface SelectorOptions<A extends any[] = any, R = any> {
   /**
    * The type of the selector, used for devtools to print friendly names.
    * You do not need to pass this option, the library will generate the type
@@ -51,6 +40,8 @@ export interface SelectorOptions<A extends any[], R> {
   cacheKey?: (...args: A) => string | false;
 }
 
+export type Compute<A extends any[] = any, R = any> = (select: Select, ...args: A) => R;
+
 /**
  * SelectorFactory is created by {@see selector}, it is used for create a {@see Selector}.
  *
@@ -65,24 +56,26 @@ export interface SelectorOptions<A extends any[], R> {
  * You do not need to care about the data structure of a SelectorFactory.
  */
 export interface SelectorFactory<A extends any[] = any, R = any>
-  extends AmosObject<'SELECTOR_FACTORY'>,
-    SelectorOptions<A, R> {
-  id: string;
-  compute: (select: Select, ...args: A) => R;
+  extends AmosObject<'SELECTOR_FACTORY'> {
   (...args: A): Selector<A, R>;
+
+  id: string;
+  compute: Compute<A, R>;
+  options: SelectorOptions<A, R>;
 }
 
 /**
- * SelectorEnhancer is a function to reshape a {@see SelectorFactory}.
+ * Selector is created by {@see SelectorFactory}, it is used for select some state
+ * in the {@see import('./createStore').Store}.
  *
- * It could be registered by {@see selector.enhance} and it is applied
- * when a {@see selector} is called.
+ * You do not need to care about the data structure of a Selector.
  */
-export type SelectorEnhancer = <A extends any[], R>(
-  factory: SelectorFactory<A, R>,
-) => SelectorFactory<A, R>;
+export interface Selector<A extends any[] = any, R = any> extends AmosObject<'SELECTOR'> {
+  args: A;
+  factory: SelectorFactory<A, R>;
+}
 
-const selectorEnhancers: SelectorEnhancer[] = [];
+export const enhanceSelector = enhancerCollector<[Compute, SelectorOptions], SelectorFactory>();
 
 /**
  * Create a {@see SelectorFactory}, the factory is enhanced by enhancers.
@@ -93,36 +86,30 @@ const selectorEnhancers: SelectorEnhancer[] = [];
  * @param options
  */
 export function selector<A extends any[], R>(
-  compute: (select: Select, ...args: A) => R,
+  compute: Compute<A, R>,
   options: SelectorOptions<A, R> = {},
 ): SelectorFactory<A, R> {
   if (process.env.NODE_ENV === 'development' && !options.type) {
     options.type = resolveCallerName();
   }
+  options.equal ??= is;
 
-  let factory: SelectorFactory<A, R> = Object.assign(
-    (...args: A): Selector<A, R> => ({ $amos: 'SELECTOR', args, factory }),
-    {
-      ...options,
-      equal: options.equal || is,
+  const factory = applyEnhancers(
+    [compute, options],
+    enhanceSelector.enhancers,
+    (compute, options) => {
+      return createAmosObject(
+        'SELECTOR_FACTORY',
+        Object.assign(
+          (...args: A): Selector<A, R> =>
+            createAmosObject('SELECTOR', {
+              args,
+              factory,
+            }),
+          { compute, options },
+        ),
+      );
     },
-    {
-      $amos: 'SELECTOR_FACTORY',
-      id: Math.random().toString().substr(2),
-      compute,
-    } as const,
   );
-  factory = applyEnhancers<SelectorFactory<A, R>>(factory, selectorEnhancers);
   return factory;
 }
-
-/**
- * Register a  {@see SelectorEnhancer}.
- *
- * @param enhancer
- */
-selector.enhance = (enhancer: SelectorEnhancer) => {
-  selectorEnhancers.push(enhancer);
-};
-
-selector.enhancers = selectorEnhancers;

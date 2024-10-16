@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkamos_website=self.webpackChunkamos_website||[]).push([[6338],{4030:s=>{s.exports=JSON.parse('{"permalink":"/amos/blog/tags/docusaurus","page":1,"postsPerPage":10,"totalPages":1,"totalCount":4,"blogDescription":"Blog","blogTitle":"Blog"}')}}]);

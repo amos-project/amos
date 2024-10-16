@@ -3,20 +3,23 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { AnyFn } from 'amos-utils';
+import { AnyFunc, NotImplemented } from 'amos-utils';
+import { action } from 'amos-core';
 
 export interface PagedListActionFactoryOptions {}
 
 export interface PagedListActionOptions<A extends any[], R> {}
 
-export interface PagedListAction<S extends AnyFn> {}
+export interface PagedListAction<S extends AnyFunc> {}
 
-export interface PagedListActionFactory<S extends AnyFn> {
+export interface PagedListActionFactory<S extends AnyFunc> {
   (options: PagedListActionOptions<any[], any>): PagedListAction<S>;
 }
 
 export function createPagedListActionFactory(
   config: PagedListActionFactoryOptions,
-): PagedListActionFactory<AnyFn> {
-  return null as any;
+): PagedListActionFactory<AnyFunc> {
+  return action(() => {
+    throw new NotImplemented();
+  });
 }

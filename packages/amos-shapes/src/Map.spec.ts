@@ -8,26 +8,26 @@ import { Map } from './Map';
 describe('Map', function () {
   it('should create Map', function () {
     let m1 = new Map<number, number>(0);
-    m1 = m1.fromJSON({ '-3': -1, '-1': 0 });
-    m1 = m1.setItem(1, 2);
+    m1 = m1.fromJS({ '-3': -1, '-1': 0 });
+    m1 = m1.set(1, 2);
     m1 = m1.mergeItem(3, 4);
     m1 = m1.setAll([
       [5, 6],
       [7, 8],
     ]);
-    m1 = m1.mergeAll([
+    m1 = m1.merge([
       [9, 10],
       [11, 12],
     ]);
     m1 = m1.updateItem(1, (v) => v * 2);
-    m1 = m1.removeItem(11);
+    m1 = m1.delete(11);
     const m2 = m1.clear();
     expect([
       m1.size(),
-      m1.keys().sort(),
-      m1.hasItem(-1),
-      m1.hasItem(11),
-      m1.getItem(1),
+      Array.from(m1.keys()).sort(),
+      m1.has(-1),
+      m1.has(11),
+      m1.get(1),
       m1.map((value, key, index) => [value, key, index] as const).sort(([a], [b]) => a - b),
       m2.size(),
     ]).toEqual([

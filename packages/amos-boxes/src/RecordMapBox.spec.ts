@@ -11,14 +11,14 @@ describe('RecordMapBox', function () {
     expect(
       toJS(
         applyMutations(postMapBox.initialState, [
-          postMapBox.setItem(new PostRecord({ id: 1, title: 'Hello world' })),
-          postMapBox.setItem(2, new PostRecord({ id: 2, title: 'Second' })),
+          postMapBox.set(new PostRecord({ id: 1, title: 'Hello world' })),
+          postMapBox.set(2, new PostRecord({ id: 2, title: 'Second' })),
           postMapBox.mergeItem(3, { title: 'Third' }),
           postMapBox.mergeItem({ id: 4, title: 'Forth' }),
           postMapBox.setAll([new PostRecord({ id: 5, title: 'Fifth' })]),
           postMapBox.setAll([[6, new PostRecord({ id: 6, title: 'Sixth' })]]),
-          postMapBox.mergeAll([{ id: 7, title: 'Seventh' }]),
-          postMapBox.mergeAll([[8, new PostRecord({ id: 8, title: 'Eighth' })]]),
+          postMapBox.merge([{ id: 7, title: 'Seventh' }]),
+          postMapBox.merge([[8, new PostRecord({ id: 8, title: 'Eighth' })]]),
         ]).pop(),
       ),
     ).toEqual({

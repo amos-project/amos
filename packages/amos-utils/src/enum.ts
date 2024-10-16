@@ -81,27 +81,12 @@ export class Enum<K extends string, V extends ID, D> {
 
 export type EnumOptions<K extends string, V extends ID, D> = Enum<K, V, D> & Record<K, V>;
 
-export type EnumKeys<T extends EnumOptions<any, any, any>> = T extends EnumOptions<
-  infer K,
-  infer V,
-  infer D
->
-  ? K
-  : never;
-export type EnumLabels<T extends EnumOptions<any, any, any>> = T extends EnumOptions<
-  infer K,
-  infer V,
-  infer D
->
-  ? D
-  : never;
-export type EnumValues<T extends EnumOptions<any, any, any>> = T extends EnumOptions<
-  infer K,
-  infer V,
-  infer D
->
-  ? V
-  : never;
+export type EnumKeys<T extends EnumOptions<any, any, any>> =
+  T extends EnumOptions<infer K, infer V, infer D> ? K : never;
+export type EnumLabels<T extends EnumOptions<any, any, any>> =
+  T extends EnumOptions<infer K, infer V, infer D> ? D : never;
+export type EnumValues<T extends EnumOptions<any, any, any>> =
+  T extends EnumOptions<infer K, infer V, infer D> ? V : never;
 
 /**
  * create an enum instance with strict value type

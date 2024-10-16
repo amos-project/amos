@@ -3,21 +3,28 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { applyEnhancers, resolveCallerName } from 'amos-utils';
-import { AmosObject, Dispatch, Select } from './types';
+import { applyEnhancers, enhancerCollector, resolveCallerName } from 'amos-utils';
+import { AmosObject, createAmosObject, Dispatch, Select } from './types';
 
-export interface ActionOptions<A extends any[], R = any> {
+export interface ActionOptions<A extends any[] = any, R = any> {
   type?: string;
   conflictPolicy?: 'always' | 'first' | 'latest';
   conflictKey?: (select: Select, ...args: A) => string | number;
   rollback?: (select: Select, reason: unknown, ...args: A) => void;
 }
 
+export type Actor<A extends any[] = any, R = any> = (
+  dispatch: Dispatch,
+  select: Select,
+  ...args: A
+) => R;
+
 export interface ActionFactory<A extends any[] = any, R = any>
-  extends AmosObject<'ACTION_FACTORY'>,
-    ActionOptions<A, R> {
+  extends AmosObject<'ACTION_FACTORY'> {
   (...args: A): Action<A, R>;
-  actor: (dispatch: Dispatch, select: Select, ...args: A) => R;
+
+  actor: Actor<A, R>;
+  options: ActionOptions<A, R>;
 }
 
 export interface Action<A extends any[] = any, R = any> extends AmosObject<'ACTION'> {
@@ -25,11 +32,7 @@ export interface Action<A extends any[] = any, R = any> extends AmosObject<'ACTI
   factory: ActionFactory<A, R>;
 }
 
-export type ActionEnhancer = <A extends any[], R>(
-  factory: ActionFactory<A, R>,
-) => ActionFactory<A, R>;
-
-const actionEnhancers: ActionEnhancer[] = [];
+export const enhanceAction = enhancerCollector<[Actor, ActionOptions], ActionFactory>();
 
 /**
  * create an action factory.
@@ -40,28 +43,20 @@ const actionEnhancers: ActionEnhancer[] = [];
  * @param options
  */
 export function action<A extends any[], R>(
-  actor: (dispatch: Dispatch, select: Select, ...args: A) => R,
+  actor: Actor<A, R>,
   options: ActionOptions<A, R> = {},
 ): ActionFactory<A, R> {
   if (process.env.NODE_ENV === 'development' && !options.type) {
     options.type = resolveCallerName();
   }
-  let factory: ActionFactory<A, R> = Object.assign(
-    (...args: A): Action<A, R> => ({
-      $amos: 'ACTION',
-      args,
-      factory,
-    }),
-    options,
-    {
-      $amos: 'ACTION_FACTORY' as const,
-      actor,
-    },
-  );
-  factory = applyEnhancers<ActionFactory<A, R>>(factory, actionEnhancers);
+  const factory = applyEnhancers([actor, options], enhanceAction.enhancers, (actor, options) => {
+    return createAmosObject(
+      'ACTION_FACTORY',
+      Object.assign((...args: A): Action<A, R> => createAmosObject('ACTION', { args, factory }), {
+        actor,
+        options,
+      }),
+    );
+  });
   return factory;
 }
-
-action.enhance = (enhancer: ActionEnhancer) => {
-  actionEnhancers.push(enhancer);
-};

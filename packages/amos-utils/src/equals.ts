@@ -19,18 +19,22 @@ export const is: (x: any, y: any) => boolean = Object.is || shimObjectIs;
  * @param v
  */
 export const identity = <T>(v: T) => v;
-export const truly = <T>(value: T | undefined | null): value is T => value != null;
-export const falsy = <T>(value: T | undefined | null): value is undefined | null => value == null;
-export type EqualFn<T> = (a: T, b: T) => boolean;
+export const notNullable = <T>(value: T | undefined | null): value is T => value != null;
+export const isNullable = <T>(value: T | undefined | null): value is undefined | null =>
+  value == null;
+export const isTruly = <T>(value: T | undefined | null | '' | 0 | false): value is T => !!value;
 
 /**
  * Check two objects is shallow equal or not
  * @param a
  * @param b
  */
-export function shallowEqual<T extends {}>(a: T, b: T): boolean {
+export function shallowEqual<T>(a: T, b: T): boolean {
   if (is(a, b)) {
     return true;
+  }
+  if (!isObject(a) || !isObject(b)) {
+    return false;
   }
   const ka = Object.keys(a) as Array<keyof T>;
   if (ka.length !== Object.keys(b).length) {
@@ -39,12 +43,15 @@ export function shallowEqual<T extends {}>(a: T, b: T): boolean {
   return ka.every((k) => a[k] === b[k]);
 }
 
-export function propsEqual<T extends {}>(a: T, b: Partial<T>): boolean {
+export function shallowContainEqual<T>(a: T, b: Partial<T>): boolean {
   if (is(a, b)) {
     return true;
   }
+  if (!isObject(a) || !isObject(b)) {
+    return false;
+  }
   const kb = Object.keys(b) as Array<keyof T>;
-  return kb.every((k) => a[k] === b[k]);
+  return kb.every((k) => is(a[k], b[k]));
 }
 
 /**
@@ -64,22 +71,6 @@ export function arrayEqual<T extends ArrayLike<any>>(a: T, b: T) {
   return true;
 }
 
-export type ShapeEqualSchema<T> = T extends readonly (infer U)[]
-  ? [ShapeEqualSchema<U>]
-  : EqualFn<T>;
-
-function shapeEqualExec<T>(a: T, b: T, schema: ShapeEqualSchema<T>): boolean {
-  if (Array.isArray(schema)) {
-    return (
-      Array.isArray(a) &&
-      Array.isArray(b) &&
-      a.length === b.length &&
-      a.every((value, index) => shapeEqualExec(value, b[index], schema[0]))
-    );
-  }
-  return schema(a, b);
-}
-
-export function shapeEqual<T>(schema: ShapeEqualSchema<T>): EqualFn<T> {
-  return (a: T, b: T) => shapeEqualExec(a, b, schema);
+export function isObject<T>(value: T): value is T & object {
+  return typeof value === 'object' && value !== null;
 }

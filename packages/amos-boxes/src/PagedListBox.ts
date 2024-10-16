@@ -48,7 +48,7 @@ export class PagedList<
   }
 
   getPage(page: number = this.pageNum): List<E> {
-    return this.pagedData.getItem(page);
+    return this.pagedData.getOrDefault(page);
   }
 
   delete(value: E): this {

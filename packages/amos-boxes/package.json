@@ -24,6 +24,6 @@
     "amos-core": "^0.3.0-beta.1",
     "amos-shapes": "^0.3.0-beta.1",
     "amos-utils": "^0.3.0-beta.1",
-    "tslib": "^2.6.1"
+    "tslib": "^2.8.0"
   }
 }
