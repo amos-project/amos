@@ -1,6 +1,6 @@
 {
   "name": "amos-io",
-  "version": "0.3.0-beta.4",
+  "version": "0.3.0-beta.15",
   "description": "The builtin io library for amos.",
   "author": "acrazing <joking.young@gmail.com>",
   "homepage": "https://github.com/amos-project/amos",
