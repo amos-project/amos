@@ -37,11 +37,12 @@
     "importsNotUsedAsValues": "remove",
     "preserveValueImports": false,
     "paths": {
+      "amos": ["amos/src"],
       "amos-*": ["amos-*/src"]
     },
     "skipLibCheck": true,
     "noImplicitOverride": true
   },
-  "include": ["packages", "scripts"],
+  "include": ["packages", "scripts", "apps"],
   "exclude": ["dist", "node_modules"]
 }

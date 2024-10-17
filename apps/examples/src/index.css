@@ -1,0 +1,28 @@
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  --black: #242424;
+  --white: rgba(255, 255, 255, 0.87);
+
+  color-scheme: light dark;
+  color: var(--white);
+  background-color: var(--black);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --white: #ffffff;
+    --black: #213547;
+  }
+}
+
+body {
+  margin: 0;
+}

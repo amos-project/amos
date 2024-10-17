@@ -146,11 +146,11 @@ export function implementation<B extends Box>(
       typeof mutations[k] === 'function'
         ? mutations[k]
         : (state: any, ...args: any[]) => state[k](...args);
-    (Box.prototype as any)[k] = function (...args: any[]) {
+    (box.prototype as any)[k] = function (...args: any[]) {
       return createAmosObject('MUTATION', { k, args, mutator, box: this });
     };
   }
-  Object.assign(Box.prototype, mutations, selectors, methods);
+  Object.assign(box.prototype, mutations, selectors, methods);
 }
 
 implementation(
@@ -160,7 +160,7 @@ implementation(
     mergeState: <S>(state: S, partialNextState: ValueOrFactory<WellPartial<S>, [S]>) => {
       return clone(state, resolveFnValue(partialNextState, state));
     },
-    resetState: function () {
+    resetState() {
       return this.initialState;
     },
   },
