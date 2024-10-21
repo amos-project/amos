@@ -5,7 +5,7 @@
  * record box
  */
 
-import { createRecordBox } from 'amos-boxes';
+import { recordBox } from 'amos-boxes';
 import { Record } from 'amos-shapes';
 
 export class ExampleRecord extends Record({
@@ -25,4 +25,4 @@ export class ExampleRecord extends Record({
   }
 }
 
-export const exampleBox = createRecordBox('example', ExampleRecord);
+export const exampleBox = recordBox('example', ExampleRecord);

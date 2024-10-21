@@ -19,10 +19,9 @@ export const is: (x: any, y: any) => boolean = Object.is || shimObjectIs;
  * @param v
  */
 export const identity = <T>(v: T) => v;
-export const notNullable = <T>(value: T | undefined | null): value is T => value != null;
-export const isNullable = <T>(value: T | undefined | null): value is undefined | null =>
-  value == null;
-export const isTruly = <T>(value: T | undefined | null | '' | 0 | false): value is T => !!value;
+export const notNullable = <T>(v: T): v is Exclude<T, undefined | null> => v != null;
+export const isNullable = (v: unknown): v is undefined | null => v == null;
+export const isTruly = <T>(v: T): v is Exclude<T, undefined | null | '' | 0 | false> => !!v;
 
 /**
  * Check two objects is shallow equal or not
@@ -71,6 +70,16 @@ export function arrayEqual<T extends ArrayLike<any>>(a: T, b: T) {
   return true;
 }
 
-export function isObject<T>(value: T): value is T & object {
-  return typeof value === 'object' && value !== null;
+export function isObject<T>(v: T): v is Extract<T, object> {
+  return typeof v === 'object' && v !== null;
+}
+
+export const isArray: <T>(v: T) => v is Extract<T, readonly any[]> = Array.isArray as any;
+
+export function isPlainObject(v: unknown): v is object {
+  if (!isObject(v)) {
+    return false;
+  }
+  const proto = Object.getPrototypeOf(v);
+  return proto === null || proto === Object.prototype;
 }

@@ -4,27 +4,26 @@
  */
 
 import { addPost } from 'amos-testing';
+import { $amos } from 'amos-utils';
 import { Action } from './action';
-import { $amos } from './types';
 
 describe('action', () => {
   it('should create action factory', () => {
     const props = { ...addPost };
     expect(props).toEqual<typeof props>({
-      [$amos]: 'ACTION_FACTORY',
-      id: '',
-      options: {
-        type: 'addTwiceAsync',
-      },
-      actor: expect.any(Function),
+      [$amos]: 'action_factory',
+      id: expect.any(String),
+      select: expect.any(Function),
     });
 
     const action = addPost({ title: 'Hello world!', content: 'First article.' });
     expect(action).toEqual<Action>({
-      [$amos]: 'ACTION',
+      [$amos]: 'action',
       id: '',
+      type: '',
+      conflictPolicy: 'always',
       args: [{ title: 'Hello world!', content: 'First article.' }],
-      factory: addPost,
+      actor: expect.any(Function),
     });
   });
 });

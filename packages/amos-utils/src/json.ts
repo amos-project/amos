@@ -3,13 +3,13 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { isObject } from './equals';
+import { isArray, isObject } from './equals';
 import { IsAny } from './types';
 
 export type JSONState<S> =
   IsAny<S> extends true
     ? any
-    : S extends { toJSON(): infer R }
+    : S extends ToJSON<infer R>
       ? JSONState<R>
       : S extends object
         ? S extends (...args: any[]) => any
@@ -69,12 +69,12 @@ export function fromJS<T>(v: T, s: unknown): T {
     return v.fromJS(s);
   }
   // dst or src is not an object or is an array
-  if (!isObject(v) || Array.isArray(v) || !isObject(s) || Array.isArray(s)) {
+  if (!isObject(v) || isArray(v) || !isObject(s) || isArray(s)) {
     return s as T;
   }
   const o: any = { ...v };
-  for (const k in s) {
-    if (s.hasOwnProperty(k)) {
+  for (const k in s as any) {
+    if ((s as any).hasOwnProperty(k)) {
       o[k] = fromJS(o[k], (s as any)[k]);
     }
   }

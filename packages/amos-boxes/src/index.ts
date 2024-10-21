@@ -3,10 +3,12 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-export * from './BoolBox';
-export * from './ListBox';
-export * from './ListMapBox';
-export * from './MapBox';
-export * from './NumberBox';
-export * from './RecordBox';
-export * from './RecordMapBox';
+export * from './arrayBox';
+export * from './boolBox';
+export * from './listBox';
+export * from './listMapBox';
+export * from './mapBox';
+export * from './numberBox';
+export * from './objectBox';
+export * from './recordBox';
+export * from './recordMapBox';

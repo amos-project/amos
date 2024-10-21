@@ -3,9 +3,9 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { createListMapBox, createRecordMapBox } from 'amos-boxes';
-import { Record } from 'amos-shapes';
+import { listMapBox, recordMapBox } from 'amos-boxes';
 import { createPagedListMapBox } from 'amos-io';
+import { Record } from 'amos-shapes';
 
 export interface PostModel {
   id: number;
@@ -23,7 +23,7 @@ export class PostRecord extends Record<PostModel>({
   authorId: 0,
 }) {}
 
-export const postMapBox = createRecordMapBox('posts', PostRecord, 'id');
+export const postMapBox = recordMapBox('posts', PostRecord, 'id');
 
 export const userPostListBox = createPagedListMapBox('posts.userPostList', 0, 0, 0);
 
@@ -43,6 +43,6 @@ export class MediaRecord extends Record<MediaModel>({
   url: '',
 }) {}
 
-export const mediaMapBox = createRecordMapBox('postMedias', MediaRecord, 'id');
+export const mediaMapBox = recordMapBox('postMedias', MediaRecord, 'id');
 
-export const postMediaListBox = createListMapBox('postMedias.postMediaList', 0, 0);
+export const postMediaListBox = listMapBox('postMedias.postMediaList', 0, 0);

@@ -8,5 +8,5 @@ import { selectUserId } from './session.selectors';
 import { userTodoListBox } from './todo.boxes';
 
 export const selectTodoList = selector((select, userId: number = select(selectUserId())) => {
-  return select(userTodoListBox.getOrDefault(userId));
+  return select(userTodoListBox.getItem(userId));
 });

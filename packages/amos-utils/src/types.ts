@@ -15,9 +15,12 @@ export type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) ex
 
 export type Replace<A, B> = Omit<A, keyof B> & B;
 
-export type ValueOrFactory<T, A extends any[] = []> = T | ((...args: A) => T);
+export type ValueOrFunc<T, A extends any[] = []> = T | ((...args: A) => T);
 export type ValueOrConstructor<T, A extends any[] = []> = T | (new (...args: A) => T);
 export type Constructor<T, A extends any[] = []> = new (...args: A) => T;
+export type ValueOrReadonlyArray<T> = T | readonly T[];
+export type ValueOrArray<T> = T | T[];
+export type ValueOrPromise<T> = T | Promise<T>;
 
 export type ToString<T> = T extends string
   ? T

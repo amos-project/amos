@@ -3,6 +3,6 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-export { __Context, Consumer, Provider, ProviderProps, useDispatch, useStore } from './context';
+export { Provider, ProviderProps, useDispatch, useStore } from './context';
+export { QueryState, UseQuery, useQuery } from './useQuery';
 export { useSelector } from './useSelector';
-export * from './PersistGate';

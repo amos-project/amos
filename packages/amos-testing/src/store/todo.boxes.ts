@@ -3,7 +3,7 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { createListMapBox, createRecordMapBox } from 'amos-boxes';
+import { listMapBox, recordMapBox } from 'amos-boxes';
 import { Record } from 'amos-shapes';
 import { createStrictEnum, EnumValues } from 'amos-utils';
 
@@ -46,6 +46,6 @@ export class TodoRecord extends Record<TodoModel>({
   }
 }
 
-export const todoMapBox = createRecordMapBox('todos', TodoRecord, 'id');
+export const todoMapBox = recordMapBox('todos', TodoRecord, 'id');
 
-export const userTodoListBox = createListMapBox('todos.userList', 0, 0);
+export const userTodoListBox = listMapBox('todos.userList', 0, 0);

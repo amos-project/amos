@@ -5,8 +5,13 @@
 
 export * from './action';
 export * from './box';
-export * from './createBoxFactory';
-export * from './createStore';
+export * from './enhancers/withBatch';
+export * from './enhancers/withCache';
+export * from './enhancers/withConcurrent';
+export * from './enhancers/withDevtools';
+export * from './enhancers/withPreload';
 export * from './selector';
 export * from './signal';
+export * from './store';
 export * from './types';
+export * from './utils';

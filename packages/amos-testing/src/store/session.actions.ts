@@ -4,10 +4,10 @@
  */
 
 import { action } from 'amos-core';
+import { sleep } from '../utils';
 import { sessionIdBox, sessionMapBox } from './session.boxes';
 import { selectSession } from './session.selectors';
-import { LOGOUT } from './session.signals';
-import { sleep } from '../utils';
+import { logoutSignal } from './session.signals';
 
 export const login = action(async (dispatch, select, userId: number) => {
   await sleep();
@@ -19,8 +19,8 @@ export const logout = action(async (dispatch, select) => {
   await sleep();
   const session = select(selectSession());
   dispatch([
-    sessionMapBox.delete(session.id),
-    sessionIdBox.resetState(),
-    LOGOUT({ userId: session.userId }),
+    sessionMapBox.removeItem(session.id),
+    sessionIdBox.setState(),
+    logoutSignal({ userId: session.userId }),
   ]);
 });

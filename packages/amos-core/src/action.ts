@@ -3,15 +3,9 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { applyEnhancers, enhancerCollector, resolveCallerName } from 'amos-utils';
-import { AmosObject, createAmosObject, Dispatch, Select } from './types';
-
-export interface ActionOptions<A extends any[] = any, R = any> {
-  type?: string;
-  conflictPolicy?: 'always' | 'first' | 'latest';
-  conflictKey?: (select: Select, ...args: A) => string | number;
-  rollback?: (select: Select, reason: unknown, ...args: A) => void;
-}
+import { AmosObject, createAmosObject, enhancerCollector, resolveCallerName } from 'amos-utils';
+import { SelectorFactory } from './selector';
+import { CacheOptions, Dispatch, Select } from './types';
 
 export type Actor<A extends any[] = any, R = any> = (
   dispatch: Dispatch,
@@ -19,44 +13,91 @@ export type Actor<A extends any[] = any, R = any> = (
   ...args: A
 ) => R;
 
-export interface ActionFactory<A extends any[] = any, R = any>
-  extends AmosObject<'ACTION_FACTORY'> {
-  (...args: A): Action<A, R>;
-
+export interface ActionOptions<A extends any[] = any, R = any> {
+  type: string;
   actor: Actor<A, R>;
-  options: ActionOptions<A, R>;
+
+  /**
+   * How to handle conflicted action dispatch.
+   * - always: will always dispatch.
+   * - leading: only take first to dispatch.
+   * The default value is always when no conflictKey is set.
+   *
+   * TODO: do we need tail? If so, we should consider introduce DispatchContext to
+   *  Actor to simplify the arguments.
+   *  As for now, we discard that, but the API is hard to change.
+   */
+  conflictPolicy: 'always' | 'leading';
+
+  /**
+   * Use for checking if the action is equal to another one, if so,
+   * dispatch will respect {@link conflictPolicy} strategy.
+   *
+   * If set this option, conflictPolicy's default value is 'first'.
+   * This option is required for {@link import('amos-react').useQuery}.
+   */
+  conflictKey?: CacheOptions<A>;
 }
 
-export interface Action<A extends any[] = any, R = any> extends AmosObject<'ACTION'> {
-  args: A;
-  factory: ActionFactory<A, R>;
+export interface Action<A extends any[] = any, R = any>
+  extends AmosObject<'action'>,
+    Readonly<ActionOptions<A, R>> {
+  readonly args: A;
 }
 
-export const enhanceAction = enhancerCollector<[Actor, ActionOptions], ActionFactory>();
+export interface ActionFactory<A extends any[] = any, R = any>
+  extends AmosObject<'action_factory'> {
+  (...args: A): Action<A, R>;
+}
 
-/**
- * create an action factory.
- *
- * action factory is a function to create an action object, with is dispatchable.
- *
- * @param actor
- * @param options
- */
+export const enhanceAction = enhancerCollector<[ActionOptions], ActionFactory>();
+
 export function action<A extends any[], R>(
   actor: Actor<A, R>,
-  options: ActionOptions<A, R> = {},
+  options: Partial<ActionOptions<A, R>> = {},
 ): ActionFactory<A, R> {
-  if (process.env.NODE_ENV === 'development' && !options.type) {
-    options.type = resolveCallerName();
-  }
-  const factory = applyEnhancers([actor, options], enhanceAction.enhancers, (actor, options) => {
-    return createAmosObject(
-      'ACTION_FACTORY',
-      Object.assign((...args: A): Action<A, R> => createAmosObject('ACTION', { args, factory }), {
-        actor,
-        options,
-      }),
-    );
+  const finalOptions = { ...options } as ActionOptions;
+  finalOptions.type ??= resolveCallerName(2);
+  finalOptions.actor = actor;
+  finalOptions.conflictPolicy ??= options.conflictKey ? 'leading' : 'always';
+  return enhanceAction.apply([finalOptions], (options) => {
+    const factory = createAmosObject<ActionFactory>('action_factory', ((...args: any[]) => {
+      return createAmosObject<Action>('action', {
+        ...options,
+        id: factory.id,
+        args: args,
+      });
+    }) as ActionFactory);
+    return factory;
   });
-  return factory;
 }
+
+export interface SelectableActionOptions<A extends any[] = any, S = any> {
+  /**
+   * Use for {@link import('amos-react').useQuery} derive the state even if
+   * the action is running.
+   */
+  selector: SelectorFactory<A, S>;
+}
+
+export interface SelectableAction<A extends any[] = any, R = any, S = any>
+  extends Action<A, R>,
+    SelectableActionOptions<A, S> {}
+
+export interface ActionFactory<A extends any[] = any, R = any> {
+  select<S>(selector: SelectorFactory<A, S>): SelectableActionFactory<A, R, S>;
+}
+
+export interface SelectableActionFactory<A extends any[] = any, R = any, S = any>
+  extends AmosObject<'action_factory'> {
+  (...args: A): SelectableAction<A, R, S>;
+}
+
+enhanceAction((next) => (options) => {
+  return Object.assign(next(options), {
+    select: (selector: SelectorFactory) => {
+      Object.assign(options, { selector });
+      return this;
+    },
+  });
+});

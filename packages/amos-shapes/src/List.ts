@@ -3,7 +3,7 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { clone, Cloneable, JSONSerializable, JSONState, MustNever } from 'amos-utils';
+import { arrayEqual, clone, Cloneable, JSONSerializable, JSONState, MustNever } from 'amos-utils';
 
 export class List<E> extends Cloneable implements JSONSerializable<readonly E[]> {
   constructor(
@@ -28,12 +28,12 @@ export class List<E> extends Cloneable implements JSONSerializable<readonly E[]>
 
   // query
 
-  getOrDefault(index: number): E {
-    return this.data.length > index && index > -1 ? this.data[index] : this.defaultElement;
+  has(index: number): boolean {
+    return index > -1 && this.data.length > index;
   }
 
-  get(index: number): E | undefined {
-    return this.data[index];
+  get(index: number): E {
+    return this.has(index) ? this.data[index] : this.defaultElement;
   }
 
   at(index: number): E | undefined {
@@ -235,3 +235,15 @@ declare type MissedKeys = Exclude<
   | keyof List<any>
 >;
 declare type CheckMissedKeys = MustNever<MissedKeys>;
+
+export function isSameList<T>(a: List<T> | readonly T[], b: List<T> | readonly T[]): boolean {
+  if (a === b) {
+    return true;
+  }
+  if (a instanceof List && b instanceof List) {
+    return false;
+  }
+  const aa = a instanceof List ? a.toJSON() : a;
+  const ab = b instanceof List ? b.toJSON() : b;
+  return arrayEqual(aa, ab);
+}

@@ -4,10 +4,10 @@
  */
 
 import { Dispatch, Store } from 'amos-core';
-import { threw } from 'amos-utils';
+import { must } from 'amos-utils';
 import React, { createContext, ReactNode, useContext } from 'react';
 
-export const __Context = createContext<Store | null>(null);
+export const Context = createContext<Store | null>(null);
 
 export interface ProviderProps {
   store: Store;
@@ -15,16 +15,16 @@ export interface ProviderProps {
 }
 
 export const Provider = ({ store, children }: ProviderProps) => {
-  threw(!store, 'store is required for <Provider />.');
-  return <__Context.Provider value={store}>{children}</__Context.Provider>;
+  must(store, 'store is required for <Provider />.');
+  return <Context.Provider value={store}>{children}</Context.Provider>;
 };
 
-export const Consumer = __Context.Consumer;
+export const Consumer = Context.Consumer;
 
 export function useStore(): Store {
-  const state = useContext(__Context);
-  threw(!state, 'It seems you are using hooks without <Provider />.');
-  return state!;
+  const state = useContext(Context);
+  must(state, 'It seems you are using hooks without <Provider />.');
+  return state;
 }
 
 export function useDispatch(): Dispatch {

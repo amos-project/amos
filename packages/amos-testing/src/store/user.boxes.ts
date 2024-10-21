@@ -3,7 +3,7 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { createListBox, createRecordMapBox } from 'amos-boxes';
+import { listBox, recordMapBox } from 'amos-boxes';
 import { Record } from 'amos-shapes';
 
 export interface UserModel {
@@ -34,10 +34,8 @@ export const Jessica = Jerry.set('id', 4).set('firstName', 'Jessica').set('fathe
 export const Morty = Jerry.merge({ id: 5, firstName: 'Morty' });
 export const users = [Rick, Beth, Jerry, Jessica, Morty];
 
-export const userMapBox = createRecordMapBox(
-  'user.userMap',
-  new UserRecord(),
-  'id',
-).setInitialState((state) => state.setAll(users));
+export const userMapBox = recordMapBox('user.userMap', new UserRecord(), 'id').config((b) => ({
+  initialState: b.initialState.setAll(users),
+}));
 
-export const onlineUserListBox = createListBox('users.onlineList', 0);
+export const onlineUserListBox = listBox('users.onlineList', 0);

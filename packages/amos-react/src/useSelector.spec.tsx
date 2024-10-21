@@ -17,7 +17,6 @@ import React, { FC } from 'react';
 import { Provider, useDispatch, useStore } from './context';
 import { useSelector } from './useSelector';
 import fn = jest.fn;
-import Mock = jest.Mock;
 
 describe('useStore & useDispatch', () => {
   const store = createStore();
@@ -53,14 +52,14 @@ describe('useSelector', () => {
   });
   it('should select state', () => {
     const { result } = renderUseSelector(
-      () => [countBox, selectCount, selectDoubleCount, selectMultipleCount(3)] as const,
+      () => [countBox, selectCount(), selectDoubleCount(), selectMultipleCount(3)] as const,
       { count: 1, test: { greets: ['PRELOAD'], count: 1 } },
     );
     expect(result.current).toEqual([1, 1, 2, 3]);
   });
   it('should update', async () => {
     const { result, dispatch, waitForNextUpdate, rerender } = renderUseSelector(
-      (props: { multiply: number }) => [selectDoubleCount, selectMultipleCount(props.multiply)],
+      (props: { multiply: number }) => [selectDoubleCount(), selectMultipleCount(props.multiply)],
       { count: 1 },
       { multiply: 3 },
     );
@@ -82,15 +81,14 @@ describe('useSelector', () => {
   });
 
   it('should respect deps', async () => {
-    const defaultSelector = selector(
-      fn((select: Select, t: number) => {
-        return select(countBox) * t;
-      }),
-    );
+    const compute = fn((select: Select, t: number) => {
+      return select(countBox) * t;
+    });
+    const defaultSelector = selector(compute);
     const inlineFn = fn((select: Select) => select(countBox));
     const expectCalled = (defaultCount = 1, inlineCount = 1) => {
-      expect(defaultSelector.compute).toBeCalledTimes(defaultCount);
-      (defaultSelector.compute as Mock).mockClear();
+      expect(compute).toBeCalledTimes(defaultCount);
+      compute.mockClear();
       expect(inlineFn).toBeCalledTimes(inlineCount);
       inlineFn.mockClear();
     };

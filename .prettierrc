@@ -17,10 +17,15 @@
   "singleAttributePerLine": false,
   "overrides": [
     {
-      "files": ["types.ts", "index.ts", "*.types.ts"],
+      "files": [
+        "types.ts"
+      ],
       "options": {
         "printWidth": 1000
       }
     }
+  ],
+  "plugins": [
+    "prettier-plugin-organize-imports"
   ]
 }

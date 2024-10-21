@@ -7,7 +7,7 @@ import { selector } from 'amos-core';
 import { sessionIdBox, sessionMapBox } from './session.boxes';
 
 export const selectSession = selector((select, sessionId: number = select(sessionIdBox)) => {
-  return select(sessionMapBox.getOrDefault(sessionId));
+  return select(sessionMapBox.getItem(sessionId));
 });
 
 export const selectUserId = selector((select, sessionId: number = select(sessionIdBox)) => {

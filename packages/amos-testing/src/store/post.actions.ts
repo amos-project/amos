@@ -26,8 +26,8 @@ export const removePost = createHttpAction({
   key: 'DELETE/posts.deletePost',
   optimistic: true,
   mutations: (select, result, args) => [
-    postMapBox.delete(args.id),
-    userPostListBox.deleteAt(select(selectUserId()), args.id),
+    postMapBox.removeItem(args.id),
+    userPostListBox.deleteIn(select(selectUserId()), args.id),
   ],
 });
 
@@ -39,10 +39,10 @@ export const getPost = createHttpAction({
 export const getPostMediaList = createHttpAction({
   key: 'GET/postMedias.getPostMediaList',
   mutations: (select, result, args) => [
-    mediaMapBox.merge(result),
-    postMediaListBox.set(
+    mediaMapBox.mergeAll(result),
+    postMediaListBox.setItem(
       args.postId,
-      result.map((r) => r.id),
+      result.map((r: any) => r.id),
     ),
   ],
 });
@@ -60,14 +60,14 @@ export const updatePostMedia = createHttpAction({
 
 export const addPostMedia = createHttpAction({
   key: 'POST/postMedias.addPostMedia',
-  mutations: (select, r) => [postMediaListBox.pushAt(r.postId, r.id), mediaMapBox.mergeItem(r)],
+  mutations: (select, r) => [postMediaListBox.pushIn(r.postId, r.id), mediaMapBox.mergeItem(r)],
 });
 
 export const removePostMedia = createHttpAction({
   key: 'DELETE/postMedias.deletePostMedia',
   optimistic: true,
   mutations: (select, result, args) => [
-    postMediaListBox.deleteAt(select(mediaMapBox.getOrDefault(args.id)).postId, args.id),
-    mediaMapBox.delete(args.id),
+    postMediaListBox.deleteIn(select(mediaMapBox.getItem(args.id)).postId, args.id),
+    mediaMapBox.removeItem(args.id),
   ],
 });

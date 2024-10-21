@@ -9,4 +9,4 @@ export interface LogoutEvent {
   userId: number;
 }
 
-export const LOGOUT = signal<LogoutEvent>('LOGOUT');
+export const logoutSignal = signal<LogoutEvent>('logout');

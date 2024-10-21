@@ -3,166 +3,224 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
+import { BoxPersistOptions } from 'amos-persist';
 import {
-  clone,
-  Constructor,
-  Mutable,
-  NotImplemented,
-  resolveCallerName,
-  resolveFnValue,
-  threw,
-  ValueOrFactory,
-  WellPartial,
+  AmosObject,
+  createAmosObject,
+  is,
+  IsAny,
+  resolveFuncValue,
+  toFunc,
+  Unsubscribe,
+  ValueOrFunc,
 } from 'amos-utils';
+import { Selector, SelectorFactory, SelectorOptions } from './selector';
 import { SignalFactory } from './signal';
-import { AmosObject, createAmosObject } from './types';
+import { Select } from './types';
 
-export interface Mutation<A extends any[] = any, S = any> extends AmosObject<'MUTATION'> {
+export type Mutator<A extends any[] = any, S = any> = (state: S, ...args: A) => S;
+
+export interface MutationOptions<A extends any[] = any, S = any> {
   type: string;
-  args: A;
-  box: Box<S>;
-  mutator: (this: Box<S>, state: S, ...args: A) => S;
+  mutator: Mutator<A, S>;
 }
 
-export type MutationFactory<A extends any[], S> = (this: Box<S>, ...args: A) => Mutation<A, S>;
+export interface Mutation<A extends any[] = any, S = any>
+  extends AmosObject<'mutation'>,
+    MutationOptions<A, S> {
+  args: A;
+  box: Box<S>;
+}
 
-export interface BoxOptions<S> {}
+export interface MutationFactory<A extends any[] = any, S = any> {
+  (...args: A): Mutation<A, S>;
+}
 
-export class Box<S = any> {
-  readonly options: BoxOptions<S>;
-
+export interface TableOptions<S = any> {
   /**
-   * create a box instance
+   * Covert the state to rows map, used for compute updated rows.
+   * The time complexity is O(M + N), M and N is the old and new
+   * state's key count.
+   * TODO: optimize to get the updated rows exactly.
+   */
+  toRows: (state: S) => Readonly<Record<string, unknown>>;
+}
+
+export interface BoxOptions<S = any> {
+  initialState: S;
+  /**
+   * `table` is used for check a box is multiple row or not, is used for
+   * {@link import('amos-persist').withPersist} to determine how to load
+   * and persist a box's state.
    *
-   * @param key - the unique key of the box, it should be unique in your system
-   * @param initialState - the initial state of the box, it should not be a function
+   * If this option is empty, persist with treat the entire box as a single
+   * row, and use empty string as row id to persist and load.
    */
-  constructor(
-    readonly key: string,
-    readonly initialState: S,
-  ) {
-    if (process.env.NODE_ENV === 'development') {
-      threw(typeof initialState === 'function', 'initialState should not be a function.');
-    }
-    this.options = {};
-  }
+  table?: TableOptions<S>;
 
   /**
-   * Update the options of the box.
-   * @param options
-   * TThis is TS2344: Type 'RecordMapBox<any>' does not satisfy the constraint 'Box<any>'. The
-   *   types returned by 'resetInitialState(...)' are incompatible between these types.
-   *   Property 'relations' is missing in type 'MapBox<any>' but required in type
-   *   'RecordMapBox<any>'.
+   * Persist config, if false, will never been persisted, if not set,
+   * will be persisted with version=1 if matched by
+   * {@link import('amos-persist').PersistOptions.includes}, else,
+   * will be persisted by specified version.
    */
-  config<TThis extends Box<S>>(this: TThis, options: Partial<BoxOptions<S>>): TThis {
-    Object.assign(this.options, options);
-    return this;
-  }
+  persist?: BoxPersistOptions<S> | false;
+}
 
-  setInitialState<TThis extends Box<S>>(this: TThis, state: ValueOrFactory<S, [S]>): TThis {
-    (this as Mutable<TThis>).initialState = resolveFnValue(state, this.initialState);
-    return this;
-  }
+export interface Box<S = any> extends AmosObject<'box'>, Readonly<BoxOptions<S>> {
+  readonly key: string;
 
-  /**
-   * subscribe a signal
-   *
-   * @param signal
-   * @param handler
-   */
-  subscribe<TThis extends Box<S>, D>(
+  config<TThis extends Box>(
     this: TThis,
-    signal: SignalFactory<any, D>,
-    handler: (state: S, data: D) => S,
-  ): TThis {
-    signal.listeners.set(this, handler);
-    return this;
-  }
+    options: ValueOrFunc<Partial<BoxOptions<S>>, [this]>,
+  ): TThis;
 
-  /**
-   * replace state with new state.
-   *
-   * @param nextState - the next state or its transformer
-   */
-  setState(nextState: ValueOrFactory<S, [S]>): Mutation<[ValueOrFactory<S, [S]>], S> {
-    throw new NotImplemented();
-  }
+  setState(): Mutation<[], S>;
+  setState(state: S): Mutation<[S], S>;
+  setState(next: (state: S) => S): Mutation<[(state: S) => S], S>;
 
-  /**
-   * merge state with partial props, it only works with object state.
-   *
-   * @param partialNextState - the partial next state properties or its factory
-   */
-  mergeState(partialNextState: ValueOrFactory<WellPartial<S>, [S]>): Mutation<[WellPartial<S>], S> {
-    throw new NotImplemented();
-  }
-
-  /**
-   * Reset state to the initial state.
-   */
-  resetState(): Mutation<[], S> {
-    throw new NotImplemented();
-  }
+  subscribe<T>(signal: SignalFactory<any, T>, fn: (state: S, data: T) => S): Unsubscribe;
 }
 
 export type BoxState<B extends Box> = B extends Box<infer S> ? S : never;
 
-export function mutation<S, A extends any[]>(
-  box: Box<S>,
-  mutator: (state: S, ...args: A) => S,
-  type?: string,
-): MutationFactory<A, S> {
-  if (!type && process.env.NODE_ENV === 'development') {
-    type = resolveCallerName();
-  }
-  return (...args: A) => createAmosObject('MUTATION', { type: type!, box, args, mutator });
+export interface BoxFactoryStatic<B extends Box> {
+  extends<NB extends Box>(options: BoxFactoryOptions<NB, B>): BoxFactory<NB>;
 }
 
-/**
- * implementation the mutations & selectors for a box.
- * @param box
- * @param mutations
- * @param selectors
- * @param methods
- * TODO: implement selectors
- */
-export function implementation<B extends Box>(
-  box: Constructor<B, any[]>,
+export interface BoxFactory<B extends Box = Box> extends BoxFactoryStatic<B> {
+  new (key: string, initialState: BoxState<B>): B;
+}
+
+export interface BoxFactorySelectorOptions<S = any, A extends any[] = any, R = any>
+  extends Omit<Partial<SelectorOptions<A, R>>, 'type' | 'compute'> {
+  derive?: (state: S, ...args: A) => R;
+}
+
+export interface BoxFactoryOptions<TBox extends Box, TParentBox = {}> {
+  name: string;
   mutations: {
-    [P in keyof B]?: B[P] extends (...args: infer A) => Mutation<infer A, BoxState<B>>
-      ? (state: BoxState<B>, ...args: A) => BoxState<B>
-      : null;
-  },
+    [P in keyof TBox as IsAny<TBox[P]> extends true
+      ? never
+      : TBox[P] extends MutationFactory
+        ? P extends keyof TParentBox
+          ? never
+          : P
+        : never]: TBox[P] extends MutationFactory<infer A, BoxState<TBox>>
+      ? null | ((state: BoxState<TBox>, ...args: A) => BoxState<TBox>)
+      : never;
+  };
   selectors: {
-    [P in keyof B]?: B[P] extends (...args: infer A) => infer R
-      ? (state: BoxState<B>, ...args: A) => R
-      : null;
-  },
-  methods?: Partial<B>,
-) {
+    [P in keyof TBox as IsAny<TBox[P]> extends true
+      ? never
+      : TBox[P] extends (...args: infer A) => Selector
+        ? P extends keyof TParentBox
+          ? never
+          : P
+        : never]: TBox[P] extends (...args: infer A) => Selector<any, infer R>
+      ? null | ValueOrFunc<BoxFactorySelectorOptions<BoxState<TBox>, A, R>, [TBox]>
+      : never;
+  };
+  options?: Partial<BoxOptions>;
+}
+
+function createBoxFactory<B extends Box, SB = {}>(
+  { mutations, selectors, name, options = {} }: BoxFactoryOptions<B, SB>,
+  Parent?: BoxFactory<any>,
+): BoxFactory<B> {
+  const Box: BoxFactory<any> = Parent
+    ? class _Box extends Parent {
+        constructor(key: string, initialState: any) {
+          super(key, initialState);
+        }
+      }
+    : class {
+        constructor(
+          public key: string,
+          public initialState: any,
+        ) {
+          createAmosObject('box', this);
+        }
+
+        static extends(options: BoxFactoryOptions<any>) {
+          return createBoxFactory(options, this);
+        }
+
+        config(options: ValueOrFunc<Partial<BoxOptions>, [this]>) {
+          Object.assign(this, resolveFuncValue(options, this));
+        }
+
+        subscribe<D>(this: Box, signal: SignalFactory<any, D>, fn: (state: any, data: D) => any) {
+          return signal.subscribe((dispatch, select, data) => {
+            dispatch(this.setState(fn(select(this), data)));
+          });
+        }
+      };
   for (const k in mutations) {
     const mutator =
       typeof mutations[k] === 'function'
         ? mutations[k]
         : (state: any, ...args: any[]) => state[k](...args);
-    (box.prototype as any)[k] = function (...args: any[]) {
-      return createAmosObject('MUTATION', { k, args, mutator, box: this });
-    };
+    Object.defineProperty(Box.prototype, k, {
+      value: function (this: Box, ...args: any[]): Mutation {
+        return createAmosObject<Mutation>('mutation', {
+          type: `${this.key}/${k as string}`,
+          mutator: mutator,
+          args: args,
+          box: this,
+        });
+      },
+    });
   }
-  Object.assign(box.prototype, mutations, selectors, methods);
+  for (const k in selectors) {
+    const options = toFunc(selectors[k] || ({} as BoxFactorySelectorOptions));
+    Object.defineProperty(Box.prototype, k, {
+      value: function (this: B, ...args: any[]) {
+        const resolvedOptions = options(this);
+        const derive = resolvedOptions.derive || ((state: any, ...args) => state[k](...args));
+        return createAmosObject<Selector>('selector', {
+          equal: is,
+          ...resolvedOptions,
+          id: this.id,
+          type: `${this.key}/${k as string}`,
+          compute: (select: Select, ...args) => derive(select(this), ...args),
+          args: args,
+        });
+      },
+    });
+  }
+  for (const k in options) {
+    Object.defineProperty(Box.prototype, k, { value: options[k as keyof BoxOptions] });
+  }
+  Object.assign(Box.prototype, options);
+  Object.defineProperty(Box, 'name', { value: name });
+  return Box;
 }
 
-implementation(
-  Box,
-  {
-    setState: <S>(state: S, nextState: ValueOrFactory<S, [S]>) => resolveFnValue(nextState, state),
-    mergeState: <S>(state: S, partialNextState: ValueOrFactory<WellPartial<S>, [S]>) => {
-      return clone(state, resolveFnValue(partialNextState, state));
-    },
-    resetState() {
-      return this.initialState;
-    },
+export const Box: BoxFactory = createBoxFactory<Box>({
+  name: 'Box',
+  mutations: {
+    setState: (state, next) => resolveFuncValue(next, state),
   },
-  {},
-);
+  selectors: {},
+});
+
+export function box<S>(key: string, initialState: S): Box<S> {
+  return new Box(key, initialState);
+}
+
+export type ShapeBox<
+  TShape,
+  TMutationKeys extends keyof TShape,
+  TSelectorKeys extends keyof TShape,
+  TBox extends Box = Box<TShape>,
+  KLimiter = TShape /* tricky for WebStorm go to definitions to shape method, if TypeScript allows P in keyof S & KM, this should be removed */,
+> = TBox & {
+  [P in keyof KLimiter & TMutationKeys]: TShape[P] extends (...args: infer A) => TShape
+    ? MutationFactory<A, TShape>
+    : never;
+} & {
+  [P in keyof KLimiter & TSelectorKeys]: TShape[P] extends (...args: infer A) => infer R
+    ? SelectorFactory<A, R>
+    : never;
+};

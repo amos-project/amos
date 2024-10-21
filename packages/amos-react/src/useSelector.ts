@@ -3,41 +3,111 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { Box, isAmosObject, MapSelector, Selectable, Store } from 'amos-core';
-import { useDebugValue, useEffect, useReducer, useRef } from 'react';
+import {
+  Box,
+  isSelectValueEqual,
+  MapSelector,
+  Select,
+  Selectable,
+  Selector,
+  SelectValuePair,
+} from 'amos-core';
+import { isAmosObject } from 'amos-utils';
+import { useCallback, useDebugValue, useLayoutEffect, useReducer, useRef } from 'react';
 import { useStore } from './context';
-import { identity } from 'amos-utils';
 
-interface StoreRef {
-  store: Store;
-  dispose: () => void;
-  error: any;
+export function useSelect(): Select {
+  const [, update] = useReducer((s) => s + 1, 0);
+  const store = useStore();
+  const deps = useRef<SelectValuePair[]>([]);
+  const rendering = useRef(true);
+  rendering.current = true;
+  deps.current = [];
+  useLayoutEffect(() => {
+    rendering.current = false;
+  });
+  useLayoutEffect(() => {
+    return store.subscribe(() => {
+      if (deps.current.some(([s, v]) => !isSelectValueEqual(s, v, store.select(s)))) {
+        update();
+      }
+    });
+  }, []);
+  useDebugValue(
+    deps.current,
+    typeof process === 'object' && process.env.NODE_ENV === 'development'
+      ? (value) => {
+          return value.reduce(
+            (map, [selectable, value], index) => {
+              let type =
+                (isAmosObject<Box>(selectable, 'box')
+                  ? selectable.key
+                  : isAmosObject<Selector>(selectable, 'selector')
+                    ? selectable.type
+                    : '') || 'anonymous';
+              if (map.hasOwnProperty(type)) {
+                type = type + '_' + index;
+              }
+              map[type] = value;
+              return map;
+            },
+            {} as Record<string, any>,
+          );
+        }
+      : void 0,
+  );
+  return useCallback(
+    (selectable: any) => {
+      const value: any = store.select(selectable);
+      if (!rendering.current) {
+        return value;
+      }
+      if (Array.isArray(selectable)) {
+        deps.current.push(...selectable.map((s, i) => [s, value[i]] as const));
+      } else {
+        deps.current.push([selectable, value]);
+      }
+      return value;
+    },
+    [store, rendering, deps],
+  );
 }
 
-function isEqual(selector: Selectable, results: unknown[], index: number, current: unknown) {
-  if (results.length <= index) {
-    return false;
-  }
-  return isAmosObject(selector, 'SELECTOR')
-    ? selector.factory.options.equal!(results[index], current)
-    : isAmosObject(selector, 'SELECTOR_FACTORY')
-      ? selector.options.equal!(results[index], current)
-      : results[index] === current;
-}
-
+/**
+ * Get the {@link import('amos-core').Store.select} and any call to the
+ * returned selector in the render will be recorded and the component
+ * will re-render when the used selector's value changed.
+ *
+ * You can use the returned select function anywhere, including the
+ * conditional or loop blocks, and also in callbacks. Only the selector
+ * called in render function will trigger re-render.
+ *
+ * @example
+ * const select = useSelector();
+ * const foo = select(selectFoo());
+ * if (something) {
+ *   select(bar())
+ * }
+ * return (
+ *   <div onClick={() => alert(select(baz())}>
+ *     {keys.map((key) => <div>{select(selectItem(key)).title</div>}
+ *   </div>
+ * )
+ * ```
+ */
+export function useSelector(): Select;
 /**
  * Get the selected states according to the selectors, and rerender the
  * component when the selected states updated.
  *
  * A selector is a selectable thing, it could be one of this:
  *
- * 1. A pure function accepts `store.select` as the only one parameter
+ * 1. A `Box` instance
  * 2. A `Selector` which is created by `SelectorFactory`
- * 3. A `Box` instance
  *
- * If the selector is a function or a `Selector`, the selected state is its
- * return value, otherwise, when the selector is a `Box`, the selected state is
- * the state of the `Box`.
+ * If the selector is a `Selector`, the selected state is its return value,
+ * otherwise, when the selector is a `Box`, the selected state is the state
+ * of the `Box`.
  *
  * `useSelector` accepts multiple selectors, and returns an array of the
  * selected states of the selectors.
@@ -46,88 +116,24 @@ function isEqual(selector: Selectable, results: unknown[], index: number, curren
  * ```typescript
  * const [
  *   count, // 1
- *   doubleCount, // 2
- *   tripleCount, // 3
+ *   tripleCount, // 2
  * ] = useSelector(
  *   countBox, // A Box
- *   selectDoubleCount, // A pure function
  *   selectMultipleCount(3), // A Selector
  * );
  * ```
- *
- * @param selectors a selectable array
  */
-export function useSelector<Rs extends Selectable[]>(...selectors: Rs): MapSelector<Rs> {
-  const [, update] = useReducer((s) => s + 1, 0);
-  const store = useStore();
-  const lastSelectors = useRef<Selectable[]>([]);
-  const lastResults = useRef<MapSelector<Rs>>([] as any);
-  const lastStore = useRef<StoreRef>(void 0 as any);
-  if (lastStore.current?.store !== store) {
-    lastStore.current?.dispose();
-    lastStore.current = {
-      store,
-      error: void 0,
-      dispose: store.subscribe(() => {
-        try {
-          for (let i = 0; i < lastSelectors.current.length; i++) {
-            const selector = lastSelectors.current[i];
-            if (!isEqual(selector, lastResults.current, i, store.select(selector))) {
-              update();
-              return;
-            }
-          }
-        } catch (e: any) {
-          lastStore.current.error =
-            typeof e === 'object' && e
-              ? Object.assign(e, { message: '[Amos] selector throws error: ' + e.message })
-              : new Error('[Amos] selector throws falsy error: ' + e);
-          update();
-        }
-      }),
-    };
+export function useSelector<Rs extends Selectable[]>(...selectors: Rs): MapSelector<Rs>;
+export function useSelector(...selectors: Selectable[]): any {
+  const select = useSelect();
+  const size = useRef(selectors.length);
+  if (size.current !== selectors.length) {
+    throw new Error(
+      `selector size should be immutable, previous is ${size.current}, current is ${selectors.length}`,
+    );
   }
-  useEffect(
-    () => () => {
-      lastStore.current?.dispose();
-    },
-    [],
-  );
-  if (lastStore.current.error) {
-    const error = lastStore.current.error;
-    lastStore.current.error = void 0;
-    throw error;
+  if (selectors.length === 0) {
+    return select;
   }
-  try {
-    lastSelectors.current = selectors;
-    lastResults.current = selectors.map((s) => store.select(s)) as any;
-  } catch (e) {
-    lastResults.current = [] as any;
-    throw e;
-  }
-  useDebugValue(
-    lastResults.current,
-    typeof process === 'object' && process.env.NODE_ENV === 'development'
-      ? (value: any[]) => {
-          return value.reduce((map, value, index) => {
-            const s = selectors[index];
-            let type =
-              s instanceof Box
-                ? s.key
-                : isAmosObject(s, 'SELECTOR')
-                  ? s.factory.options.type
-                  : s.options.type;
-            if (!type) {
-              type = `anonymous`;
-            }
-            if (map.hasOwnProperty(type)) {
-              type = type + '_' + index;
-            }
-            map[type] = value;
-            return map;
-          }, {} as any);
-        }
-      : identity,
-  );
-  return lastResults.current;
+  return select(selectors);
 }

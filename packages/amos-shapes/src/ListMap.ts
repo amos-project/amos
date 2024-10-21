@@ -3,7 +3,7 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { ID, Pair, PartialRecord } from 'amos-utils';
+import { ID, isArray, Pair, PartialRecord } from 'amos-utils';
 import { List, ListElement } from './List';
 import { DelegateMapValueMutations, implementMapDelegations, Map } from './Map';
 
@@ -26,7 +26,8 @@ export interface ListMap<K extends ID, L extends List<any>>
     | 'splice'
     | 'delete'
     | 'set'
-    | 'reset',
+    | 'reset'
+    | 'get',
     List<any>
   > {}
 
@@ -35,15 +36,15 @@ export class ListMap<K extends ID, L extends List<any>> extends Map<K, L> {
     super(defaultValue);
   }
 
-  override set(key: K, value: L): this;
-  override set(key: K, items: readonly ListElement<L>[]): this;
-  override set(key: any, value: any): this {
-    return super.set(key, Array.isArray(value) ? this.defaultValue.reset(value) : value);
+  override setItem(key: K, value: L | readonly ListElement<L>[]): this {
+    return super.setItem(key, isArray(value) ? this.defaultValue.reset(value) : value);
   }
 
-  override setAll(items: PartialRecord<K, L | readonly ListElement<L>[]>): this;
-  override setAll(items: readonly Pair<K, L | readonly ListElement<L>[]>[]): this;
-  override setAll(items: any): this {
+  override setAll(
+    items:
+      | PartialRecord<K, L | readonly ListElement<L>[]>
+      | ReadonlyArray<Pair<K, L | readonly ListElement<L>[]>>,
+  ): this {
     const data = Array.isArray(items) ? items : Object.entries(items);
     data.forEach((d) => {
       if (Array.isArray(d[1])) {
@@ -71,4 +72,5 @@ implementMapDelegations(ListMap, {
   delete: null,
   set: null,
   reset: null,
+  get: null,
 });

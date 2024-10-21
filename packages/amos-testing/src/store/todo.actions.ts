@@ -4,9 +4,9 @@
  */
 
 import { action } from 'amos-core';
+import { sleep } from '../utils';
 import { selectUserId } from './session.selectors';
 import { todoMapBox, TodoModel, userTodoListBox } from './todo.boxes';
-import { sleep } from '../utils';
 
 export const addTodo = action(
   async (
@@ -17,6 +17,6 @@ export const addTodo = action(
   ) => {
     await sleep();
     const id = Math.random();
-    dispatch([todoMapBox.mergeItem(id, input), userTodoListBox.unshiftAt(userId, id)]);
+    dispatch([todoMapBox.mergeItem(id, input), userTodoListBox.unshiftIn(userId, id)]);
   },
 );

@@ -4,7 +4,6 @@
  */
 
 import { arrayEqual, identity, is, shallowEqual } from './equals';
-import { isArray } from './misc';
 
 describe('utils', () => {
   it('should compare array shallow', () => {
@@ -41,9 +40,5 @@ describe('utils', () => {
     }
 
     testArgs();
-  });
-
-  it('should test is array', () => {
-    expect(isArray([] as readonly [])).toBe(true);
   });
 });

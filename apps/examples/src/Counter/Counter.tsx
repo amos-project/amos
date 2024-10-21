@@ -1,8 +1,8 @@
-import React from 'react';
-import { NumberBox } from 'amos';
+import { numberBox } from 'amos';
 import { useDispatch, useSelector } from 'amos-react';
+import React from 'react';
 
-const countBox = new NumberBox('count', 0);
+const countBox = numberBox('count', 0);
 
 export const Counter = () => {
   const dispatch = useDispatch();

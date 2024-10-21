@@ -9,6 +9,6 @@ describe('enhancer', () => {
   it('should apply enhancers', () => {
     const incr: Enhancer<[], number> = (next) => () => next() + 1;
     const double: Enhancer<[], number> = (next) => () => next() * 2;
-    expect(applyEnhancers([], [incr, double], () => 1)).toBe(3);
+    expect(applyEnhancers([incr, double], [], () => 1)).toBe(3);
   });
 });

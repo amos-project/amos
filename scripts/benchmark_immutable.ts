@@ -3,11 +3,11 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import * as crypto from 'node:crypto';
-import * as I from 'immutable';
 import * as N from 'amos-shapes';
 import { printTable } from 'console-table-printer';
+import * as I from 'immutable';
 import { range } from 'lodash';
+import * as crypto from 'node:crypto';
 
 const randKey = (size: number) => {
   return crypto
@@ -395,7 +395,7 @@ benches.push([
   (size) => {
     const m = new N.Map<string, unknown>(pickProps(0)).reset(pickProps(size));
     return (i) => {
-      return m.set(propEntries[i % propsSize][0], propEntries[i % propsSize][1]);
+      return m.setItem(propEntries[i % propsSize][0], propEntries[i % propsSize][1]);
     };
   },
 ]);
@@ -411,7 +411,7 @@ benches.push([
   (size) => {
     const m = new N.Map<string, unknown>(pickProps(0)).reset(pickProps(size));
     return (i) => {
-      return m.merge(propEntries.slice(0, i));
+      return m.mergeAll(propEntries.slice(0, i));
     };
   },
 ]);
@@ -427,7 +427,7 @@ benches.push([
   (size) => {
     const m = new N.Map<string, unknown>(pickProps(0)).reset(pickProps(size));
     return (i) => {
-      return m.get(propEntries[(i % size) + 1][0]);
+      return m.getItem(propEntries[(i % size) + 1][0]);
     };
   },
 ]);

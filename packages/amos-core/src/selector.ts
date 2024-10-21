@@ -3,113 +3,80 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { applyEnhancers, enhancerCollector, is, resolveCallerName } from 'amos-utils';
-import { AmosObject, createAmosObject, Select } from './types';
+import {
+  AmosObject,
+  createAmosObject,
+  enhancerCollector,
+  ID,
+  is,
+  resolveCallerName,
+  ValueOrReadonlyArray,
+} from 'amos-utils';
+import { Box } from './box';
+import { Select } from './types';
 
-/**
- * The options for a {@see SelectorFactory}.
- *
- * It could be extended by plugins.
- */
+export type Compute<A extends any[] = any, R = any> = (select: Select, ...args: A) => R;
+
 export interface SelectorOptions<A extends any[] = any, R = any> {
-  /**
-   * The type of the selector, used for devtools to print friendly names.
-   * You do not need to pass this option, the library will generate the type
-   * automatically when NODE_ENV is development.
-   */
-  type?: string;
+  type: string;
+  compute: Compute<A, R>;
 
   /**
    * The equal fn, which is used for check the result is updated or not. If the fn
    * returns true the new result will be ignored when compares the cached result and
-   * new result.
-   *
-   * @param oldResult
-   * @param newResult
+   * new result. Default is {@link Object.is}
    */
-  equal?: (oldResult: R, newResult: R) => boolean;
+  equal: (oldResult: R, newResult: R) => boolean;
 
   /**
-   * The cache key of a selector created by the factory.
-   *
-   * If set, the selector's result will be cached. You should cache a selector if it is expensive.
-   *
-   * @param select
+   * Should cache the selector or not, you should set this flag to true if the selector
+   * is expensive.
+   */
+  cache?: boolean;
+
+  /**
+   * Is this selector loading a box's row? Used for persist module to determine load which row
+   * for multi-row state box.
    * @param args
    */
-  cacheKey?: (...args: A) => string | false;
-}
-
-export type Compute<A extends any[] = any, R = any> = (select: Select, ...args: A) => R;
-
-/**
- * SelectorFactory is created by {@see selector}, it is used for create a {@see Selector}.
- *
- * A SelectorFactory is also selectable, when you select it, directly, its compute function
- * will get empty args.
- *
- * @example
- * const someSelector = selector((select, arg0) => arg0);
- * store.select(someSelector); // => undefined
- * store.select(someSelector(1)); // 1
- *
- * You do not need to care about the data structure of a SelectorFactory.
- */
-export interface SelectorFactory<A extends any[] = any, R = any>
-  extends AmosObject<'SELECTOR_FACTORY'> {
-  (...args: A): Selector<A, R>;
-
-  id: string;
-  compute: Compute<A, R>;
-  options: SelectorOptions<A, R>;
+  loadRow?: (...args: A) => ValueOrReadonlyArray<readonly [Box, ID]>;
 }
 
 /**
- * Selector is created by {@see SelectorFactory}, it is used for select some state
- * in the {@see import('./createStore').Store}.
+ * Selector is created by {@link SelectorFactory}, it is used for select some state
+ * in the {@link import('./store').Store}.
  *
  * You do not need to care about the data structure of a Selector.
  */
-export interface Selector<A extends any[] = any, R = any> extends AmosObject<'SELECTOR'> {
+export interface Selector<A extends any[] = any, R = any>
+  extends AmosObject<'selector'>,
+    SelectorOptions<A, R> {
   args: A;
-  factory: SelectorFactory<A, R>;
 }
 
-export const enhanceSelector = enhancerCollector<[Compute, SelectorOptions], SelectorFactory>();
+export interface SelectorFactory<A extends any[] = any, R = any>
+  extends AmosObject<'selector_factory'> {
+  (...args: A): Selector<A, R>;
+}
 
-/**
- * Create a {@see SelectorFactory}, the factory is enhanced by enhancers.
- *
- * You can register enhancer by {@see selector.enhance}.
- *
- * @param compute
- * @param options
- */
+export const enhanceSelector = enhancerCollector<[SelectorOptions], SelectorFactory>();
+
 export function selector<A extends any[], R>(
   compute: Compute<A, R>,
-  options: SelectorOptions<A, R> = {},
+  options: Partial<SelectorOptions<A, R>> = {},
 ): SelectorFactory<A, R> {
-  if (process.env.NODE_ENV === 'development' && !options.type) {
-    options.type = resolveCallerName();
-  }
-  options.equal ??= is;
-
-  const factory = applyEnhancers(
-    [compute, options],
-    enhanceSelector.enhancers,
-    (compute, options) => {
-      return createAmosObject(
-        'SELECTOR_FACTORY',
-        Object.assign(
-          (...args: A): Selector<A, R> =>
-            createAmosObject('SELECTOR', {
-              args,
-              factory,
-            }),
-          { compute, options },
-        ),
-      );
-    },
-  );
-  return factory;
+  const finalOptions = { ...options } as SelectorOptions;
+  finalOptions.type ??= resolveCallerName();
+  finalOptions.equal ??= is;
+  finalOptions.compute = compute;
+  return enhanceSelector.apply([finalOptions], (options) => {
+    const factory = createAmosObject<SelectorFactory>('selector_factory', ((...args: A) => {
+      return createAmosObject<Selector<A, R>>('selector', {
+        ...options,
+        id: factory.id,
+        args,
+      });
+    }) as SelectorFactory<A, R>);
+    return factory;
+  });
 }

@@ -24,47 +24,57 @@ export class RecordMap<R extends Record<any>, KF extends keyof RecordProps<R>> e
     return super.fromJS(state as any);
   }
 
-  override set(key: R[KF], value: R): this;
-  override set(value: R): this;
-  override set(key: any, value?: any) {
+  override setItem(key: R[KF], value: R): this;
+  override setItem(value: R): this;
+  override setItem(key: any, value?: any) {
     value ??= key;
     key = key === value ? key[this.keyField] : key;
-    return super.set(key, value);
-  }
-
-  override setAll(items: PartialRecord<R[KF], R>): this;
-  override setAll(items: readonly R[]): this;
-  override setAll(items: readonly Pair<R[KF], R>[]): this;
-  override setAll(items: any): this {
-    if (!Array.isArray(items)) {
-      return super.setAll(items);
-    }
-    return super.setAll(
-      items.map((value: R | [R[KF], R]) => {
-        return Array.isArray(value) ? value : [value[this.keyField], value];
-      }) as any[],
-    );
+    return super.setItem(key, value);
   }
 
   override mergeItem(props: PartialRequiredProps<R, KF>): this;
-  override mergeItem(key: R[KF], props: PartialProps<R>): this;
-  override mergeItem(key: any, value?: any) {
-    value ??= key;
-    key = key === value ? key[this.keyField] : key;
-    return this.set(key, this.getOrDefault(key).merge(value));
+  override mergeItem(key: IDOf<R[KF]>, props: PartialProps<R>): this;
+  override mergeItem(a: any, b?: any) {
+    const props = b ?? a;
+    const key = b ? a : a[this.keyField];
+    return this.setItem(key, this.getItem(key).merge(props));
   }
 
-  override merge(items: PartialRecord<R[KF], PartialProps<R>>): this;
-  override merge(items: readonly Pair<R[KF], PartialProps<R>>[]): this;
-  override merge(items: readonly PartialRequiredProps<R, KF>[]): this;
-  override merge(items: any[]): this {
-    const data = Array.isArray(items) ? items : Object.entries(items);
-    return super.setAll(
-      data.map((item): [R[KF], R] => {
-        const [key, props] = Array.isArray(item) ? item : [item[this.keyField], item];
-        return [key, this.getOrDefault(key).merge(props)];
-      }),
-    );
+  override setAll(
+    items: PartialRecord<IDOf<R[KF]>, R> | ReadonlyArray<R | Pair<IDOf<R[KF]>, R>>,
+  ): this {
+    if (Array.isArray(items)) {
+      return super.setAll(items.map((v): any => (Array.isArray(v) ? v : [v[this.keyField], v])));
+    } else {
+      return super.setAll(items as PartialRecord<IDOf<R[KF]>, R>);
+    }
+  }
+
+  // resolve types error
+  override mergeAll(
+    items:
+      | ReadonlyArray<Pair<IDOf<R[KF]>, PartialProps<R>>>
+      | PartialRecord<IDOf<R[KF]>, PartialProps<R>>,
+  ): this;
+  override mergeAll(
+    items:
+      | ReadonlyArray<Pair<IDOf<R[KF]>, PartialProps<R>>>
+      | PartialRecord<IDOf<R[KF]>, PartialProps<R>>
+      | ReadonlyArray<PartialRequiredProps<R, KF> | Pair<IDOf<R[KF]>, PartialProps<R>>>,
+  ): this;
+  override mergeAll(
+    items:
+      | ReadonlyArray<Pair<IDOf<R[KF]>, PartialProps<R>>>
+      | PartialRecord<IDOf<R[KF]>, PartialProps<R>>
+      | ReadonlyArray<PartialRequiredProps<R, KF> | Pair<IDOf<R[KF]>, PartialProps<R>>>,
+  ): this {
+    if (Array.isArray(items)) {
+      return super.setAll(items.map((v): any => (Array.isArray(v) ? v : [v[this.keyField], v])));
+    } else {
+      return super.setAll(
+        Object.entries(items).map(([k, v]): any => [k, this.getItem(k as IDOf<R[KF]>).merge(v)]),
+      );
+    }
   }
 }
 

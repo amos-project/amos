@@ -3,50 +3,63 @@
  * @author junbao <junbao@mymoement.com>
  */
 
-import { Box } from 'amos-core';
-import { JSONState, StorageEngine } from 'amos-utils';
-
-export interface PersistedState<T> {
-  v: number;
-  s: T;
-}
+import { ActionFactory, Box } from 'amos-core';
+import { ID } from 'amos-utils';
 
 export interface BoxPersistOptions<S> {
+  /**
+   * The data structure version of the box, if the current version
+   * is not equal to the persisted version, will call {@link migrate}
+   * to migrate it to the current version.
+   */
   version: number;
-  migrations?: {
-    from: number;
-    to: number;
-    handler: (jsonState: any) => JSONState<S>;
-  }[];
+
+  /**
+   * Migration function, should be an `ActionFactory`, which allows
+   * you to use existing state or run some actions.
+   */
+  migrate?: ActionFactory<[version: number, row: ID, state: unknown], S | undefined>;
 }
 
-declare module 'amos-core' {
-  export interface BoxOptions<S> {
-    persist?: BoxPersistOptions<S>;
-  }
+export type PersistValue = readonly [version: number, value: any];
+export type PersistSpan = readonly [key: string, ...PersistValue];
+
+export interface PersistRow {
+  key: string;
+  version: number;
+  value: any;
+}
+
+export interface StorageEngine {
+  init?(): Promise<void>;
+  getMulti(items: readonly string[]): Promise<readonly (PersistValue | null)[]>;
+  getPrefix(prefix: string): Promise<readonly PersistSpan[]>;
+  setMulti(items: readonly PersistSpan[]): Promise<void>;
+  removeMulti(items: readonly string[]): Promise<void>;
+  removePrefix(prefix: string): Promise<void>;
 }
 
 export interface PersistOptions {
   /**
-   * The key of the state persisted in the engine
+   * The storage engine of the persist, supports localStorage/sessionStorage/indexedDB
+   * in browser, and AsyncStorage/SQLite in react-native.
    */
-  key: string;
-
-  /**
-   * The engine of the persist, supports localStorage/sessionStorage
-   * in browser, and AsyncStorage in react-native.
-   */
-  engine: StorageEngine;
+  storage: StorageEngine;
 
   /**
    * determine the box should be persisted/hydrated or not.
    */
-  includes?: Array<Box | string>;
+  includes?: (box: Box) => boolean;
 
   /**
    * determine the box should be persisted/hydrated or not.
    *
    * Please note the `excludes` has priority over `includes`.
    */
-  excludes?: Array<Box | string>;
+  excludes?: (box: Box) => boolean;
+
+  /**
+   * error handling
+   */
+  onError: (error: unknown) => void;
 }

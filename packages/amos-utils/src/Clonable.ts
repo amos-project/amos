@@ -17,7 +17,7 @@ export class Cloneable {
 
   /**
    * Is this object derived from other object?
-   * {@link clone} will skip {@link _isValid} property, then is value will be true.
+   * {@link clone} will skip {@link _isValid} property, then this value will be true.
    * This is helpful for valid if target object is changed or not.
    */
   isValid() {
@@ -32,9 +32,6 @@ export class Cloneable {
  * @param props - the properties to override.
  */
 export function clone<T>(obj: T, props: WellPartial<T>): T {
-  if (!obj || typeof obj !== 'object') {
-    return props as T;
-  }
   return Object.assign(Object.create(Object.getPrototypeOf(obj)), obj, props);
 }
 

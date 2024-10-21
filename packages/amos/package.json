@@ -28,7 +28,6 @@
   "dependencies": {
     "amos-boxes": "0.3.0-beta.17",
     "amos-core": "0.3.0-beta.17",
-    "amos-devtools": "0.3.0-beta.17",
     "amos-io": "0.3.0-beta.17",
     "amos-persist": "0.3.0-beta.17",
     "amos-react": "0.3.0-beta.17",

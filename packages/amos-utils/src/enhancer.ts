@@ -3,27 +3,24 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { Unsubscribe } from './types';
 import { removeElement } from './misc';
+import { Unsubscribe } from './types';
 
 export type Enhancer<A extends any[], V> = (next: (...args: A) => V) => (...args: A) => V;
 
 export function applyEnhancers<A extends any[], V>(
-  args: A,
   enhancers: Enhancer<A, V>[],
-  factory: (...args: A) => V,
+  args: NoInfer<A>,
+  factory: (...args: NoInfer<A>) => NoInfer<V>,
 ): V {
-  return enhancers.reduceRight(
-    (previousValue, currentValue) => currentValue(previousValue),
-    factory,
-  )(...args);
+  return enhancers
+    .slice()
+    .reduceRight((previousValue, currentValue) => currentValue(previousValue), factory)(...args);
 }
 
 export interface EnhancerCollector<A extends any[], V> {
   (enhancer: Enhancer<A, V>): Unsubscribe;
-
-  /** @internal */
-  enhancers: Enhancer<A, V>[];
+  apply: (args: A, factory: (...args: A) => V) => V;
 }
 
 export function enhancerCollector<A extends any[], V>(): EnhancerCollector<A, V> {
@@ -36,12 +33,11 @@ export function enhancerCollector<A extends any[], V>(): EnhancerCollector<A, V>
       };
     },
     {
-      enhancers,
+      apply: (args: A, factory: (...args: A) => V) => applyEnhancers(enhancers, args, factory),
     },
   );
 }
 
 export function override<T, K extends keyof T>(obj: T, key: K, override: (original: T[K]) => T[K]) {
   obj[key] = override(obj[key]);
-  return obj;
 }

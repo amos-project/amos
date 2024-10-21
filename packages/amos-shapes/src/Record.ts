@@ -13,14 +13,14 @@ import {
   WellPartial,
 } from 'amos-utils';
 
-export interface IRecord<P extends object> extends Cloneable, JSONSerializable<P> {
+export interface RecordInstance<P extends object> extends Cloneable, JSONSerializable<P> {
   get<K extends keyof P>(key: K): P[K];
   set<K extends keyof P>(key: K, value: P[K]): this;
   merge(props: Partial<P>): this;
   update<K extends keyof P>(key: K, updater: (value: P[K]) => P[K]): this;
 }
 
-export type Record<P extends object> = Readonly<P> & IRecord<P>;
+export type Record<P extends object> = Readonly<P> & RecordInstance<P>;
 
 export type RecordProps<T> = T extends Record<infer P> ? P : T;
 export type PartialProps<T> = WellPartial<RecordProps<T>>;
@@ -34,7 +34,7 @@ export interface RecordConstructor<P extends object> {
 }
 
 export function Record<P extends object>(props: P): RecordConstructor<P> {
-  return class Record extends Cloneable implements IRecord<P> {
+  return class Record extends Cloneable implements RecordInstance<P> {
     constructor(data?: Partial<P>, isValid = data !== void 0) {
       super(isValid);
       Object.assign(this, props, data);

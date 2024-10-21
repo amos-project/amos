@@ -4,18 +4,22 @@
  */
 
 import { selectUser } from 'amos-testing';
-import { $amos } from './types';
+import { createAmosObject, is } from 'amos-utils';
+import { Selector } from './selector';
 
 describe('selector', () => {
   it('should create selector factory', () => {
     expect(selectUser).toBe(expect.any(Function));
   });
   it('should create selector', () => {
-    expect(selectUser()).toEqual(<ReturnType<typeof selectUser>>{
-      [$amos]: 'SELECTOR',
-      id: '',
-      args: [],
-      factory: selectUser,
-    });
+    expect(selectUser()).toEqual(
+      createAmosObject<Selector>('selector', {
+        compute: expect.any(Function),
+        type: '',
+        equal: is,
+        args: [],
+        id: expect.any(String),
+      }),
+    );
   });
 });

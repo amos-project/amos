@@ -11,6 +11,25 @@ describe('RecordMap', function () {
     const userMap = new RecordMap(new UserRecord(), 'id');
     userMap.mergeItem(Rick.id, Rick.toJSON());
     userMap.mergeItem(1, { firstName: 'Rick' });
+    userMap.mergeItem(1, {
+      firstName: 'Rick',
+      // @ts-expect-error
+      foo: 'bar',
+    });
     userMap.mergeItem(Rick.toJSON());
+    userMap.mergeItem({
+      id: 1,
+    });
+    userMap.mergeItem({
+      id: 1,
+      // @ts-expect-error
+      foo: 'bar',
+    });
+    userMap.mergeItem(
+      // @ts-expect-error
+      {
+        firstName: 'Morty',
+      },
+    );
   });
 });

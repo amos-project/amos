@@ -3,8 +3,8 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { createRecordMapBox } from 'amos-boxes';
-import { Box } from 'amos-core';
+import { recordMapBox } from 'amos-boxes';
+import { box } from 'amos-core';
 import { Record } from 'amos-shapes';
 
 export interface SessionModel {
@@ -23,5 +23,5 @@ export class SessionRecord extends Record<SessionModel>({
   }
 }
 
-export const sessionMapBox = createRecordMapBox('sessions', SessionRecord, 'id');
-export const sessionIdBox = new Box('sessions.currentId', 0);
+export const sessionMapBox = recordMapBox('sessions', SessionRecord, 'id');
+export const sessionIdBox = box('sessions.currentId', 0);

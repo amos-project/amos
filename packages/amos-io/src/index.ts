@@ -3,6 +3,5 @@
  * @author junbao <junbao@mymoement.com>
  */
 
-export * from './createAsyncActionFactory';
-export * from './createPagedListActionFactory';
-export * from './PagedListBox';
+export * from './paging/createPagedListActionFactory';
+export * from './paging/PagedListBox';

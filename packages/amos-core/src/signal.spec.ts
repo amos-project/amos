@@ -3,15 +3,15 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { LOGOUT } from 'amos-testing';
+import { logoutSignal } from 'amos-testing';
 
 describe('event', () => {
   it('should create signal factory', () => {
-    expect(LOGOUT).toBe(expect.any(Function));
-    expect({ ...LOGOUT }).toEqual({ $object: 'signal_factory', type: 'RESET' });
+    expect(logoutSignal).toBe(expect.any(Function));
+    expect({ ...logoutSignal }).toEqual({ $object: 'signal_factory', type: 'RESET' });
   });
   it('should create signal', () => {
-    expect(LOGOUT({ userId: 1 })).toEqual({
+    expect(logoutSignal({ userId: 1 })).toEqual({
       $object: 'signal',
       type: 'RESET',
       data: { count: 0 },

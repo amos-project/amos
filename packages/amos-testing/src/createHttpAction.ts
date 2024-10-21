@@ -4,17 +4,17 @@
  */
 
 import { ActionFactory } from 'amos-core';
-import { AsyncActionOptions, createAsyncActionFactory } from 'amos-io';
-import { HttpEndpoints, mockServer } from './HttpEndpoints';
+import { NotImplemented } from 'amos-utils';
+import { HttpEndpoints } from './HttpEndpoints';
 
-export interface HttpActionOptions<K extends keyof HttpEndpoints>
-  extends AsyncActionOptions<[HttpEndpoints[K]['Req']], HttpEndpoints[K]['Res']> {
+export interface HttpActionOptions<K extends keyof HttpEndpoints> {
   key: K;
+  optimistic?: boolean;
+  mutations: (...args: any[]) => any;
 }
 
 export const createHttpAction: <K extends keyof HttpEndpoints>(
   options: HttpActionOptions<K>,
-) => ActionFactory<[input: HttpEndpoints[K]['Req']], Promise<HttpEndpoints[K]['Res']>> =
-  createAsyncActionFactory(async (options: HttpActionOptions<any>, req: any) => {
-    return (mockServer as any)[options.key](req);
-  });
+) => ActionFactory<[input: HttpEndpoints[K]['Req']], Promise<HttpEndpoints[K]['Res']>> = () => {
+  throw new NotImplemented();
+};
