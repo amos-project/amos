@@ -43,6 +43,7 @@ export {
   Dispatch,
   Dispatchable,
   DispatchableRecord,
+  EnhanceableStore,
   MapSelector,
   Mutation,
   MutationFactory,
