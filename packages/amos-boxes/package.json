@@ -1,6 +1,6 @@
 {
   "name": "amos-boxes",
-  "version": "0.3.0-beta.19",
+  "version": "0.3.0-beta.21",
   "private": true,
   "description": "The amos box factories built on amos-shapes and other well-known shapes.",
   "author": "acrazing <joking.young@gmail.com>",

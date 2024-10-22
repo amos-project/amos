@@ -111,5 +111,6 @@ export const build = autorun(
       }),
     );
     await fs.remove('dist');
+    await fs.copyFile('README.md', 'packages/amos/README.md');
   },
 );

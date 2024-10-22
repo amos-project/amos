@@ -1,6 +1,6 @@
 {
   "name": "amos-persist",
-  "version": "0.3.0-beta.19",
+  "version": "0.3.0-beta.21",
   "private": true,
   "description": "Hybrid amos with redux.",
   "author": "acrazing <joking.young@gmail.com>",
