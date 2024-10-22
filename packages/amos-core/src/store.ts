@@ -148,6 +148,7 @@ export function createStore(options: StoreOptions = {}, ...enhancers: StoreEnhan
     },
   );
   return {
+    snapshot: store.snapshot,
     subscribe: store.subscribe,
     dispatch: store.dispatch,
     select: store.select,
