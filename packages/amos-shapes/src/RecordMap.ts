@@ -3,7 +3,7 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { IDOf, JSONState, Pair, PartialRecord } from 'amos-utils';
+import { Entry, IDOf, JSONState, PartialRecord } from 'amos-utils';
 import { Map } from './Map';
 import { PartialProps, PartialRequiredProps, Record, RecordProps } from './Record';
 
@@ -41,7 +41,7 @@ export class RecordMap<R extends Record<any>, KF extends keyof RecordProps<R>> e
   }
 
   override setAll(
-    items: PartialRecord<IDOf<R[KF]>, R> | ReadonlyArray<R | Pair<IDOf<R[KF]>, R>>,
+    items: PartialRecord<IDOf<R[KF]>, R> | ReadonlyArray<R | Entry<IDOf<R[KF]>, R>>,
   ): this {
     if (Array.isArray(items)) {
       return super.setAll(items.map((v): any => (Array.isArray(v) ? v : [v[this.keyField], v])));
@@ -53,20 +53,20 @@ export class RecordMap<R extends Record<any>, KF extends keyof RecordProps<R>> e
   // resolve types error
   override mergeAll(
     items:
-      | ReadonlyArray<Pair<IDOf<R[KF]>, PartialProps<R>>>
+      | ReadonlyArray<Entry<IDOf<R[KF]>, PartialProps<R>>>
       | PartialRecord<IDOf<R[KF]>, PartialProps<R>>,
   ): this;
   override mergeAll(
     items:
-      | ReadonlyArray<Pair<IDOf<R[KF]>, PartialProps<R>>>
+      | ReadonlyArray<Entry<IDOf<R[KF]>, PartialProps<R>>>
       | PartialRecord<IDOf<R[KF]>, PartialProps<R>>
-      | ReadonlyArray<PartialRequiredProps<R, KF> | Pair<IDOf<R[KF]>, PartialProps<R>>>,
+      | ReadonlyArray<PartialRequiredProps<R, KF> | Entry<IDOf<R[KF]>, PartialProps<R>>>,
   ): this;
   override mergeAll(
     items:
-      | ReadonlyArray<Pair<IDOf<R[KF]>, PartialProps<R>>>
+      | ReadonlyArray<Entry<IDOf<R[KF]>, PartialProps<R>>>
       | PartialRecord<IDOf<R[KF]>, PartialProps<R>>
-      | ReadonlyArray<PartialRequiredProps<R, KF> | Pair<IDOf<R[KF]>, PartialProps<R>>>,
+      | ReadonlyArray<PartialRequiredProps<R, KF> | Entry<IDOf<R[KF]>, PartialProps<R>>>,
   ): this {
     if (Array.isArray(items)) {
       return super.setAll(items.map((v): any => (Array.isArray(v) ? v : [v[this.keyField], v])));

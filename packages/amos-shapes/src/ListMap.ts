@@ -3,7 +3,7 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { ID, isArray, Pair, PartialRecord } from 'amos-utils';
+import { Entry, ID, isArray, PartialRecord } from 'amos-utils';
 import { List, ListElement } from './List';
 import { DelegateMapValueMutations, implementMapDelegations, Map } from './Map';
 
@@ -43,7 +43,7 @@ export class ListMap<K extends ID, L extends List<any>> extends Map<K, L> {
   override setAll(
     items:
       | PartialRecord<K, L | readonly ListElement<L>[]>
-      | ReadonlyArray<Pair<K, L | readonly ListElement<L>[]>>,
+      | ReadonlyArray<Entry<K, L | readonly ListElement<L>[]>>,
   ): this {
     const data = Array.isArray(items) ? items : Object.entries(items);
     data.forEach((d) => {

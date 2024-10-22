@@ -3,10 +3,10 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { autorun } from './utils';
-import yargs from 'yargs';
-import { pick } from 'lodash';
 import * as fs from 'fs-extra';
+import { pick } from 'lodash';
+import yargs from 'yargs';
+import { autorun } from './utils';
 
 export const version = autorun(
   module,
@@ -54,11 +54,6 @@ export const version = autorun(
       const pjFile = `packages/${p}/package.json`;
       const pj = await fs.readJSON(pjFile);
       pj.version = version;
-      for (const dep in pj.dependencies) {
-        if (dep.startsWith('amos')) {
-          pj.dependencies[dep] = version;
-        }
-      }
       await fs.outputJSON(pjFile, pj, { spaces: 2 });
     }
   },

@@ -3,7 +3,7 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { Dispatch, Store } from 'amos-core';
+import { Dispatch, Store } from 'amos';
 import { must } from 'amos-utils';
 import React, { createContext, ReactNode, useContext } from 'react';
 

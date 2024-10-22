@@ -3,7 +3,7 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { action } from 'amos-core';
+import { action } from 'amos';
 import { todoMapBox, TodoModel, userTodoListBox } from './todo.boxes';
 import { selectUserTodoList, selectVisibleUserTodoList } from './todo.selectors';
 import { doAsync } from './user.actions';

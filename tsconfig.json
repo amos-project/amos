@@ -38,6 +38,7 @@
     "preserveValueImports": false,
     "paths": {
       "amos": ["amos/src"],
+      "amos/react": ["amos/src/react"],
       "amos-*": ["amos-*/src"]
     },
     "skipLibCheck": true,

@@ -4,9 +4,10 @@
  */
 
 import { createStore } from 'amos-core';
-import { MemoryStorage, sessionIdBox, sessionMapBox } from 'amos-testing';
+import { sessionIdBox, sessionMapBox } from 'amos-testing';
 import { loadBoxes } from './actions';
 import { withPersist } from './enhancer';
+import { MemoryStorage } from './storages/MemoryStorage';
 
 describe('actions', () => {
   it('should load boxes', async () => {

@@ -5,13 +5,26 @@
 
 import { listMapBox, recordMapBox } from 'amos-boxes';
 import { Record } from 'amos-shapes';
-import { createStrictEnum, EnumValues } from 'amos-utils';
+import { enumLabels } from '../utils';
 
-export const TodoStatus = createStrictEnum({
-  created: [1, { group: 'TODO' }],
-  started: [2, { group: 'IN PROGRESS' }],
-  finished: [3, { group: 'DONE' }],
-  deleted: [4, { group: 'BACKLOG' }],
+export enum TodoStatus {
+  created = 1,
+  started = 2,
+  finished = 3,
+  deleted = 4,
+}
+
+export type TodoStatusLabel = {
+  group: string;
+};
+
+export type TodoStatusKey = keyof typeof TodoStatus;
+
+export const TodoStatusLabels = enumLabels<typeof TodoStatus, TodoStatusLabel>(TodoStatus, {
+  created: { group: 'TODO' },
+  started: { group: 'IN PROGRESS' },
+  finished: { group: 'DONE' },
+  deleted: { group: 'BACKLOG' },
 });
 
 export interface TodoModel {
@@ -19,7 +32,7 @@ export interface TodoModel {
   userId: number;
   title: string;
   description: string;
-  status: EnumValues<typeof TodoStatus>;
+  status: TodoStatus;
   createdAt: number;
   startedAt: number;
   finishedAt: number;
@@ -39,7 +52,7 @@ export class TodoRecord extends Record<TodoModel>({
 }) {
   compareTo(t: TodoRecord) {
     if (this.status === t.status) {
-      const field = `${TodoStatus.key(this.status)}At` as const;
+      const field = `${TodoStatus[this.status] as TodoStatusKey}At` as const;
       return this.get(field) - t.get(field);
     }
     return this.status - t.status;

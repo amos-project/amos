@@ -3,4 +3,13 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-export * from 'amos-react';
+export {
+  Provider,
+  ProviderProps,
+  QueryState,
+  UseQuery,
+  useDispatch,
+  useQuery,
+  useSelector,
+  useStore,
+} from 'amos-react';

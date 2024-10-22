@@ -3,7 +3,7 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { useDispatch, useSelector } from 'amos-react';
+import { useDispatch, useSelector } from 'amos/react';
 import React, { memo, useState } from 'react';
 import { addTodo } from '../store/todo.actions';
 import { TodoStatusFilter, todoStatusFilterBox } from '../store/todo.boxes';

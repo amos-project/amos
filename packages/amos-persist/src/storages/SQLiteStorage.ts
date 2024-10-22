@@ -3,7 +3,7 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { PersistRow, PersistSpan, PersistValue, StorageEngine } from '../types';
+import { PersistEntry, PersistModel, PersistValue, StorageEngine } from '../types';
 
 export interface Database {
   runAsync(sql: string, values?: any[]): Promise<void>;
@@ -33,7 +33,7 @@ export class SQLiteStorage implements StorageEngine {
 
   async getMulti(items: readonly string[]): Promise<readonly (PersistValue | null)[]> {
     const rows = items.map(() => '?').join(', ');
-    const result = await this.db.getAllAsync<PersistRow>(
+    const result = await this.db.getAllAsync<PersistModel>(
       `SELECT key, version, value
        FROM ${this.table}
        WHERE key IN (${rows})`,
@@ -47,8 +47,8 @@ export class SQLiteStorage implements StorageEngine {
     return items.map((key) => map[key]);
   }
 
-  async getPrefix(prefix: string): Promise<readonly PersistSpan[]> {
-    const result = await this.db.getAllAsync<PersistRow>(
+  async getPrefix(prefix: string): Promise<readonly PersistEntry[]> {
+    const result = await this.db.getAllAsync<PersistModel>(
       `SELECT key, version, value
        FROM ${this.table}
        WHERE key LIKE ? ESCAPE '\\'`,
@@ -57,7 +57,7 @@ export class SQLiteStorage implements StorageEngine {
     return result.map((r) => [r.key, r.version, r.value]);
   }
 
-  async setMulti(items: readonly PersistSpan[]): Promise<void> {
+  async setMulti(items: readonly PersistEntry[]): Promise<void> {
     const rows = items.map(() => '?, ?, ?').join('), (');
     const values = items
       .map(([k, version, value]) => [k, version, value === void 0 ? null : JSON.stringify(value)])

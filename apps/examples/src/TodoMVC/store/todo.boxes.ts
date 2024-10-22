@@ -8,6 +8,12 @@ import { box } from 'amos-core';
 import { Record } from 'amos-shapes';
 import { signOutSignal } from './user.boxes';
 
+export function hashCode(s: string) {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (Math.imul(31, h) + s.charCodeAt(i)) | 0;
+  return h;
+}
+
 export interface TodoModel {
   id: number;
   userId: number;

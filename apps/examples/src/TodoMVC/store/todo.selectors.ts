@@ -3,8 +3,7 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { selector } from 'amos-core';
-import { isSameList } from 'amos-shapes';
+import { isSameList, selector } from 'amos';
 import { todoMapBox, TodoStatusFilter, todoStatusFilterBox, userTodoListBox } from './todo.boxes';
 import { currentUserIdBox } from './user.boxes';
 

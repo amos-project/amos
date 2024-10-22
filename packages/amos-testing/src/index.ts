@@ -3,7 +3,6 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-export * from '../../amos-persist/src/storages/MemoryStorage';
 export * from './entry';
 export * from './store/example.boxes';
 export * from './store/misc.actions';

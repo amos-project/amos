@@ -3,13 +3,13 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { autorun, getPackages } from './utils';
 import { pick } from 'lodash';
-import yargs from 'yargs';
-import { version } from './version';
-import { build } from './build';
 import * as child_process from 'node:child_process';
 import * as process from 'node:process';
+import yargs from 'yargs';
+import { build } from './build';
+import { autorun } from './utils';
+import { version } from './version';
 
 export const publish = autorun(
   module,
@@ -21,7 +21,7 @@ export const publish = autorun(
             updateVersion: {
               type: 'string',
               choices: ['major', 'minor', 'patch', 'beta'],
-              default: 'beta',
+              demandOption: true,
             },
             withBuild: {
               type: 'boolean',
@@ -42,7 +42,7 @@ export const publish = autorun(
     ] as const,
   async ({ updateVersion, withBuild, unpublish }) => {
     await version({ update: updateVersion });
-    const pkgs = await getPackages();
+    const pkgs = ['amos'];
     if (unpublish) {
       for (const pkg of pkgs.slice()) {
         console.log('Unpublishing ', pkg);

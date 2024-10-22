@@ -6,6 +6,7 @@
 import {
   clone,
   Constructor,
+  Entry,
   fromJS,
   FuncParams,
   ID,
@@ -13,7 +14,6 @@ import {
   JSONSerializable,
   JSONState,
   nullObject,
-  Pair,
   PartialRecord,
   toArray,
   ToString,
@@ -60,7 +60,7 @@ export class Map<K extends ID, V> implements JSONSerializable<Record<K, V>> {
     return this.reset(nullObject(this.data, { [key]: item } as any));
   }
 
-  setAll(items: PartialRecord<K, V> | ReadonlyArray<Pair<K, V>>): this {
+  setAll(items: PartialRecord<K, V> | ReadonlyArray<Entry<K, V>>): this {
     const up: PartialRecord<K, V> = {};
     let dirty = false;
     if (Array.isArray(items)) {
@@ -89,7 +89,9 @@ export class Map<K extends ID, V> implements JSONSerializable<Record<K, V>> {
     return this.setItem(key, clone(this.getItem(key), props));
   }
 
-  mergeAll(items: PartialRecord<K, WellPartial<V>> | ReadonlyArray<Pair<K, WellPartial<V>>>): this {
+  mergeAll(
+    items: PartialRecord<K, WellPartial<V>> | ReadonlyArray<Entry<K, WellPartial<V>>>,
+  ): this {
     const data = isArray(items) ? items : Object.entries(items);
     return this.setAll(data.map(([k, v]) => [k, clone(this.getItem(k), v)]));
   }
@@ -161,7 +163,7 @@ export class Map<K extends ID, V> implements JSONSerializable<Record<K, V>> {
 
 export type MapKey<T> = T extends Map<any, any> ? Parameters<T['getItem']>[0] : never;
 export type MapValue<T> = T extends Map<any, any> ? ReturnType<T['getItem']> : never;
-export type MapPair<T> = T extends Map<infer K, infer V> ? Pair<K, V> : never;
+export type MapEntry<T> = T extends Map<infer K, infer V> ? Entry<K, V> : never;
 
 export type DelegateMapValueMutations<K extends ID, V, M extends keyof V, KLimiter = V> = {
   [P in keyof KLimiter & M as `${P & string}In`]: <TThis>(

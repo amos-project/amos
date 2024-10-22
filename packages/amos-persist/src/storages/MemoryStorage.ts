@@ -3,7 +3,7 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { PersistSpan, PersistValue, StorageEngine } from 'amos-persist';
+import { PersistEntry, PersistValue, StorageEngine } from 'amos-persist';
 import { nullObject } from 'amos-utils';
 
 export class MemoryStorage implements StorageEngine {
@@ -13,13 +13,13 @@ export class MemoryStorage implements StorageEngine {
     return items.map((item) => this.data[item] || null);
   }
 
-  async getPrefix(prefix: string): Promise<readonly PersistSpan[]> {
+  async getPrefix(prefix: string): Promise<readonly PersistEntry[]> {
     return Object.keys(this.data)
       .filter((k) => k.startsWith(prefix))
       .map((k) => [k, ...this.data[k]]);
   }
 
-  async setMulti(items: readonly PersistSpan[]): Promise<void> {
+  async setMulti(items: readonly PersistEntry[]): Promise<void> {
     items.forEach(([k, v, d]) => (this.data[k] = [v, d]));
   }
 

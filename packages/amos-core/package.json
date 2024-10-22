@@ -1,6 +1,7 @@
 {
   "name": "amos-core",
-  "version": "0.3.0-beta.17",
+  "version": "0.3.0-beta.19",
+  "private": true,
   "description": "The core infrastructure of amos.",
   "author": "acrazing <joking.young@gmail.com>",
   "homepage": "https://github.com/amos-project/amos",
@@ -8,18 +9,12 @@
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
-  "files": [
-    "dist"
-  ],
+  "files": [],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/amos-project/amos.git"
   },
   "bugs": {
     "url": "https://github.com/amos-project/amos/issues"
-  },
-  "dependencies": {
-    "amos-utils": "0.3.0-beta.17",
-    "tslib": "^2.8.0"
   }
 }

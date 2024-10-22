@@ -3,6 +3,6 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-export { Provider, ProviderProps, useDispatch, useStore } from './context';
-export { QueryState, UseQuery, useQuery } from './useQuery';
-export { useSelector } from './useSelector';
+export * from './context';
+export * from './useQuery';
+export * from './useSelector';

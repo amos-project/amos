@@ -9,7 +9,13 @@ import { Box, Mutation } from './box';
 import { Compute, Selector, SelectorFactory } from './selector';
 import { Signal } from './signal';
 
-export type Dispatchable<R = any> = Mutation<any, R> | Action<any, R> | Signal<any, R>;
+export interface DispatchableRecord<R> {
+  mutation: Mutation<any, R>;
+  action: Action<any, R>;
+  signal: Signal<any, R>;
+}
+
+export type Dispatchable<R = any> = DispatchableRecord<R>[keyof DispatchableRecord<R>];
 
 export interface Dispatch {
   <R>(task: Dispatchable<R>): R;
@@ -25,7 +31,12 @@ export interface Dispatch {
   <R>(tasks: readonly Dispatchable<R>[]): R[];
 }
 
-export type Selectable<R = any> = Box<R> | Selector<any, R>;
+export interface SelectableRecord<R> {
+  box: Box<R>;
+  selector: Selector<any, R>;
+}
+
+export type Selectable<R = any> = SelectableRecord<R>[keyof SelectableRecord<R>];
 
 export interface Select {
   <R>(selector: Selectable<R>): R;

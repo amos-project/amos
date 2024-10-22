@@ -3,7 +3,7 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { useDispatch, useSelector } from 'amos-react';
+import { useDispatch, useSelector } from 'amos/react';
 import React, { memo } from 'react';
 import { signOut } from '../store/user.actions';
 import { selectCurrentUser } from '../store/user.selectors';

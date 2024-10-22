@@ -3,7 +3,7 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { useSelector } from 'amos-react';
+import { useSelector } from 'amos/react';
 import React, { memo } from 'react';
 import { currentUserIdBox } from '../store/user.boxes';
 import { Filter } from './Filter';

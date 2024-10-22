@@ -5,21 +5,21 @@
 
 import {
   Box,
+  isAmosObject,
   isSelectValueEqual,
   MapSelector,
   Select,
   Selectable,
   Selector,
-  SelectValuePair,
-} from 'amos-core';
-import { isAmosObject } from 'amos-utils';
+  SelectValueEntry,
+} from 'amos';
 import { useCallback, useDebugValue, useLayoutEffect, useReducer, useRef } from 'react';
 import { useStore } from './context';
 
 export function useSelect(): Select {
   const [, update] = useReducer((s) => s + 1, 0);
   const store = useStore();
-  const deps = useRef<SelectValuePair[]>([]);
+  const deps = useRef<SelectValueEntry[]>([]);
   const rendering = useRef(true);
   rendering.current = true;
   deps.current = [];

@@ -3,7 +3,7 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { useDispatch } from 'amos-react';
+import { useDispatch } from 'amos/react';
 import React, { memo, useState } from 'react';
 import { signIn } from '../store/user.actions';
 

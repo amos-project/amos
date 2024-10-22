@@ -5,7 +5,6 @@
 
 export * from './Clonable';
 export * from './enhancer';
-export * from './enum';
 export * from './equals';
 export * from './event';
 export * from './json';

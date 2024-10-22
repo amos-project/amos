@@ -3,9 +3,9 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { autorun } from './utils';
 import * as fs from 'fs-extra';
 import { glob } from 'glob';
+import { autorun } from './utils';
 
 export const check_deps = autorun(
   module,
@@ -13,6 +13,7 @@ export const check_deps = autorun(
   async () => {
     const r = await fs.readJSON('package.json');
     const pkgs = await fs.readdir('packages');
+    const ext = ['amos-react'];
     const pkgInfo: Record<string, { deps: string[]; devDeps: string[]; pj: any }> = {};
     for (const pkg of pkgs) {
       const deps = new Set<string>();
@@ -34,59 +35,104 @@ export const check_deps = autorun(
       {
         deps,
         devDeps,
-        pj: { name, dependencies = {}, devDependencies, peerDependencies = {} },
+        pj: {
+          name,
+          dependencies = {},
+          devDependencies,
+          peerDependencies = {},
+          optionalDependencies = {},
+        },
       },
     ] of Object.entries(pkgInfo)) {
-      if (name !== pkg) {
-        console.error('%s name is %s', pkg, name);
-      }
-      if (deps.includes('amos') || devDeps.includes('amos')) {
-        console.error(`%s should not dependents on amos.`, pkg);
-      }
-      if (deps.includes('amos-testing')) {
-        console.error('%s should not dependents on amos-testing.', pkg);
-      }
-      for (const d of deps) {
-        if (d.startsWith('./') || d.startsWith('../')) {
-          if (d.includes('src')) {
-            console.error('%s import bad path %s', pkg, d);
+      const checkNoAmosInPkgDeps = () => {
+        for (const dm of [
+          dependencies,
+          devDependencies || {},
+          peerDependencies,
+          optionalDependencies,
+        ]) {
+          for (const d in dm) {
+            if (d.startsWith('amos')) {
+              console.error(`no amos in deps: ${d} in ${pkg}`);
+            }
           }
-          continue;
         }
-        if (!dependencies[d] && !peerDependencies[d]) {
-          console.error('%s dependents on %s not specified', pkg, d);
+      };
+      const checkName = () => {
+        if (name !== pkg) {
+          console.error('%s name is %s', pkg, name);
         }
-      }
-      for (const d of devDeps) {
-        if (d.startsWith('./') || d.startsWith('../')) {
-          if (d.includes('src')) {
-            console.error('%s import bad path %s', pkg, d);
+      };
+      const checkNoInternalOrRootDeps = () => {
+        if (ext.includes(name)) {
+          const bad = deps.filter((d) => d.startsWith('amos-') && d !== 'amos-utils');
+          if (bad.length > 0) {
+            console.error('%s should not deps on %s', pkg, bad.join(', '));
           }
-          continue;
+        } else if (deps.includes('amos')) {
+          console.error(`%s should not dependents on amos.`, pkg);
         }
-        if (d.startsWith('amos')) {
-          continue;
+        if (devDeps.includes('amos')) {
+          console.error(`%s should not dev dependents on amos.`, pkg);
         }
-        if (!r.devDependencies?.[d] && !r.dependencies?.[d] && !r.peerDependencies?.[d]) {
-          console.error('%s dev dependents on %s not specified', pkg, d);
+        if (pkg === 'amos-utils') {
+          const bad = deps.concat(devDeps).filter((d) => d.startsWith('amos'));
+          if (bad.length) {
+            console.error('amos-utils no amos deps: ', bad.join(', '));
+          }
         }
-      }
-      for (const d in dependencies) {
-        if (d === 'tslib') {
-          continue;
+      };
+      const checkNoSrcAndExternalPkgDeps = () => {
+        for (const d of deps) {
+          if (d.startsWith('./') || d.startsWith('../')) {
+            if (d.includes('src')) {
+              console.error('%s import bad path %s', pkg, d);
+            }
+            continue;
+          }
+          if (d.startsWith('amos')) {
+            continue;
+          }
+          if (!dependencies[d] && !peerDependencies[d]) {
+            console.error('%s dependents on %s not specified', pkg, d);
+          }
         }
-        if (!deps.includes(d) && !deps.includes(d.replace(/^@types\//, ''))) {
-          console.error('%s unused dependencies %s', pkg, d);
+        for (const d of devDeps) {
+          if (d.startsWith('./') || d.startsWith('../')) {
+            if (d.includes('src')) {
+              console.error('%s import bad path %s', pkg, d);
+            }
+            continue;
+          }
+          if (d.startsWith('amos')) {
+            continue;
+          }
+          if (!r.devDependencies?.[d] && !r.dependencies?.[d] && !r.peerDependencies?.[d]) {
+            console.error('%s dev dependents on %s not specified', pkg, d);
+          }
         }
-      }
-      for (const d in peerDependencies) {
-        if (!deps.includes(d) && !deps.includes(d.replace(/^@types\//, ''))) {
-          console.error('%s unused dependencies %s', pkg, d);
+      };
+      const checkDepUsage = () => {
+        for (const d in dependencies) {
+          if (!deps.includes(d) && !deps.includes(d.replace(/^@types\//, ''))) {
+            console.error('%s unused dependencies %s', pkg, d);
+          }
         }
-      }
-      if (devDependencies) {
-        console.error('%s devDependencies is not empty', pkg);
-      }
+        for (const d in peerDependencies) {
+          if (!deps.includes(d) && !deps.includes(d.replace(/^@types\//, ''))) {
+            console.error('%s unused dependencies %s', pkg, d);
+          }
+        }
+        if (devDependencies) {
+          console.error('%s devDependencies is not empty', pkg);
+        }
+      };
+
+      checkName();
+      checkNoAmosInPkgDeps();
+      checkDepUsage();
+      checkNoSrcAndExternalPkgDeps();
+      checkNoInternalOrRootDeps();
     }
   },
 );

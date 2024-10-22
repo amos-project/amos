@@ -94,10 +94,11 @@ export interface SelectableActionFactory<A extends any[] = any, R = any, S = any
 }
 
 enhanceAction((next) => (options) => {
-  return Object.assign(next(options), {
+  const factory = next(options);
+  return Object.assign(factory, {
     select: (selector: SelectorFactory) => {
       Object.assign(options, { selector });
-      return this;
+      return factory;
     },
   });
 });

@@ -3,7 +3,7 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { useDispatch, useSelector } from 'amos-react';
+import { useDispatch, useSelector } from 'amos/react';
 import React, { memo } from 'react';
 import { completeTodo, deleteTodo } from '../store/todo.actions';
 import { todoMapBox } from '../store/todo.boxes';

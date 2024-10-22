@@ -19,3 +19,4 @@ coverage/
 *.tgz
 
 .rollup.cache/
+packages/amos/react/

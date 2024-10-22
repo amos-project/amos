@@ -3,7 +3,7 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { selector } from 'amos-core';
+import { selector } from 'amos';
 import { currentUserIdBox, userMapBox } from './user.boxes';
 
 export const selectCurrentUser = selector((select) => {

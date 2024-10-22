@@ -34,7 +34,7 @@ export type ToString<T> = T extends string
 
 export type PartialRecord<K extends keyof any, V> = { [P in K]+?: V };
 export type PartialRequired<T, K extends keyof T> = Required<Pick<T, K>> & Partial<Omit<T, K>>;
-export type Pair<K, V> = readonly [K, V];
+export type Entry<K, V> = readonly [K, V];
 
 export type PrimitiveOf<T> = Exclude<T, object>;
 

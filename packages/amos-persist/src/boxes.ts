@@ -6,12 +6,12 @@
 import { objectBox } from 'amos-boxes';
 import { PersistOptions } from './types';
 
-export interface PersistModel {
+export interface PersistModel2 {
   options: PersistOptions | null;
   loading: Map<string, Promise<any>> | null;
 }
 
-export const persistBox = objectBox<PersistModel>('amos.persist', {
+export const persistBox = objectBox<PersistModel2>('amos.persist', {
   options: null,
   loading: null,
 });

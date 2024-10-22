@@ -4,7 +4,6 @@
  */
 
 import { TodoStatus } from 'amos-testing';
-import { EnumValues } from 'amos-utils';
 import { List } from './List';
 import { ListMap } from './ListMap';
 
@@ -21,9 +20,7 @@ describe('AmosListDict', () => {
     foo.getIn(1, 2);
 
     // with value type limit
-    const bar = new ListMap<number, List<EnumValues<typeof TodoStatus>>>(
-      new List(TodoStatus.created),
-    );
+    const bar = new ListMap<number, List<TodoStatus>>(new List(TodoStatus.created));
     // @ts-expect-error
     expect(bar.getItem(0).get(0) === 10).toBeFalsy();
 
@@ -31,9 +28,7 @@ describe('AmosListDict', () => {
       fine() {}
     }
 
-    const l1 = new ListMap<number, EList<EnumValues<typeof TodoStatus>>>(
-      new EList(TodoStatus.created),
-    );
+    const l1 = new ListMap<number, EList<TodoStatus>>(new EList(TodoStatus.created));
     l1.getItem(0).fine();
 
     class NList extends List<number> {

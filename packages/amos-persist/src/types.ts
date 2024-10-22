@@ -22,9 +22,9 @@ export interface BoxPersistOptions<S> {
 }
 
 export type PersistValue = readonly [version: number, value: any];
-export type PersistSpan = readonly [key: string, ...PersistValue];
+export type PersistEntry = readonly [key: string, ...PersistValue];
 
-export interface PersistRow {
+export interface PersistModel {
   key: string;
   version: number;
   value: any;
@@ -33,8 +33,8 @@ export interface PersistRow {
 export interface StorageEngine {
   init?(): Promise<void>;
   getMulti(items: readonly string[]): Promise<readonly (PersistValue | null)[]>;
-  getPrefix(prefix: string): Promise<readonly PersistSpan[]>;
-  setMulti(items: readonly PersistSpan[]): Promise<void>;
+  getPrefix(prefix: string): Promise<readonly PersistEntry[]>;
+  setMulti(items: readonly PersistEntry[]): Promise<void>;
   removeMulti(items: readonly string[]): Promise<void>;
   removePrefix(prefix: string): Promise<void>;
 }

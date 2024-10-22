@@ -192,7 +192,6 @@ function createBoxFactory<B extends Box, SB = {}>(
   for (const k in options) {
     Object.defineProperty(Box.prototype, k, { value: options[k as keyof BoxOptions] });
   }
-  Object.assign(Box.prototype, options);
   Object.defineProperty(Box, 'name', { value: name });
   return Box;
 }

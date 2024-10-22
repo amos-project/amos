@@ -1,8 +1,8 @@
-import { createStore, hashCode, IDBStorage } from 'amos';
-import { withPersist } from 'amos-persist';
-import { Provider } from 'amos-react';
+import { createStore, IDBStorage, withPersist } from 'amos';
+import { Provider } from 'amos/react';
 import React, { memo } from 'react';
 import App from '../App';
+import { hashCode } from './store/todo.boxes';
 
 const store = createStore(
   { preloadedState: { 'users.currentUserId': hashCode('Amos') } },

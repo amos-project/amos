@@ -3,5 +3,6 @@
  * @author junbao <junbao@mymoement.com>
  */
 
+export * from './optimistic';
 export * from './paging/createPagedListActionFactory';
 export * from './paging/PagedListBox';

@@ -3,9 +3,7 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { recordMapBox } from 'amos-boxes';
-import { box, signal } from 'amos-core';
-import { Record } from 'amos-shapes';
+import { box, Record, recordMapBox, signal } from 'amos';
 
 export interface UserModel {
   id: number;

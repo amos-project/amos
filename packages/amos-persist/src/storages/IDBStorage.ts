@@ -3,7 +3,7 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { PersistRow, PersistSpan, PersistValue, StorageEngine } from 'amos-persist';
+import { PersistEntry, PersistModel, PersistValue, StorageEngine } from 'amos-persist';
 
 export class IDBStorage implements StorageEngine {
   private db!: IDBDatabase;
@@ -38,7 +38,7 @@ export class IDBStorage implements StorageEngine {
       Promise.all(
         items.map((item) => {
           return new Promise<PersistValue | null>((resolve, reject) => {
-            let request: IDBRequest<PersistRow | null> = objectStore.get(item);
+            let request: IDBRequest<PersistModel | null> = objectStore.get(item);
             request.onerror = reject;
             request.onsuccess = () =>
               resolve(request.result ? [request.result.version, request.result.value] : null);
@@ -48,12 +48,12 @@ export class IDBStorage implements StorageEngine {
     });
   }
 
-  getPrefix(prefix: string): Promise<readonly PersistSpan[]> {
+  getPrefix(prefix: string): Promise<readonly PersistEntry[]> {
     return new Promise((resolve, reject) => {
       let transaction = this.db.transaction([this.table], 'readwrite');
       transaction.onerror = reject;
       const os = transaction.objectStore(this.table);
-      const req: IDBRequest<PersistRow[]> = os.getAll(
+      const req: IDBRequest<PersistModel[]> = os.getAll(
         IDBKeyRange.bound(prefix, prefix + '\uFFFF', false, true),
       );
       req.onsuccess = () => resolve(req.result.map((r) => [r.key, r.version, r.value]));
@@ -61,14 +61,14 @@ export class IDBStorage implements StorageEngine {
     });
   }
 
-  setMulti(items: readonly PersistSpan[]): Promise<void> {
+  setMulti(items: readonly PersistEntry[]): Promise<void> {
     return new Promise<any>((resolve, reject) => {
       let transaction = this.db.transaction([this.table], 'readwrite');
       transaction.oncomplete = resolve;
       transaction.onerror = reject;
       let objectStore = transaction.objectStore(this.table);
       items.forEach(([key, version, value]) => {
-        const request = objectStore.put({ key, version, value } satisfies PersistRow);
+        const request = objectStore.put({ key, version, value } satisfies PersistModel);
         request.onerror = reject;
       });
     });

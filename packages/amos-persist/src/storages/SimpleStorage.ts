@@ -4,7 +4,7 @@
  */
 
 import { ValueOrPromise } from 'amos-utils';
-import { PersistSpan, PersistValue, StorageEngine } from '../types';
+import { PersistEntry, PersistValue, StorageEngine } from '../types';
 
 // compat with Web Storage and React Native AsyncStorage
 export interface Storage {
@@ -27,13 +27,13 @@ export class SimpleStorage implements StorageEngine {
     return Promise.all(items.map((key) => this.getItem(this.genKey(key))));
   }
 
-  async getPrefix(prefix: string): Promise<readonly PersistSpan[]> {
+  async getPrefix(prefix: string): Promise<readonly PersistEntry[]> {
     const keys = await this.allKeys(prefix);
     const r = await Promise.all(keys.map((k) => this.getItem(k)));
     return keys.map((k, i) => [k, ...(r[i] || [])] as const).filter((v) => v.length === 3);
   }
 
-  async setMulti(items: readonly PersistSpan[]): Promise<void> {
+  async setMulti(items: readonly PersistEntry[]): Promise<void> {
     for (const [key, version, value] of items) {
       this.storage.setItem(this.genKey(key), JSON.stringify([version, value]));
     }

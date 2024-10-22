@@ -4,8 +4,8 @@
  */
 
 // fake http
-import { action } from 'amos-core';
-import { hashCode } from 'amos-utils';
+import { action } from 'amos';
+import { hashCode } from './todo.boxes';
 import { currentUserIdBox, signInSignal, signOutSignal, userMapBox, UserModel } from './user.boxes';
 
 export async function doAsync<T>(value: T) {

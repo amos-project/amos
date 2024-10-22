@@ -3,7 +3,7 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { Action, SelectableAction } from 'amos-core';
+import { Action, SelectableAction } from 'amos';
 import { NotImplemented } from 'amos-utils';
 
 export interface QueryState<R> {
