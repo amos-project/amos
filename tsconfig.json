@@ -44,6 +44,6 @@
     "skipLibCheck": true,
     "noImplicitOverride": true
   },
-  "include": ["packages", "scripts", "apps"],
+  "include": ["packages", "scripts", "examples", "website"],
   "exclude": ["dist", "node_modules"]
 }

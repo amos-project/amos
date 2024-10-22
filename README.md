@@ -1,6 +1,6 @@
 # Amos
 
-Amos is a decentralized state management library, inspired by `redux`, `vuex` and `recoil`.
+A decentralized, data structure-based, fully featured state management library.
 
 ## Highlights
 

@@ -5,7 +5,8 @@
   "license": "MIT",
   "workspaces": [
     "packages/*",
-    "apps/*"
+    "examples/*",
+    "website"
   ],
   "devDependencies": {
     "@rollup/plugin-alias": "^5.1.1",

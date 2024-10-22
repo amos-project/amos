@@ -1,0 +1,55 @@
+<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
+  <!-- Gradient Background -->
+  <defs>
+    <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFEDE8; stop-opacity:1"/>
+      <stop offset="50%" style="stop-color:#FFF8DC; stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#E8FFE8; stop-opacity:1"/>
+    </linearGradient>
+
+    <!-- Gradient for Brand Name -->
+    <linearGradient id="brand-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#FF6F61; stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#FFA07A; stop-opacity:1"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg-gradient)"/>
+
+  <!-- Logo Section (moved higher) -->
+  <g transform="translate(100, 115)">
+    <circle cx="50" cy="50" r="49" stroke="#FF6F61" stroke-width="2" fill="#FFFFFF"/>
+    <circle cx="50" cy="50" r="13" fill="#FF6F61"/>
+    <circle cx="25" cy="35" r="9" fill="#FF6F61"/>
+    <circle cx="70" cy="35" r="9" fill="#FF6F61"/>
+    <circle cx="40" cy="70" r="6" fill="#FF6F61"/>
+    <circle cx="63" cy="80" r="8" fill="#FF6F61"/>
+    <path d="M50 50 C 45 45, 30 45, 25 35" stroke="#FF6F61" stroke-width="2" fill="none"/>
+    <path d="M50 50 C 55 45, 70 45, 70 35" stroke="#FF6F61" stroke-width="2" fill="none"/>
+    <path d="M50 50 C 45 55, 40 65, 40 70" stroke="#FF6F61" stroke-width="2" fill="none"/>
+    <path d="M50 50 C 55 55, 60 65, 63 80" stroke="#FF6F61" stroke-width="2" fill="none"/>
+  </g>
+
+  <!-- Brand Name with Gradient Color (moved higher) -->
+  <text x="250" y="180" font-family="Arial, sans-serif" font-size="64" font-weight="bold"
+        fill="url(#brand-gradient)">
+    Amos
+  </text>
+
+  <!-- New Line Below Brand Name (moved higher) -->
+  <text x="250" y="250" font-family="Arial, sans-serif" font-size="36" fill="#333333">
+    Your next generation state management library.
+  </text>
+
+  <!-- Three Keyword Slogan Section, Decentralized centered -->
+  <text x="250" y="350" font-family="Arial, sans-serif" font-size="40" fill="#FF6F61">
+    Decentralized
+  </text>
+  <text x="250" y="410" font-family="Arial, sans-serif" font-size="40" fill="#1E90FF">
+    Data-driven
+  </text>
+  <text x="250" y="470" font-family="Arial, sans-serif" font-size="40" fill="#32CD32">
+    All-in-one
+  </text>
+</svg>
