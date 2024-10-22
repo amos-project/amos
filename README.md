@@ -7,7 +7,7 @@ Amos is a decentralized state management library, inspired by `redux`, `vuex` an
 - Decentralized (or, in a more trendy term: atomic).
 - Data structure-based: help you read/write state easily.
 - Strong TypeScript support.
-- All in one: everything in a single package `amos`, including:
+- All in one: everything in a single package `amos` with zero dependencies, including:
   - All commonly used data structures: Number, Boolean, Array, Object, List, Map.
   - Box relationships.
   - Batch.

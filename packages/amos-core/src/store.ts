@@ -44,6 +44,11 @@ export interface StoreOptions {
 
 export interface Store {
   /**
+   * Get the state snapshot or the store
+   */
+  snapshot: () => Readonly<Snapshot>;
+
+  /**
    * Subscribe the update of the store. The event contains all mutated boxes
    * and its original state.
    *
@@ -87,6 +92,7 @@ export function createStore(options: StoreOptions = {}, ...enhancers: StoreEnhan
       let isDispatching = false;
       return {
         state: {},
+        snapshot: () => store.state,
         getInitialState: (box) => box.initialState,
         subscribe: ec.subscribe,
         // only accepts Dispatchable here
