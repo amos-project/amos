@@ -4,7 +4,7 @@
  */
 
 import { useQuery } from 'amos/react';
-import React, { memo } from 'react';
+import { memo } from 'react';
 import { getTodoList } from '../store/todo.actions';
 import { TodoItem } from './TodoItem';
 

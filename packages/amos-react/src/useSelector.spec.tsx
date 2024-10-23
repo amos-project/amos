@@ -4,7 +4,7 @@
  */
 
 import { act, renderHook, RenderHookResult } from '@testing-library/react-hooks';
-import { createStore, MapSelector, Select, Selectable, selector, Snapshot, Store } from 'amos-core';
+import { createStore, MapSelectable, Select, Selectable, selector, Snapshot, Store } from 'amos-core';
 import {
   addTwiceAsync,
   countBox,
@@ -13,7 +13,7 @@ import {
   selectDoubleCount,
   selectMultipleCount,
 } from 'amos-testing';
-import React, { FC } from 'react';
+import  { FC } from 'react';
 import { Provider, useDispatch, useStore } from './context';
 import { useSelector } from './useSelector';
 import fn = jest.fn;
@@ -35,9 +35,9 @@ function renderUseSelector<P, Rs extends readonly Selectable[]>(
   fn: (props: P) => Rs,
   preloaded?: Snapshot,
   initialProps?: P,
-): RenderHookResult<P, MapSelector<Rs>> & Store {
+): RenderHookResult<P, MapSelectable<Rs>> & Store {
   const store = createStore({ preloadedState: preloaded });
-  const hook = renderHook((props: P) => useSelector(...fn(props)), {
+  const hook = renderHook((props: P) => useSelector(fn(props)), {
     wrapper: (props: any) => <Provider store={store}>{props.children}</Provider>,
     initialProps,
   });
@@ -47,7 +47,7 @@ function renderUseSelector<P, Rs extends readonly Selectable[]>(
 describe('useSelector', () => {
   it('should works fine with WebStorm', () => {
     renderHook(() => {
-      const [] = useSelector(countBox);
+      useSelector(countBox);
     });
   });
   it('should select state', () => {

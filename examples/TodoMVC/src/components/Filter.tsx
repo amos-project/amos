@@ -4,13 +4,13 @@
  */
 
 import { useDispatch, useSelector } from 'amos/react';
-import React, { memo, useState } from 'react';
+import { memo, useState } from 'react';
 import { addTodo } from '../store/todo.actions';
 import { TodoStatusFilter, todoStatusFilterBox } from '../store/todo.boxes';
 
 export const Filter = memo(() => {
   const dispatch = useDispatch();
-  const [status] = useSelector(todoStatusFilterBox);
+  const status = useSelector(todoStatusFilterBox);
   const [input, setInput] = useState('');
   return (
     <div>

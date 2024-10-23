@@ -1,7 +1,6 @@
-import { createStore } from 'amos-core';
-import { IDBStorage, withPersist } from 'amos-persist';
+import { createStore, IDBStorage, withPersist } from 'amos';
 import { Provider } from 'amos/react';
-import React, { StrictMode } from 'react';
+import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './App';
 import './index.css';

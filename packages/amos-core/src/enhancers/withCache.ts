@@ -8,7 +8,7 @@ import { Entry, isAmosObject, override } from 'amos-utils';
 import { StoreEnhancer } from '../store';
 import { resolveCacheKey } from '../utils';
 
-export type SelectValueEntry<R = any> = Entry<Selectable<R>, R>;
+export type SelectEntry<R = any> = Entry<Selectable<R>, R>;
 
 export function isSelectValueEqual<R>(s: Selectable<R>, a: R, b: R) {
   if (!isAmosObject<Selector>(s, 'selector') || s.cache) {
@@ -20,8 +20,8 @@ export function isSelectValueEqual<R>(s: Selectable<R>, a: R, b: R) {
 export const withCache: () => StoreEnhancer = () => {
   return (next) => (options) => {
     const store = next(options);
-    const cacheMap = new Map<string, readonly [value: any, deps: readonly SelectValueEntry[]]>();
-    const stack: Array<SelectValueEntry[] | null> = [];
+    const cacheMap = new Map<string, readonly [value: any, deps: readonly SelectEntry[]]>();
+    const stack: Array<SelectEntry[] | null> = [];
     const peak = () => stack[stack.length - 1];
     override(store, 'select', (select) => {
       return (s: any) => {

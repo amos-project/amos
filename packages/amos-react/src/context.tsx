@@ -5,7 +5,7 @@
 
 import { Dispatch, Store } from 'amos';
 import { must } from 'amos-utils';
-import React, { createContext, ReactNode, useContext } from 'react';
+import { createContext, ReactNode, useContext } from 'react';
 
 export const Context = createContext<Store | null>(null);
 

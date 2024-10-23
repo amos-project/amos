@@ -5,7 +5,6 @@
 
 import { render } from '@testing-library/react';
 import { createStore, Store } from 'amos-core';
-import React from 'react';
 import { Consumer, Provider } from './context';
 
 describe('provider', () => {

@@ -4,7 +4,7 @@
  */
 
 import { useDispatch } from 'amos/react';
-import React, { memo, useState } from 'react';
+import { memo, useState } from 'react';
 import { signIn } from '../store/user.actions';
 
 export const SignIn = memo(() => {

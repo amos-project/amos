@@ -4,13 +4,13 @@
  */
 
 import { useDispatch, useSelector } from 'amos/react';
-import React, { memo } from 'react';
+import { memo } from 'react';
 import { signOut } from '../store/user.actions';
 import { selectCurrentUser } from '../store/user.selectors';
 
 export const Header = memo(() => {
   const dispatch = useDispatch();
-  const [user] = useSelector(selectCurrentUser());
+  const user = useSelector(selectCurrentUser());
   const handleSignOut = () => {
     const keepData = confirm('You will be signed out, do you want to keep your data?');
     dispatch(signOut(keepData));

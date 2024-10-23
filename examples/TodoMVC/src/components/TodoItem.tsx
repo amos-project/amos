@@ -4,13 +4,13 @@
  */
 
 import { useDispatch, useSelector } from 'amos/react';
-import React, { memo } from 'react';
+import { memo } from 'react';
 import { completeTodo, deleteTodo } from '../store/todo.actions';
 import { todoMapBox } from '../store/todo.boxes';
 
 export const TodoItem = memo(({ id }: { id: number }) => {
   const dispatch = useDispatch();
-  const [todo] = useSelector(todoMapBox.getItem(id));
+  const todo = useSelector(todoMapBox.getItem(id));
   return (
     <div>
       <span>{todo.title}</span>

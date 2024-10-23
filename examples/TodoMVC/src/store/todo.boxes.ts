@@ -3,9 +3,7 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { listMapBox, recordMapBox } from 'amos-boxes';
-import { box } from 'amos-core';
-import { Record } from 'amos-shapes';
+import { box, listMapBox, Record, recordMapBox } from 'amos';
 import { signOutSignal } from './user.boxes';
 
 export function hashCode(s: string) {

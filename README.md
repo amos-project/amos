@@ -48,7 +48,7 @@ const countBox = numberBox('count');
 
 function Count() {
     const dispatch = useDispatch();
-    const [count] = useSelector(countBox);
+    const count = useSelector(countBox);
 
     return (
         <div>

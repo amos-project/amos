@@ -3,11 +3,11 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { Action, action, Box, Dispatch, MapSelector, Select } from 'amos-core';
+import { Action, action, Box, Dispatch, MapSelectable, Select } from 'amos-core';
 import { NotImplemented } from 'amos-utils';
 
 export interface LoadBoxes {
-  <A extends Box[]>(...boxes: A): Action<A, Promise<MapSelector<A>>>;
+  <A extends Box[]>(...boxes: A): Action<A, Promise<MapSelectable<A>>>;
 }
 
 export const loadBoxes: LoadBoxes = action(

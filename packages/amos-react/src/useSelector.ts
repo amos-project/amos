@@ -7,19 +7,18 @@ import {
   Box,
   isAmosObject,
   isSelectValueEqual,
-  MapSelector,
   Select,
   Selectable,
   Selector,
-  SelectValueEntry,
+  SelectEntry,
 } from 'amos';
 import { useCallback, useDebugValue, useLayoutEffect, useReducer, useRef } from 'react';
 import { useStore } from './context';
 
-export function useSelect(): Select {
+function useSelect(): Select {
   const [, update] = useReducer((s) => s + 1, 0);
   const store = useStore();
-  const deps = useRef<SelectValueEntry[]>([]);
+  const deps = useRef<SelectEntry[]>([]);
   const rendering = useRef(true);
   rendering.current = true;
   deps.current = [];
@@ -73,67 +72,21 @@ export function useSelect(): Select {
   );
 }
 
-/**
- * Get the {@link import('amos-core').Store.select} and any call to the
- * returned selector in the render will be recorded and the component
- * will re-render when the used selector's value changed.
- *
- * You can use the returned select function anywhere, including the
- * conditional or loop blocks, and also in callbacks. Only the selector
- * called in render function will trigger re-render.
- *
- * @example
- * const select = useSelector();
- * const foo = select(selectFoo());
- * if (something) {
- *   select(bar())
- * }
- * return (
- *   <div onClick={() => alert(select(baz())}>
- *     {keys.map((key) => <div>{select(selectItem(key)).title</div>}
- *   </div>
- * )
- * ```
- */
-export function useSelector(): Select;
-/**
- * Get the selected states according to the selectors, and rerender the
- * component when the selected states updated.
- *
- * A selector is a selectable thing, it could be one of this:
- *
- * 1. A `Box` instance
- * 2. A `Selector` which is created by `SelectorFactory`
- *
- * If the selector is a `Selector`, the selected state is its return value,
- * otherwise, when the selector is a `Box`, the selected state is the state
- * of the `Box`.
- *
- * `useSelector` accepts multiple selectors, and returns an array of the
- * selected states of the selectors.
- *
- * @example
- * ```typescript
- * const [
- *   count, // 1
- *   tripleCount, // 2
- * ] = useSelector(
- *   countBox, // A Box
- *   selectMultipleCount(3), // A Selector
- * );
- * ```
- */
-export function useSelector<Rs extends Selectable[]>(...selectors: Rs): MapSelector<Rs>;
-export function useSelector(...selectors: Selectable[]): any {
+export interface UseSelector extends Select {
+  (): Select;
+}
+
+export const useSelector: UseSelector = (selectors?: Selectable | readonly Selectable[]): any => {
   const select = useSelect();
-  const size = useRef(selectors.length);
-  if (size.current !== selectors.length) {
+  const size = Array.isArray(selectors) ? selectors.length : selectors === void 0 ? -2 : -1;
+  const sizeRef = useRef(size);
+  if (sizeRef.current !== size) {
     throw new Error(
-      `selector size should be immutable, previous is ${size.current}, current is ${selectors.length}`,
+      `selector size should be immutable, previous is ${sizeRef.current}, current is ${size}`,
     );
   }
-  if (selectors.length === 0) {
+  if (!selectors) {
     return select;
   }
-  return select(selectors);
-}
+  return select(selectors as any);
+};

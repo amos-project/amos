@@ -5,13 +5,13 @@
 
 import { numberBox } from 'amos';
 import { useDispatch, useSelector } from 'amos/react';
-import React, { memo } from 'react';
+import { memo } from 'react';
 
 const countBox = numberBox('count', 0);
 
 export const App = memo(() => {
   const dispatch = useDispatch();
-  const [count] = useSelector(countBox);
+  const count = useSelector(countBox);
   return (
     <div>
       <span>Count: {count}&nbsp;</span>

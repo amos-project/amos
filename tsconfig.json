@@ -2,13 +2,17 @@
   "compilerOptions": {
     "target": "ES2022",
     "module": "ESNext",
-    "lib": ["ES2022", "DOM"],
+    "lib": [
+      "ES2022",
+      "DOM"
+    ],
     "allowJs": false,
-    "jsx": "react",
+    "jsx": "react-jsx",
     "rootDir": ".",
     "outDir": "dist",
+    "noEmit": false,
     "declaration": true,
-    "emitDeclarationOnly": true,
+    "emitDeclarationOnly": false,
     "declarationMap": false,
     "sourceMap": true,
     "removeComments": false,
@@ -33,17 +37,34 @@
     "allowUnreachableCode": false,
     "stripInternal": true,
     "allowUnusedLabels": false,
-    "baseUrl": "packages",
+    "baseUrl": ".",
     "importsNotUsedAsValues": "remove",
     "preserveValueImports": false,
     "paths": {
-      "amos": ["amos/src"],
-      "amos/react": ["amos/src/react"],
-      "amos-*": ["amos-*/src"]
+      "amos": [
+        "./packages/amos/src"
+      ],
+      "amos/react": [
+        "./packages/amos/src/react"
+      ],
+      "amos-*": [
+        "./packages/amos-*/src"
+      ],
+      "@site/*": [
+        "./website/*"
+      ]
     },
     "skipLibCheck": true,
     "noImplicitOverride": true
   },
-  "include": ["packages", "scripts", "examples", "website"],
-  "exclude": ["dist", "node_modules"]
+  "include": [
+    "packages",
+    "scripts",
+    "examples",
+    "website"
+  ],
+  "exclude": [
+    "dist",
+    "node_modules"
+  ]
 }
