@@ -4,7 +4,7 @@ import { themes as prismThemes } from 'prism-react-renderer';
 
 const config: Config = {
   title: 'Amos',
-  tagline: 'A decentralized, data-driven, all-in-one state management library for React.',
+  tagline: 'A decentralized, data-driven, all-in-one state management solution for large-scale applications.',
   favicon: 'img/amos.ico',
 
   // Set the production url of your site here
@@ -60,25 +60,31 @@ const config: Config = {
           type: 'doc',
           label: 'Get started',
           docId: 'Introduction/get-started',
-          position: 'right',
+          position: 'left',
         },
         {
           type: 'doc',
           label: 'Usage Guide',
           docId: 'Basics/store',
-          position: 'right',
+          position: 'left',
+        },
+        {
+          type: 'doc',
+          label: 'Ecosystem',
+          docId: 'Ecosystem/ssr',
+          position: 'left',
         },
         {
           type: 'doc',
           label: 'React',
           docId: 'React/provider',
-          position: 'right',
+          position: 'left',
         },
         {
           type: 'doc',
           label: 'API',
           docId: 'API/core',
-          position: 'right',
+          position: 'left',
         },
         {
           href: 'https://github.com/amos-project/amos',

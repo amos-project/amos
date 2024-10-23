@@ -27,11 +27,10 @@ function HomepageHeader() {
 }
 
 export default function Home(): JSX.Element {
-  const { siteConfig } = useDocusaurusContext();
   return (
     <Layout
-      title={`Hello from ${siteConfig.title}`}
-      description="Description will go into a meta tag in <head />"
+      title={`Amos - All-in-one state management solution for large-scale applications.`}
+      description="Amos is an all-in-one state management solution for large-scale applications."
     >
       <HomepageHeader />
       <main>
