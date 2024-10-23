@@ -4,7 +4,8 @@ import { themes as prismThemes } from 'prism-react-renderer';
 
 const config: Config = {
   title: 'Amos',
-  tagline: 'A decentralized, data-driven, all-in-one state management solution for large-scale applications.',
+  tagline:
+    'A decentralized, data-driven, all-in-one state management solution for large-scale applications.',
   favicon: 'img/amos.ico',
 
   // Set the production url of your site here
@@ -101,6 +102,11 @@ const config: Config = {
     prism: {
       theme: prismThemes.github,
       darkTheme: prismThemes.dracula,
+    },
+    algolia: {
+      appId: 'ZY0PEBSY83',
+      apiKey: 'ad9a8bee80a6f07ea33038e023435924',
+      indexName: 'amos-projectio',
     },
   } satisfies Preset.ThemeConfig,
 };
