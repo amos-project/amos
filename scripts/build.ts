@@ -4,8 +4,10 @@
  */
 
 import alias from '@rollup/plugin-alias';
+import terser from '@rollup/plugin-terser';
 import typescript from '@rollup/plugin-typescript';
 import * as fs from 'fs-extra';
+import { upperFirst } from 'lodash';
 import * as child_process from 'node:child_process';
 import * as console from 'node:console';
 import { rollup } from 'rollup';
@@ -54,6 +56,14 @@ export const build = autorun(
         await Promise.all([
           bundle.write({ format: 'esm', sourcemap: true, file: `${outDir}/index.esm.js` }),
           bundle.write({ format: 'cjs', sourcemap: true, file: `${outDir}/index.cjs.js` }),
+          bundle.write({
+            format: 'iife',
+            sourcemap: true,
+            name: name === 'dist' ? 'Amos' : 'Amos' + upperFirst(name),
+            file: `${outDir}/index.min.js`,
+            plugins: [terser()],
+            globals: { amos: 'Amos', react: 'React' },
+          }),
         ]);
         await bundle.close();
         if (name !== 'dist') {
