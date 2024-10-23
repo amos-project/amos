@@ -1,4 +1,5 @@
 {
+  "name": "amos-examples-counter",
   "private": true,
   "version": "0.0.0",
   "type": "module",

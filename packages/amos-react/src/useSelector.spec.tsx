@@ -4,7 +4,7 @@
  */
 
 import { act, renderHook, RenderHookResult } from '@testing-library/react-hooks';
-import { createStore, MapSelectable, Select, Selectable, selector, Snapshot, Store } from 'amos-core';
+import { createStore, MapSelectables, Select, Selectable, selector, Snapshot, Store } from 'amos-core';
 import {
   addTwiceAsync,
   countBox,
@@ -35,7 +35,7 @@ function renderUseSelector<P, Rs extends readonly Selectable[]>(
   fn: (props: P) => Rs,
   preloaded?: Snapshot,
   initialProps?: P,
-): RenderHookResult<P, MapSelectable<Rs>> & Store {
+): RenderHookResult<P, MapSelectables<Rs>> & Store {
   const store = createStore({ preloadedState: preloaded });
   const hook = renderHook((props: P) => useSelector(fn(props)), {
     wrapper: (props: any) => <Provider store={store}>{props.children}</Provider>,

@@ -79,6 +79,11 @@ export interface EnhanceableStore extends Store {
    * {@link import('amos-utils').fromJS}.
    */
   getInitialState: <S>(box: Box<S>) => S;
+
+  /**
+   * This function will be called after the store created.
+   */
+  init: () => void;
 }
 
 export type StoreEnhancer = Enhancer<[StoreOptions], EnhanceableStore>;
@@ -92,8 +97,9 @@ export function createStore(options: StoreOptions = {}, ...enhancers: StoreEnhan
       let isDispatching = false;
       return {
         state: {},
-        snapshot: () => store.state,
         getInitialState: (box) => box.initialState,
+        init: () => void 0,
+        snapshot: () => store.state,
         subscribe: ec.subscribe,
         // only accepts Dispatchable here
         dispatch: (_task: any) => {
@@ -147,6 +153,7 @@ export function createStore(options: StoreOptions = {}, ...enhancers: StoreEnhan
       };
     },
   );
+  store.init();
   return {
     snapshot: store.snapshot,
     subscribe: store.subscribe,

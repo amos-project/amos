@@ -58,7 +58,7 @@ export function withDevtools(): StoreEnhancer {
           dev.send(
             {
               type: `P:${s.key}`,
-              state: result,
+              args: [result],
             },
             store.state,
           );
@@ -77,7 +77,7 @@ export function withDevtools(): StoreEnhancer {
           dev.send(
             {
               type: `${task[$amos].charAt(0).toUpperCase()}:${task.type}`,
-              params: task.args,
+              args: task.args,
             },
             store.state,
           );

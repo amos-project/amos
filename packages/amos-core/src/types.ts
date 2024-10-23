@@ -17,13 +17,15 @@ export interface DispatchableRecord<R> {
 
 export type Dispatchable<R = any> = DispatchableRecord<R>[keyof DispatchableRecord<R>];
 
-export type MapDispatchable<Rs extends readonly Dispatchable[]> = {
-  [P in keyof Rs]: Rs[P] extends Dispatchable<infer R> ? R : never;
+export type ResultOfDispatchable<D> = D extends Dispatchable<infer R> ? R : never;
+
+export type MapDispatchables<Rs extends readonly Dispatchable[]> = {
+  [P in keyof Rs]: ResultOfDispatchable<Rs[P]>;
 };
 
 export interface Dispatch {
   <R>(dispatchable: Dispatchable<R>): R;
-  <Rs extends readonly Dispatchable[]>(dispatchables: Rs): MapDispatchable<Rs>;
+  <Rs extends readonly Dispatchable[] | []>(dispatchables: Rs): MapDispatchables<Rs>;
   <R>(dispatchables: readonly Dispatchable<R>[]): R[];
 }
 
@@ -34,13 +36,15 @@ export interface SelectableRecord<R> {
 
 export type Selectable<R = any> = SelectableRecord<R>[keyof SelectableRecord<R>];
 
-export type MapSelectable<Rs extends readonly Selectable[]> = {
-  [P in keyof Rs]: Rs[P] extends Selectable<infer R> ? R : never;
+export type StateOfSelectable<S> = S extends Selectable<infer R> ? R : never;
+
+export type MapSelectables<Rs extends readonly Selectable[]> = {
+  [P in keyof Rs]: StateOfSelectable<Rs[P]>;
 };
 
 export interface Select {
   <R>(selectable: Selectable<R>): R;
-  <Rs extends readonly Selectable[]>(selectables: Rs): MapSelectable<Rs>;
+  <Rs extends readonly Selectable[] | []>(selectables: Rs): MapSelectables<Rs>;
   <R>(selectables: readonly Selectable<R>[]): R[];
 }
 

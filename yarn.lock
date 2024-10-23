@@ -4516,36 +4516,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"Counter-ec41ce@workspace:examples/Counter":
-  version: 0.0.0-use.local
-  resolution: "Counter-ec41ce@workspace:examples/Counter"
-  dependencies:
-    "@types/react": "npm:^18.3.10"
-    "@types/react-dom": "npm:^18.3.0"
-    "@vitejs/plugin-react": "npm:^4.3.2"
-    globals: "npm:^15.9.0"
-    react: "npm:^18.3.1"
-    react-dom: "npm:^18.3.1"
-    typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.8"
-  languageName: unknown
-  linkType: soft
-
-"TodoMVC-1c0570@workspace:examples/TodoMVC":
-  version: 0.0.0-use.local
-  resolution: "TodoMVC-1c0570@workspace:examples/TodoMVC"
-  dependencies:
-    "@types/react": "npm:^18.3.10"
-    "@types/react-dom": "npm:^18.3.0"
-    "@vitejs/plugin-react": "npm:^4.3.2"
-    globals: "npm:^15.9.0"
-    react: "npm:^18.3.1"
-    react-dom: "npm:^18.3.1"
-    typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.8"
-  languageName: unknown
-  linkType: soft
-
 "abbrev@npm:^2.0.0":
   version: 2.0.0
   resolution: "abbrev@npm:2.0.0"
@@ -4726,6 +4696,36 @@ __metadata:
 "amos-core@workspace:packages/amos-core":
   version: 0.0.0-use.local
   resolution: "amos-core@workspace:packages/amos-core"
+  languageName: unknown
+  linkType: soft
+
+"amos-examples-counter@workspace:examples/Counter":
+  version: 0.0.0-use.local
+  resolution: "amos-examples-counter@workspace:examples/Counter"
+  dependencies:
+    "@types/react": "npm:^18.3.10"
+    "@types/react-dom": "npm:^18.3.0"
+    "@vitejs/plugin-react": "npm:^4.3.2"
+    globals: "npm:^15.9.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.4.8"
+  languageName: unknown
+  linkType: soft
+
+"amos-examples-todomvc@workspace:examples/TodoMVC":
+  version: 0.0.0-use.local
+  resolution: "amos-examples-todomvc@workspace:examples/TodoMVC"
+  dependencies:
+    "@types/react": "npm:^18.3.10"
+    "@types/react-dom": "npm:^18.3.0"
+    "@vitejs/plugin-react": "npm:^4.3.2"
+    globals: "npm:^15.9.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.4.8"
   languageName: unknown
   linkType: soft
 

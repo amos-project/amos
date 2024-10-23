@@ -44,7 +44,7 @@ export {
   Dispatchable,
   DispatchableRecord,
   EnhanceableStore,
-  MapSelectable,
+  MapSelectables,
   Mutation,
   MutationFactory,
   MutationOptions,

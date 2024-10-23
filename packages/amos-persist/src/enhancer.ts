@@ -18,14 +18,19 @@ export function withPersist(options: PartialRequired<PersistOptions, 'storage'>)
       ...options,
     };
 
-    store.dispatch(
-      persistBox.setState({
-        options: finalOptions,
-        loading: loading,
-      }),
-    );
+    override(store, 'init', (init) => {
+      return () => {
+        init();
+        store.dispatch(
+          persistBox.setState({
+            options: finalOptions,
+            loading: loading,
+          }),
+        );
+      };
+    });
 
-    override(store, 'select', (original) => {
+    override(store, 'select', (select) => {
       return (selectable: any): any => {
         throw new NotImplemented();
       };

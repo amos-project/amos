@@ -9,8 +9,8 @@ import {
   isSelectValueEqual,
   Select,
   Selectable,
-  Selector,
   SelectEntry,
+  Selector,
 } from 'amos';
 import { useCallback, useDebugValue, useLayoutEffect, useReducer, useRef } from 'react';
 import { useStore } from './context';

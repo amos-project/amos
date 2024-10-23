@@ -7,7 +7,7 @@ import { numberBox } from 'amos';
 import { useDispatch, useSelector } from 'amos/react';
 import { memo } from 'react';
 
-const countBox = numberBox('count', 0);
+const countBox = numberBox('count');
 
 export const App = memo(() => {
   const dispatch = useDispatch();
@@ -15,7 +15,7 @@ export const App = memo(() => {
   return (
     <div>
       <span>Count: {count}&nbsp;</span>
-      <button onClick={() => dispatch(countBox.setState((c) => c + 1))}>Click me!</button>
+      <button onClick={() => dispatch(countBox.add(1))}>Click me!</button>
     </div>
   );
 });
