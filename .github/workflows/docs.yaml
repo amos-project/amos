@@ -35,6 +35,8 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '18' # Change this to the node version you need
+          cache: yarn
+          cache-dependency-path: yarn.lock
       - name: Enable Corepack (for Yarn 4)
         run: corepack enable
       - name: Install dependencies
