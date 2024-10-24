@@ -117,7 +117,7 @@ export function createStore(options: StoreOptions = {}, ...enhancers: StoreEnhan
                 break;
               case 'mutation':
                 const initialState = store.select(task.box);
-                r = task.mutator(initialState, ...task.args);
+                r = task.mutator(initialState);
                 store.state[task.box.key] = r;
                 break;
               case 'signal':

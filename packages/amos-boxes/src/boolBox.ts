@@ -3,12 +3,12 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { Box, Mutation, ShapeBox } from 'amos-core';
+import { Box, Mutation } from 'amos-core';
 
-export interface BoolBox extends ShapeBox<boolean, never, never> {
-  toggle(): Mutation<[], boolean>;
-  open(): Mutation<[], boolean>;
-  close(): Mutation<[], boolean>;
+export interface BoolBox extends Box<boolean> {
+  toggle(): Mutation<boolean>;
+  open(): Mutation<boolean>;
+  close(): Mutation<boolean>;
 }
 
 export const BoolBox = Box.extends<BoolBox>({

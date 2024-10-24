@@ -16,11 +16,10 @@ export function expectCalled(fn: (...args: any[]) => any, count = 1) {
   (fn as Mock).mockClear();
 }
 
-export function applyMutations<S>(state: S, mutations: Mutation<any, S>[]) {
+export function applyMutations<S>(state: S, mutations: Mutation<S>[]) {
   return mutations
     .reduce(
-      (prev, mutation) =>
-        prev.concat([mutation.mutator.apply(mutation.box, [state, ...mutation.args])]),
+      (prev, mutation) => prev.concat([mutation.mutator.apply(mutation.box, [state])]),
       [state],
     )
     .slice(1);

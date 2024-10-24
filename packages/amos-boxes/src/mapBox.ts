@@ -8,22 +8,22 @@ import { Map } from 'amos-shapes';
 import { ID, IDOf } from 'amos-utils';
 
 export interface MapBox<M extends Map<any, any> = Map<any, any>>
-  extends ShapeBox<
-    M,
-    | 'setItem'
-    | 'setAll'
-    | 'mergeItem'
-    | 'mergeAll'
-    | 'updateItem'
-    | 'updateAll'
-    | 'removeItem'
-    | 'removeAll'
-    | 'clear'
-    | 'reset',
-    'getItem' | 'hasItem' | 'size',
-    Box<M>,
-    Map<any, any>
-  > {}
+  extends Box<M>,
+    ShapeBox<
+      M,
+      | 'setItem'
+      | 'setAll'
+      | 'mergeItem'
+      | 'mergeAll'
+      | 'updateItem'
+      | 'updateAll'
+      | 'removeItem'
+      | 'removeAll'
+      | 'clear'
+      | 'reset',
+      'getItem' | 'hasItem' | 'size',
+      Map<any, any>
+    > {}
 
 export const MapBox = Box.extends<MapBox>({
   name: 'MapBox',

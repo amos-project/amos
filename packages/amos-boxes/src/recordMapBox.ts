@@ -3,7 +3,7 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { Mutation, ShapeBox } from 'amos-core';
+import { Box, Mutation, ShapeBox } from 'amos-core';
 import {
   MapKey,
   MapValue,
@@ -14,29 +14,17 @@ import {
   RecordMapKeyField,
   RecordProps,
 } from 'amos-shapes';
-import { IDKeyof, OmitKeys, resolveCtorValue, ValueOrConstructor } from 'amos-utils';
+import { IDKeyof, resolveCtorValue, ValueOrConstructor } from 'amos-utils';
 import { MapBox } from './mapBox';
 
 export interface RecordMapBox<RM extends RecordMap<any, any> = RecordMap<any, any>>
-  extends ShapeBox<
-    RM,
-    'setAll' | 'mergeAll',
-    never,
-    OmitKeys<MapBox<RM>, 'setItem' | 'setAll' | 'mergeItem'>,
-    RecordMap<Record<{}>, never>
-  > {
-  setItem(
-    key: MapKey<RM>,
-    value: MapValue<RM>,
-  ): Mutation<[key: MapKey<RM>, value: MapValue<RM>], RM>;
-  setItem(value: MapValue<RM>): Mutation<[value: MapValue<RM>], RM>;
-  mergeItem(
-    props: PartialRequiredProps<MapValue<RM>, RecordMapKeyField<RM>>,
-  ): Mutation<[props: PartialRequiredProps<MapValue<RM>, RecordMapKeyField<RM>>], RM>;
-  mergeItem(
-    key: MapKey<RM>,
-    props: PartialProps<MapValue<RM>>,
-  ): Mutation<[key: MapKey<RM>, props: PartialProps<MapValue<RM>>], RM>;
+  extends Omit<MapBox<RM>, 'setItem' | 'mergeItem' | keyof Box>,
+    Box<RM>,
+    ShapeBox<RM, 'setAll' | 'mergeAll', never, RecordMap<Record<{}>, never>> {
+  setItem(key: MapKey<RM>, value: MapValue<RM>): Mutation<RM>;
+  setItem(value: MapValue<RM>): Mutation<RM>;
+  mergeItem(props: PartialRequiredProps<MapValue<RM>, RecordMapKeyField<RM>>): Mutation<RM>;
+  mergeItem(key: MapKey<RM>, props: PartialProps<MapValue<RM>>): Mutation<RM>;
 }
 
 export const RecordMapBox = MapBox.extends<RecordMapBox>({

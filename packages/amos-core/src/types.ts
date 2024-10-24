@@ -10,7 +10,7 @@ import { Compute, Selector, SelectorFactory } from './selector';
 import { Signal } from './signal';
 
 export interface DispatchableRecord<R> {
-  mutation: Mutation<any, R>;
+  mutation: Mutation<R>;
   action: Action<any, R>;
   signal: Signal<any, R>;
 }

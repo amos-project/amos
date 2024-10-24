@@ -18,22 +18,20 @@ import { Selector, SelectorFactory, SelectorOptions } from './selector';
 import { SignalFactory } from './signal';
 import { Select } from './types';
 
-export type Mutator<A extends any[] = any, S = any> = (state: S, ...args: A) => S;
+export type Mutator<S = any> = (state: S) => S;
 
-export interface MutationOptions<A extends any[] = any, S = any> {
+export interface MutationOptions<S = any> {
   type: string;
-  mutator: Mutator<A, S>;
+  mutator: Mutator<S>;
 }
 
-export interface Mutation<A extends any[] = any, S = any>
-  extends AmosObject<'mutation'>,
-    MutationOptions<A, S> {
-  args: A;
+export interface Mutation<S = any> extends AmosObject<'mutation'>, MutationOptions<S> {
+  args: readonly unknown[];
   box: Box<S>;
 }
 
 export interface MutationFactory<A extends any[] = any, S = any> {
-  (...args: A): Mutation<A, S>;
+  (...args: A): Mutation<S>;
 }
 
 export interface TableOptions<S = any> {
@@ -70,14 +68,11 @@ export interface BoxOptions<S = any> {
 export interface Box<S = any> extends AmosObject<'box'>, Readonly<BoxOptions<S>> {
   readonly key: string;
 
-  config<TThis extends Box>(
-    this: TThis,
-    options: ValueOrFunc<Partial<BoxOptions<S>>, [this]>,
-  ): TThis;
+  config(options: ValueOrFunc<Partial<BoxOptions<S>>, [this]>): this;
 
-  setState(): Mutation<[], S>;
-  setState(state: S): Mutation<[S], S>;
-  setState(next: (state: S) => S): Mutation<[(state: S) => S], S>;
+  setState(): Mutation<S>;
+  setState(state: S): Mutation<S>;
+  setState(next: (state: S) => S): Mutation<S>;
 
   subscribe<T>(signal: SignalFactory<any, T>, fn: (state: S, data: T) => S): Unsubscribe;
 }
@@ -157,7 +152,7 @@ function createBoxFactory<B extends Box, SB = {}>(
         }
       };
   for (const k in mutations) {
-    const mutator =
+    const fn =
       typeof mutations[k] === 'function'
         ? mutations[k]
         : (state: any, ...args: any[]) => state[k](...args);
@@ -165,7 +160,7 @@ function createBoxFactory<B extends Box, SB = {}>(
       value: function (this: Box, ...args: any[]): Mutation {
         return createAmosObject<Mutation>('mutation', {
           type: `${this.key}/${k as string}`,
-          mutator: mutator,
+          mutator: (state: any) => fn(state, ...args),
           args: args,
           box: this,
         });
@@ -196,6 +191,7 @@ function createBoxFactory<B extends Box, SB = {}>(
   return Box;
 }
 
+window.alert('1');
 export const Box: BoxFactory = createBoxFactory<Box>({
   name: 'Box',
   mutations: {
@@ -212,9 +208,8 @@ export type ShapeBox<
   TShape,
   TMutationKeys extends keyof TShape,
   TSelectorKeys extends keyof TShape,
-  TBox extends Box = Box<TShape>,
   KLimiter = TShape /* tricky for WebStorm go to definitions to shape method, if TypeScript allows P in keyof S & KM, this should be removed */,
-> = TBox & {
+> = {
   [P in keyof KLimiter & TMutationKeys]: TShape[P] extends (...args: infer A) => TShape
     ? MutationFactory<A, TShape>
     : never;

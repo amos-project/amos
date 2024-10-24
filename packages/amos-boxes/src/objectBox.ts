@@ -7,10 +7,8 @@ import { Box, Mutation, Selector } from 'amos-core';
 import { resolveFuncValue, shallowEqual } from 'amos-utils';
 
 export interface ObjectBox<T extends object> extends Box<Readonly<T>> {
-  mergeState(state: Partial<T>): Mutation<[state: Partial<T>], Readonly<T>>;
-  mergeState(
-    next: (state: Readonly<T>) => Partial<T>,
-  ): Mutation<[next: (state: Readonly<T>) => Partial<T>], Readonly<T>>;
+  mergeState(state: Partial<T>): Mutation<Readonly<T>>;
+  mergeState(next: (state: Readonly<T>) => Partial<T>): Mutation<Readonly<T>>;
   get<K extends keyof T>(key: K): Selector<[K], T[K]>;
   pick<Ks extends Array<keyof T>>(...keys: Ks): Selector<Ks, Pick<T, Ks[number]>>;
 }

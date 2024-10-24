@@ -75,7 +75,8 @@ export class PagedListMap<V extends PagedList<any, any, any>> extends RecordMap<
 implementMapDelegations(PagedListMap, { delete: null });
 
 export interface PagedListMapBox<PM extends PagedListMap<any>>
-  extends ShapeBox<PM, 'deleteIn', never, RecordMapBox<PM>, PagedListMap<any>> {}
+  extends RecordMapBox<PM>,
+    ShapeBox<PM, 'deleteIn', never, PagedListMap<any>> {}
 
 export const PagedListMapBox = RecordMapBox.extends<PagedListMapBox<any>>({
   name: 'PagedListMapBox',

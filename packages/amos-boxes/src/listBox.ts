@@ -7,42 +7,42 @@ import { Box, ShapeBox } from 'amos-core';
 import { List } from 'amos-shapes';
 
 export interface ListBox<L extends List<any>>
-  extends ShapeBox<
-    L,
-    | 'concat'
-    | 'copyWithin'
-    | 'fill'
-    | 'filterThis'
-    | 'mapThis'
-    | 'pop'
-    | 'push'
-    | 'reverse'
-    | 'shift'
-    | 'unshift'
-    | 'slice'
-    | 'sort'
-    | 'splice'
-    | 'delete'
-    | 'set'
-    | 'reset',
-    | 'some'
-    | 'reduce'
-    | 'reduceRight'
-    | 'findIndex'
-    | 'flat'
-    | 'includes'
-    | 'indexOf'
-    | 'join'
-    | 'lastIndexOf'
-    | 'map'
-    | 'find'
-    | 'filter'
-    | 'get'
-    | 'length'
-    | 'every',
-    Box<L>,
-    List<any>
-  > {}
+  extends Box<L>,
+    ShapeBox<
+      L,
+      | 'concat'
+      | 'copyWithin'
+      | 'fill'
+      | 'filterThis'
+      | 'mapThis'
+      | 'pop'
+      | 'push'
+      | 'reverse'
+      | 'shift'
+      | 'unshift'
+      | 'slice'
+      | 'sort'
+      | 'splice'
+      | 'delete'
+      | 'set'
+      | 'reset',
+      | 'some'
+      | 'reduce'
+      | 'reduceRight'
+      | 'findIndex'
+      | 'flat'
+      | 'includes'
+      | 'indexOf'
+      | 'join'
+      | 'lastIndexOf'
+      | 'map'
+      | 'find'
+      | 'filter'
+      | 'get'
+      | 'length'
+      | 'every',
+      List<any>
+    > {}
 
 export const ListBox = Box.extends<ListBox<any>>({
   name: 'ListBox',

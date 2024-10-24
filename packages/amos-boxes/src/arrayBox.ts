@@ -7,24 +7,19 @@ import { Box, Mutation, ShapeBox } from 'amos-core';
 import { removeElement } from 'amos-utils';
 
 export interface ArrayBox<E>
-  extends ShapeBox<
-    readonly E[],
-    'slice' | 'filter',
-    'at' | 'includes' | 'indexOf' | 'lastIndexOf' | 'find' | 'findIndex' | 'some' | 'every'
-  > {
-  push(...items: E[]): Mutation<[...items: E[]], readonly E[]>;
-  pop(): Mutation<[], readonly E[]>;
-  unshift(...items: E[]): Mutation<[...items: E[]], readonly E[]>;
-  shift(): Mutation<[], readonly E[]>;
-  splice(
-    start: number,
-    count: number,
-    ...items: E[]
-  ): Mutation<[start: number, count: number, ...items: E[]], readonly E[]>;
-  sort(
-    compare?: (a: E, b: E) => number,
-  ): Mutation<[compare?: (a: E, b: E) => number], readonly E[]>;
-  delete(...items: E[]): Mutation<E[], readonly E[]>;
+  extends Box<E>,
+    ShapeBox<
+      readonly E[],
+      'slice' | 'filter',
+      'at' | 'includes' | 'indexOf' | 'lastIndexOf' | 'find' | 'findIndex' | 'some' | 'every'
+    > {
+  push(...items: E[]): Mutation<readonly E[]>;
+  pop(): Mutation<readonly E[]>;
+  unshift(...items: E[]): Mutation<readonly E[]>;
+  shift(): Mutation<readonly E[]>;
+  splice(start: number, count: number, ...items: E[]): Mutation<readonly E[]>;
+  sort(compare?: (a: E, b: E) => number): Mutation<readonly E[]>;
+  delete(...items: E[]): Mutation<readonly E[]>;
 }
 
 export const ArrayBox = Box.extends<ArrayBox<any>>({
@@ -35,8 +30,11 @@ export const ArrayBox = Box.extends<ArrayBox<any>>({
     unshift: (state, ...items) => items.concat(state),
     shift: (state) => state.slice(1),
     slice: null,
-    splice: (state, start, deleteCount, ...items) =>
-      state.slice().splice(start, deleteCount, ...items),
+    splice: (state, start, deleteCount, ...items) => {
+      const value = state.slice();
+      value.splice(start, deleteCount, ...items);
+      return value;
+    },
     sort: (state, compare) => state.slice().sort(compare),
     filter: null,
     delete: (state, ...items) => removeElement(state.slice(), ...items),

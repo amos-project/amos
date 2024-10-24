@@ -9,30 +9,30 @@ import { IDOf } from 'amos-utils';
 import { MapBox } from './mapBox';
 
 export interface ListMapBox<LM extends ListMap<any, any>>
-  extends ShapeBox<
-    LM,
-    | 'setItem'
-    | 'setAll'
-    | 'concatIn'
-    | 'copyWithinIn'
-    | 'fillIn'
-    | 'filterThisIn'
-    | 'mapThisIn'
-    | 'popIn'
-    | 'pushIn'
-    | 'reverseIn'
-    | 'shiftIn'
-    | 'unshiftIn'
-    | 'sliceIn'
-    | 'sortIn'
-    | 'spliceIn'
-    | 'deleteIn'
-    | 'setIn'
-    | 'resetIn',
-    never,
-    MapBox<LM>,
-    ListMap<any, any>
-  > {}
+  extends MapBox<LM>,
+    ShapeBox<
+      LM,
+      | 'setItem'
+      | 'setAll'
+      | 'concatIn'
+      | 'copyWithinIn'
+      | 'fillIn'
+      | 'filterThisIn'
+      | 'mapThisIn'
+      | 'popIn'
+      | 'pushIn'
+      | 'reverseIn'
+      | 'shiftIn'
+      | 'unshiftIn'
+      | 'sliceIn'
+      | 'sortIn'
+      | 'spliceIn'
+      | 'deleteIn'
+      | 'setIn'
+      | 'resetIn',
+      never,
+      ListMap<any, any>
+    > {}
 
 export const ListMapBox = MapBox.extends<ListMapBox<any>>({
   name: 'ListMap',
