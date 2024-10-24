@@ -39,7 +39,7 @@ export interface StoreOptions {
    * Enable devtools or not, if not set, will auto enable devtools if NODE_ENV
    * is development.
    */
-  devtools?: DevtoolsOptions | false;
+  devtools?: DevtoolsOptions | boolean;
 }
 
 export interface Store {

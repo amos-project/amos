@@ -191,7 +191,6 @@ function createBoxFactory<B extends Box, SB = {}>(
   return Box;
 }
 
-window.alert('1');
 export const Box: BoxFactory = createBoxFactory<Box>({
   name: 'Box',
   mutations: {

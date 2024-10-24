@@ -7,6 +7,14 @@ import { signal } from 'amos-core';
 
 export interface LogoutEvent {
   userId: number;
+  sessionId: number;
 }
 
-export const logoutSignal = signal<LogoutEvent>('logout');
+export const LOGOUT = signal<LogoutEvent>('session.logout');
+
+export interface LoginEvent {
+  userId: number;
+  sessionId: number;
+}
+
+export const LOGIN = signal<LoginEvent>('session.login');

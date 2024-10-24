@@ -9,6 +9,7 @@
     "website"
   ],
   "devDependencies": {
+    "@redux-devtools/extension": "^3.3.0",
     "@rollup/plugin-alias": "^5.1.1",
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^12.1.1",

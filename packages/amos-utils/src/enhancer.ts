@@ -4,7 +4,7 @@
  */
 
 import { removeElement } from './misc';
-import { Unsubscribe } from './types';
+import { FuncParams, FuncReturn, Unsubscribe } from './types';
 
 export type Enhancer<A extends any[], V> = (next: (...args: A) => V) => (...args: A) => V;
 
@@ -19,8 +19,8 @@ export function applyEnhancers<A extends any[], V>(
 }
 
 export interface EnhancerCollector<A extends any[], V> {
-  (enhancer: Enhancer<A, V>): Unsubscribe;
   apply: (args: A, factory: (...args: A) => V) => V;
+  (enhancer: Enhancer<A, V>): Unsubscribe;
 }
 
 export function enhancerCollector<A extends any[], V>(): EnhancerCollector<A, V> {
@@ -40,4 +40,18 @@ export function enhancerCollector<A extends any[], V>(): EnhancerCollector<A, V>
 
 export function override<T, K extends keyof T>(obj: T, key: K, override: (original: T[K]) => T[K]) {
   obj[key] = override(obj[key]);
+}
+
+export function append<T, K extends keyof T>(
+  obj: T,
+  key: K,
+  fn: (...args: FuncParams<T[K]>) => FuncReturn<T[K]>,
+) {
+  return override(obj, key, ((original: any) => {
+    return (...args: any[]) => {
+      const ret = original(...args);
+      (fn as any)(...args);
+      return ret;
+    };
+  }) as any);
 }

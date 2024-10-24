@@ -3,22 +3,22 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { $amos, isAmosObject, override } from 'amos-utils';
+import { $amos, __DEV__, append, isAmosObject, override } from 'amos-utils';
 import { Action, Box, Mutation, Signal, StoreEnhancer } from '../index';
 
 export interface ReduxDevtoolsExtension {
   connect(options?: { name?: string }): {
     init(state: any): void;
-    send(action: string | { type: string; [P: string]: any }, state: any): void;
-    error(message: string): void;
+    send(action: { type: string; [P: string]: any }, state: any): void;
   };
 }
 
 export interface DevtoolsOptions {
   /**
-   * Force enable devtools, ignore env.
+   * If set, will ignore NODE_ENV, else will auto enable/disable by check
+   * if NODE_ENV === 'development' or not
    */
-  force?: boolean;
+  enable?: boolean;
   /**
    * Custom extension connector
    */
@@ -33,19 +33,20 @@ export function withDevtools(): StoreEnhancer {
     if (options.devtools === false) {
       return store;
     }
+    const finalOptions: DevtoolsOptions =
+      options.devtools === void 0
+        ? {}
+        : typeof options.devtools === 'boolean'
+          ? {
+              enable: options.devtools,
+            }
+          : options.devtools;
+    const enable = finalOptions.enable ?? __DEV__;
     const extension =
-      options.devtools?.extension ||
+      finalOptions.extension ??
       (typeof __REDUX_DEVTOOLS_EXTENSION__ === 'undefined' ? void 0 : __REDUX_DEVTOOLS_EXTENSION__);
 
-    if (!extension) {
-      return store;
-    }
-
-    if (
-      !options.devtools?.force &&
-      typeof process === 'object' &&
-      process.env.NODE_ENV !== 'development'
-    ) {
+    if (!extension || !enable) {
       return store;
     }
 
@@ -60,7 +61,7 @@ export function withDevtools(): StoreEnhancer {
               type: `P:${s.key}`,
               args: [result],
             },
-            store.state,
+            { ...store.state },
           );
         }
         return result;
@@ -79,13 +80,13 @@ export function withDevtools(): StoreEnhancer {
               type: `${task[$amos].charAt(0).toUpperCase()}:${task.type}`,
               args: task.args,
             },
-            store.state,
+            { ...store.state },
           );
         }
         return result;
       };
     });
-    dev.init(store.state);
+    append(store, 'init', () => dev.init(store.state));
     return store;
   };
 }

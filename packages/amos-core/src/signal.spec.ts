@@ -3,18 +3,24 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { logoutSignal } from 'amos-testing';
+import { LOGOUT } from 'amos-testing';
+import { isAmosObject } from 'amos-utils';
+import { pick } from 'lodash';
 
 describe('event', () => {
   it('should create signal factory', () => {
-    expect(logoutSignal).toBe(expect.any(Function));
-    expect({ ...logoutSignal }).toEqual({ $object: 'signal_factory', type: 'RESET' });
+    expect(LOGOUT).toEqual(expect.any(Function));
+    expect(LOGOUT.subscribe).toBeInstanceOf(Function);
+    expect(LOGOUT.dispatch).toBeInstanceOf(Function);
   });
   it('should create signal', () => {
-    expect(logoutSignal({ userId: 1 })).toEqual({
-      $object: 'signal',
-      type: 'RESET',
-      data: { count: 0 },
+    const s = LOGOUT({ userId: 1, sessionId: 1 });
+    expect(isAmosObject(s, 'signal')).toBe(true);
+    expect(pick(s, 'args', 'creator', 'factory', 'type')).toEqual({
+      args: [{ userId: 1, sessionId: 1 }],
+      creator: expect.any(Function),
+      factory: LOGOUT,
+      type: 'session.logout',
     });
   });
 });

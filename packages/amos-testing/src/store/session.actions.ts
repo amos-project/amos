@@ -7,20 +7,27 @@ import { action } from 'amos-core';
 import { sleep } from '../utils';
 import { sessionIdBox, sessionMapBox } from './session.boxes';
 import { selectSession } from './session.selectors';
-import { logoutSignal } from './session.signals';
+import { LOGIN, LOGOUT } from './session.signals';
 
-export const login = action(async (dispatch, select, userId: number) => {
-  await sleep();
+export const loginSync = action((dispatch, select, userId: number) => {
   const id = Math.random();
   dispatch([sessionMapBox.mergeItem(id, { userId }), sessionIdBox.setState(id)]);
+  dispatch(LOGIN({ userId, sessionId: id }));
+  return id;
 });
 
-export const logout = action(async (dispatch, select) => {
+export const loginAsync = action(async (dispatch, select, userId: number) => {
   await sleep();
+  return dispatch(loginSync(userId));
+});
+
+export const logoutSync = action((dispatch, select) => {
   const session = select(selectSession());
-  dispatch([
-    sessionMapBox.removeItem(session.id),
-    sessionIdBox.setState(),
-    logoutSignal({ userId: session.userId }),
-  ]);
+  dispatch([sessionIdBox.setState()]);
+  dispatch(LOGOUT({ userId: session.userId, sessionId: session.id }));
+});
+
+export const logoutAsync = action(async (dispatch) => {
+  await sleep();
+  return dispatch(logoutSync());
 });

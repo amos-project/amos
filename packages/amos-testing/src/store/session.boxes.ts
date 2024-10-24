@@ -6,6 +6,7 @@
 import { recordMapBox } from 'amos-boxes';
 import { box } from 'amos-core';
 import { Record } from 'amos-shapes';
+import { LOGOUT } from './session.signals';
 
 export interface SessionModel {
   id: number;
@@ -24,4 +25,6 @@ export class SessionRecord extends Record<SessionModel>({
 }
 
 export const sessionMapBox = recordMapBox('sessions', SessionRecord, 'id');
+sessionMapBox.subscribe(LOGOUT, (state, data) => state.removeItem(data.userId));
+
 export const sessionIdBox = box('sessions.currentId', 0);

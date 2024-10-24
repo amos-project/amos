@@ -20,7 +20,7 @@ export function resolveCallerName(depth = 2) {
       return factory.substring(0, index).match(/([a-z0-9$_]+)\s*=[^=]*$/)?.[1] || '';
     }
     return '';
-  } catch {
+  } catch (e) {
     return '';
   }
 }
@@ -114,3 +114,5 @@ export function toString(s: unknown) {
   }
   return toType(s);
 }
+
+export const __DEV__ = process.env.NODE_ENV === 'development';

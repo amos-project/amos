@@ -3,7 +3,7 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { ActionFactory } from 'amos-core';
+import { action, ActionFactory } from 'amos-core';
 import { NotImplemented } from 'amos-utils';
 import { HttpEndpoints } from './HttpEndpoints';
 
@@ -16,5 +16,7 @@ export interface HttpActionOptions<K extends keyof HttpEndpoints> {
 export const createHttpAction: <K extends keyof HttpEndpoints>(
   options: HttpActionOptions<K>,
 ) => ActionFactory<[input: HttpEndpoints[K]['Req']], Promise<HttpEndpoints[K]['Res']>> = () => {
-  throw new NotImplemented();
+  return action(() => {
+    throw new NotImplemented();
+  }) as any;
 };

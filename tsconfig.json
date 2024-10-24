@@ -61,7 +61,8 @@
     "packages",
     "scripts",
     "examples",
-    "website"
+    "website",
+    "jest.setup.ts"
   ],
   "exclude": [
     "dist",

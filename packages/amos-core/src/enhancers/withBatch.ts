@@ -22,7 +22,7 @@ export const withBatch: () => StoreEnhancer = () => {
     const store = next(options);
     override(store, 'dispatch', (dispatch) => {
       return (tasks: any): any => {
-        return isArray(tasks) ? dispatch(batch(tasks)) : dispatch(tasks);
+        return isArray(tasks) ? store.dispatch(batch(tasks)) : dispatch(tasks);
       };
     });
     override(store, 'select', (select) => {
