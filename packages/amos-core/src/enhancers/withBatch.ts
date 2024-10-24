@@ -8,14 +8,9 @@ import { action } from '../action';
 import { StoreEnhancer } from '../store';
 import { Dispatchable } from '../types';
 
-const batch = action(
-  (dispatch, select, dispatchableList: Dispatchable[]) => {
-    return dispatchableList.map((d) => dispatch(d));
-  },
-  {
-    type: '$$BATCH$$',
-  },
-);
+const batch = action((dispatch, select, dispatchableList: Dispatchable[]) => {
+  return dispatchableList.map((d) => dispatch(d));
+});
 
 export const withBatch: () => StoreEnhancer = () => {
   return (next) => (options) => {

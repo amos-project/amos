@@ -4,6 +4,7 @@
  */
 
 export * from './Clonable';
+export * from './compiler';
 export * from './enhancer';
 export * from './equals';
 export * from './event';

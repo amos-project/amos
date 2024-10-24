@@ -6,6 +6,7 @@
 import alias from '@rollup/plugin-alias';
 import terser from '@rollup/plugin-terser';
 import typescript from '@rollup/plugin-typescript';
+import { createAmosTransformer } from 'amos-typescript';
 import * as fs from 'fs-extra';
 import { upperFirst } from 'lodash';
 import * as child_process from 'node:child_process';
@@ -14,6 +15,7 @@ import { rollup } from 'rollup';
 import { dts } from 'rollup-plugin-dts';
 import rollupPluginStripBanner from 'rollup-plugin-strip-banner';
 import { autorun } from './utils';
+import json from '@rollup/plugin-json';
 
 export const build = autorun(
   module,
@@ -22,7 +24,11 @@ export const build = autorun(
     const entries = Object.entries({
       dist: 'index.ts',
       react: 'react.ts',
+      typescript: 'typescript.ts',
+      babel: 'babel.ts',
     });
+    await fs.remove('dist');
+    await Promise.all(entries.map(([d]) => fs.remove(`packages/amos/${d}`)));
     await Promise.all(
       entries.map(async ([name, file]) => {
         const input = `packages/amos/src/${file}`;
@@ -49,20 +55,35 @@ export const build = autorun(
               noEmit: true,
               declaration: false,
               emitDeclarationOnly: false,
+              transformers: {
+                before: [
+                  createAmosTransformer(void 0, {
+                    prefix: 'amos/',
+                    format: 'lower_underscore',
+                  }),
+                ],
+              },
             }),
+            json(),
             rollupPluginStripBanner({}),
           ],
         });
         await Promise.all([
           bundle.write({ format: 'esm', sourcemap: true, file: `${outDir}/index.esm.js` }),
-          bundle.write({ format: 'cjs', sourcemap: true, file: `${outDir}/index.cjs.js` }),
+          bundle.write({
+            format: 'cjs',
+            sourcemap: true,
+            file: `${outDir}/index.cjs.js`,
+            exports: 'named',
+          }),
           bundle.write({
             format: 'iife',
             sourcemap: true,
             name: name === 'dist' ? 'Amos' : 'Amos' + upperFirst(name),
             file: `${outDir}/index.min.js`,
             plugins: [terser()],
-            globals: { amos: 'Amos', react: 'React' },
+            globals: { amos: 'Amos', react: 'React', typescript: 'ts' },
+            exports: 'named',
           }),
         ]);
         await bundle.close();
@@ -81,7 +102,6 @@ export const build = autorun(
       }),
     );
     console.log('Generating types');
-    await fs.remove('dist');
     child_process.execSync(`npx tsc`, { stdio: 'inherit' });
     console.log('Bundling types for %s packages', entries.length);
     await Promise.all(
@@ -112,6 +132,7 @@ export const build = autorun(
                 },
               ],
             }),
+            json(),
             dts(),
           ],
         });

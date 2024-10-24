@@ -5,32 +5,6 @@
 
 import { ValueOrConstructor, ValueOrFunc } from './types';
 
-export function resolveCallerName(depth = 2) {
-  if (process.env.NODE_ENV !== 'development') {
-    return '';
-  }
-  try {
-    let caller: Function = resolveCallerName;
-    while (depth-- > 0) {
-      caller = caller.caller;
-    }
-    const factory = caller.caller.toString();
-    const index = factory.indexOf(caller.toString());
-    if (index > -1) {
-      return factory.substring(0, index).match(/([a-z0-9$_]+)\s*=[^=]*$/)?.[1] || '';
-    }
-    return '';
-  } catch (e) {
-    return '';
-  }
-}
-
-export function warning(shouldWarning: boolean, message: string) {
-  if (shouldWarning) {
-    console.error('Warning: [Amos] ' + message);
-  }
-}
-
 export function must<T>(value: T, message: string): asserts value {
   if (!value) {
     const err = new Error(message);
@@ -41,7 +15,7 @@ export function must<T>(value: T, message: string): asserts value {
 
 export const ANY: any = void 0;
 
-export function resolveCtorValue<V>(value: ValueOrConstructor<V>): V {
+export function resolveConstructorValue<V>(value: ValueOrConstructor<V>): V {
   return typeof value === 'function' ? new (value as any)() : value;
 }
 
@@ -115,4 +89,4 @@ export function toString(s: unknown) {
   return toType(s);
 }
 
-export const __DEV__ = process.env.NODE_ENV === 'development';
+export const __DEV__ = typeof process === 'object' && process.env.NODE_ENV === 'development';

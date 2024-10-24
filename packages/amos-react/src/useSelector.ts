@@ -12,6 +12,7 @@ import {
   SelectEntry,
   Selector,
 } from 'amos';
+import { __DEV__ } from 'amos-utils';
 import { useCallback, useDebugValue, useLayoutEffect, useReducer, useRef } from 'react';
 import { useStore } from './context';
 
@@ -34,7 +35,7 @@ function useSelect(): Select {
   }, []);
   useDebugValue(
     deps.current,
-    typeof process === 'object' && process.env.NODE_ENV === 'development'
+    __DEV__
       ? (value) => {
           return value.reduce(
             (map, [selectable, value], index) => {

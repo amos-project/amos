@@ -9,7 +9,6 @@ import {
   enhancerCollector,
   ID,
   is,
-  resolveCallerName,
   ValueOrReadonlyArray,
 } from 'amos-utils';
 import { Box } from './box';
@@ -66,7 +65,7 @@ export function selector<A extends any[], R>(
   options: Partial<SelectorOptions<A, R>> = {},
 ): SelectorFactory<A, R> {
   const finalOptions = { ...options } as SelectorOptions;
-  finalOptions.type ??= resolveCallerName();
+  finalOptions.type ??= '';
   finalOptions.equal ??= is;
   finalOptions.compute = compute;
   return enhanceSelector.apply([finalOptions], (options) => {

@@ -20,3 +20,5 @@ coverage/
 
 .rollup.cache/
 packages/amos/react/
+packages/amos/typescript/
+packages/amos/babel/

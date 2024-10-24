@@ -3,7 +3,7 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { AmosObject, createAmosObject, enhancerCollector, resolveCallerName } from 'amos-utils';
+import { AmosObject, createAmosObject, enhancerCollector } from 'amos-utils';
 import { SelectorFactory } from './selector';
 import { CacheOptions, Dispatch, Select } from './types';
 
@@ -57,7 +57,7 @@ export function action<A extends any[], R>(
   options: Partial<ActionOptions<A, R>> = {},
 ): ActionFactory<A, R> {
   const finalOptions = { ...options } as ActionOptions;
-  finalOptions.type ??= resolveCallerName(2);
+  finalOptions.type ||= '';
   finalOptions.actor = actor;
   finalOptions.conflictPolicy ??= options.conflictKey ? 'leading' : 'always';
   return enhanceAction.apply([finalOptions], (options) => {
