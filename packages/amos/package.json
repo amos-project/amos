@@ -17,8 +17,12 @@
   "types": "dist/index.d.ts",
   "files": [
     "dist",
-    "react"
+    "react",
+    "babel",
+    "typescript"
   ],
+  "scripts": {
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/amos-project/amos.git"
