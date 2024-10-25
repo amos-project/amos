@@ -1,11 +1,8 @@
-# `amos-store`
+# amos-react
 
-> TODO: description
+The react binding for `amos`. Supports:
 
-## Usage
-
-```
-const store = require('amos-store');
-
-// TODO: DEMONSTRATE API
-```
+- Basic: Dispatch, Select
+- Query
+- Suspense
+- Use

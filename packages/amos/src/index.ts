@@ -30,6 +30,7 @@ export {
   Actor,
   Box,
   BoxFactory,
+  BoxFactoryMutationOptions,
   BoxFactoryOptions,
   BoxFactorySelectorOptions,
   BoxFactoryStatic,
@@ -47,8 +48,6 @@ export {
   MapSelectables,
   Mutation,
   MutationFactory,
-  MutationOptions,
-  Mutator,
   ReduxDevtoolsExtension,
   Select,
   SelectEntry,
@@ -120,12 +119,4 @@ export {
   implementMapDelegations,
   isSameList,
 } from 'amos-shapes';
-export {
-  AmosObject,
-  Enhancer,
-  arrayEqual,
-  createAmosObject,
-  isAmosObject,
-  shallowEqual,
-  toJS,
-} from 'amos-utils';
+export { AmosObject, Enhancer, arrayEqual, isAmosObject, shallowEqual, toJS } from 'amos-utils';

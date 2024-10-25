@@ -1,19 +1,8 @@
-# `amos-io`
+# amos-io
 
-The builtin io library for amos.
+The IO library for amos. Including:
 
-## Install
-
-```bash
-npm i -S amos-io
-# OR
-yarn add amos-io
-```
-
-## Features
-
-1. http actions
-2. offline
-3. paged list
-
-## API References
+- HTTP
+- Pagination
+- Optimistic updates
+- Offline

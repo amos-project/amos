@@ -4766,6 +4766,12 @@ __metadata:
   languageName: node
   linkType: hard
 
+"amos-babel@workspace:packages/amos-babel":
+  version: 0.0.0-use.local
+  resolution: "amos-babel@workspace:packages/amos-babel"
+  languageName: unknown
+  linkType: soft
+
 "amos-boxes@workspace:packages/amos-boxes":
   version: 0.0.0-use.local
   resolution: "amos-boxes@workspace:packages/amos-boxes"
@@ -4838,6 +4844,12 @@ __metadata:
 "amos-testing@workspace:packages/amos-testing":
   version: 0.0.0-use.local
   resolution: "amos-testing@workspace:packages/amos-testing"
+  languageName: unknown
+  linkType: soft
+
+"amos-typescript@workspace:packages/amos-typescript":
+  version: 0.0.0-use.local
+  resolution: "amos-typescript@workspace:packages/amos-typescript"
   languageName: unknown
   linkType: soft
 

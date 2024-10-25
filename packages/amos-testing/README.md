@@ -1,11 +1,3 @@
-# `amos-store`
+# amos-testing
 
-> TODO: description
-
-## Usage
-
-```
-const store = require('amos-store');
-
-// TODO: DEMONSTRATE API
-```
+Amos internal testing data and tools.
