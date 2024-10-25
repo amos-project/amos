@@ -9,7 +9,7 @@ import { resolveConstructorValue, ValueOrConstructor } from 'amos-utils';
 
 export interface RecordBox<R extends Record<any>>
   extends Box<R>,
-    ShapeBox<R, 'merge', 'isValid', Record<{}>> {
+    ShapeBox<R, 'merge', 'isInitial', Record<{}>> {
   /** @see {Record#get} */
   get<K extends keyof RecordProps<R>>(key: K): Selector<R[K]>;
   /** @see {Record#set} */
@@ -24,7 +24,7 @@ export interface RecordBox<R extends Record<any>>
 export const RecordBox = Box.extends<RecordBox<any>>({
   name: 'RecordBox',
   mutations: { set: null, update: null, merge: null },
-  selectors: { isValid: null, get: null },
+  selectors: { isInitial: null, get: null },
 });
 
 export function recordBox<R extends Record<any>>(

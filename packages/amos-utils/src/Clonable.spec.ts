@@ -5,12 +5,15 @@
 
 import { clone, Cloneable } from './Clonable';
 
-describe('Cloneable', function () {
+describe('Cloneable', () => {
   it('should create cloneable object', () => {
-    expect([new Cloneable(true).isValid(), new Cloneable(false).isValid()]).toEqual([true, false]);
+    expect([new Cloneable(true).isInitial(), new Cloneable(false).isInitial()]).toEqual([
+      true,
+      false,
+    ]);
   });
 
-  it('should clone object', function () {
+  it('should clone object', () => {
     class Foo extends Cloneable {
       bar?: string;
 
@@ -22,18 +25,18 @@ describe('Cloneable', function () {
     const o1 = new Foo(true);
     const o2 = new Foo(false);
     const o3 = clone(o1, { bar: 'bar' });
-    const o4 = clone(o2, {});
+    const o4: Foo = clone(o2, {});
     const o5 = clone(o3, { bar: 'baz' });
     expect([
-      o1.isValid(),
-      o2.isValid(),
-      o3.isValid(),
-      o4.isValid(),
-      o5.isValid(),
-      o5.hasOwnProperty('foo'),
+      o1.isInitial(),
+      o2.isInitial(),
+      o3.isInitial(),
+      o4.isInitial(),
+      o5.isInitial(),
+      o5.hasOwnProperty('bar'),
       o5 instanceof Foo,
       o3.foo(),
       o5.foo(),
-    ]).toEqual([true, false, true, true, true, false, true, 'bar', 'baz']);
+    ]).toEqual([true, false, false, false, false, true, true, 'bar', 'baz']);
   });
 });

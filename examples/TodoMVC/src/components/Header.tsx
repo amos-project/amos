@@ -15,7 +15,7 @@ export const Header = memo(() => {
     const keepData = confirm('You will be signed out, do you want to keep your data?');
     dispatch(signOut(keepData));
   };
-  if (!user.isValid()) {
+  if (!user.isInitial()) {
     return null;
   }
   return (

@@ -6,15 +6,16 @@
 import { recordBox, RecordBox, RecordMapBox } from 'amos-boxes';
 import { ShapeBox } from 'amos-core';
 import {
-  DelegateMapValueMutations,
   implementMapDelegations,
   List,
   ListMap,
+  MapDelegateOperations,
   Record,
   RecordMap,
   RecordObject,
+  RecordProps,
 } from 'amos-shapes';
-import { ANY, clone, ID, IDOf, WellPartial } from 'amos-utils';
+import { ANY, clone, ID, IDKeyof, IDOf, WellPartial } from 'amos-utils';
 
 export interface PagedListModel<E extends ID, NT extends ID = E, OT extends ID = number> {
   data: List<E>;
@@ -68,11 +69,14 @@ export function createPagedListBox<E, NT = E, OT = number>(
 }
 
 export interface PagedListMap<V extends PagedList<any, any, any>>
-  extends DelegateMapValueMutations<V['ownerId'], V, 'delete', PagedList<any>> {}
+  extends MapDelegateOperations<V['ownerId'], V, 'delete', never, PagedList<any>> {}
 
-export class PagedListMap<V extends PagedList<any, any, any>> extends RecordMap<V, 'ownerId'> {}
+export class PagedListMap<V extends PagedList<any, any, any>> extends RecordMap<
+  V,
+  'ownerId' & IDKeyof<RecordProps<V>>
+> {}
 
-implementMapDelegations(PagedListMap, { delete: null });
+implementMapDelegations(PagedListMap, { delete: 'set' }, RecordMap);
 
 export interface PagedListMapBox<PM extends PagedListMap<any>>
   extends RecordMapBox<PM>,

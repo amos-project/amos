@@ -3,18 +3,42 @@
  * @author junbao <junbao@mymoement.com>
  */
 
-import { Morty, users } from 'amos-testing';
+import { UserRecord } from 'amos-testing';
 
 describe('Record', () => {
-  it('should make Record', () => {
-    expect(users.map((u) => u.id)).toEqual([1, 2, 3, 4]);
-    expect(users.map((u) => u.fullName())).toEqual([
-      'Rick Sanchez',
-      'Jessica Sanchez',
-      'Morty Smith',
-      'Beth Smith',
+  const u1 = new UserRecord();
+  const u2 = new UserRecord({ id: 2 });
+  it('should set & get Record', () => {
+    expect([
+      u1.isInitial(),
+      u2.isInitial(),
+      u2.get('id'),
+      u2.get('firstName'),
+      u2.set('id', 3),
+      u2.set('firstName', 'A'),
+      u2.merge({ id: 3, firstName: 'B' }),
+      u2.update('firstName', (v, t) => t.lastName + ':' + v + ':C'),
+      u2.set('lastName', 'D').fullName(),
+    ]).toEqual([
+      true,
+      false,
+      2,
+      '',
+      new UserRecord({ id: 3 }),
+      new UserRecord({ id: 2, firstName: 'A' }),
+      new UserRecord({ id: 3, firstName: 'B' }),
+      new UserRecord({ id: 2, firstName: '::C' }),
+      'D',
     ]);
-    expect(users.map((u) => u.isValid())).toEqual([false, true, true, true]);
-    expect(Morty.toJSON()).toEqual({ id: 3, firstName: 'Morty', lastName: 'Smith' });
+  });
+  it('should not update Record', () => {
+    expect(
+      [
+        u2.set('id', 2),
+        u2.set('firstName', ''),
+        u2.merge({ id: 2, lastName: '' }),
+        u2.update('firstName', () => '').update('id', (v) => v),
+      ].map((u) => u === u2),
+    ).toEqual([true, true, true, true]);
   });
 });

@@ -1,6 +1,6 @@
 {
   "name": "amos",
-  "version": "0.3.0-beta.24",
+  "version": "0.3.0-beta.25",
   "description": "An out-of-the-box state management library designed for your large-scale projects.",
   "keywords": [
     "amos",
@@ -21,8 +21,7 @@
     "babel",
     "typescript"
   ],
-  "scripts": {
-  },
+  "scripts": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/amos-project/amos.git"

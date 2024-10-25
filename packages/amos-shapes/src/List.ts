@@ -9,9 +9,13 @@ export class List<E> extends Cloneable implements JSONSerializable<readonly E[]>
   constructor(
     protected readonly defaultElement: E,
     protected readonly data: readonly E[] = [],
-    isValid: boolean = false,
+    isInitial: boolean = !data.length,
   ) {
-    super(isValid);
+    super(isInitial);
+  }
+
+  get length() {
+    return this.data.length;
   }
 
   fromJS(state: JSONState<readonly E[]>): this {
@@ -20,10 +24,6 @@ export class List<E> extends Cloneable implements JSONSerializable<readonly E[]>
 
   toJSON(): readonly E[] {
     return this.data;
-  }
-
-  get length() {
-    return this.data.length;
   }
 
   // query

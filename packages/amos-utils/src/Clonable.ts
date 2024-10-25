@@ -3,25 +3,31 @@
  * @author junbao <junbao@moego.pet>
  */
 
+import { isObject } from './equals';
 import { WellPartial } from './types';
 
 /**
  * Cloneable object is used to detect the current object is cloned from initial object or not.
  */
 export class Cloneable {
-  private _isValid: boolean | undefined;
+  private _isInitial: boolean | undefined;
 
-  constructor(isValid: boolean) {
-    Object.defineProperty(this, '_isValid', { value: isValid });
+  constructor(isInitial: boolean) {
+    Object.defineProperty(this, '_isInitial', {
+      value: isInitial,
+      configurable: false,
+      writable: false,
+      enumerable: false,
+    });
   }
 
   /**
    * Is this object derived from other object?
-   * {@link clone} will skip {@link _isValid} property, then this value will be true.
+   * {@link clone} will skip {@link _isInitial} property, then this value will be true.
    * This is helpful for valid if target object is changed or not.
    */
-  isValid() {
-    return this._isValid !== false;
+  isInitial() {
+    return this._isInitial === true;
   }
 }
 
@@ -32,6 +38,9 @@ export class Cloneable {
  * @param props - the properties to override.
  */
 export function clone<T>(obj: T, props: WellPartial<T>): T {
+  if (!isObject(obj) || !isObject(props)) {
+    return props as T;
+  }
   return Object.assign(Object.create(Object.getPrototypeOf(obj)), obj, props);
 }
 

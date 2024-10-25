@@ -8,9 +8,9 @@ import { List } from './List';
 
 describe('AmosList', () => {
   it('should create list', () => {
-    expect(new List(0).isValid()).toBeFalsy();
+    expect(new List(0).isInitial()).toBeFalsy();
     let list = new List(0).reset([0, 1]);
-    expect(list.isValid()).toBeTruthy();
+    expect(list.isInitial()).toBeTruthy();
     expect(list.fromJS([1, 2]).toJSON()).toEqual([1, 2]);
     expect(list.toJSON()).toEqual([0, 1]);
     expect(list.length).toEqual(2);

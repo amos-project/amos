@@ -3,10 +3,21 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { Rick, select, userPostListBox } from 'amos-testing';
+import { checkType, Rick, select, userPostListBox } from 'amos-testing';
 
 describe('PagedListBox', function () {
   it('should create PagedListBox', function () {
+    checkType(() => {
+      // @ts-expect-error
+      userPostListBox.mergeItem({});
+      // @ts-expect-error
+      userPostListBox.mergeItem('', {});
+      // @ts-expect-error
+      userPostListBox.mergeAll([{}]);
+      userPostListBox.mergeAll([{ ownerId: 0 }]);
+      userPostListBox.mergeAll({});
+      userPostListBox.mergeItem({ ownerId: 1 });
+    });
     select(userPostListBox.getItem(Rick.id)).getPage();
     select(userPostListBox.getItem(Rick.id)).getAll();
   });

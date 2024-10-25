@@ -5,6 +5,7 @@
 
 import { listBox, recordMapBox } from 'amos-boxes';
 import { Record } from 'amos-shapes';
+import { isTruly } from 'amos-utils';
 
 export interface UserModel {
   id: number;
@@ -12,6 +13,7 @@ export interface UserModel {
   lastName: string;
   fatherId: number;
   motherId: number;
+  createdAt: Date;
 }
 
 export class UserRecord extends Record<UserModel>({
@@ -20,9 +22,10 @@ export class UserRecord extends Record<UserModel>({
   lastName: '',
   fatherId: 0,
   motherId: 0,
+  createdAt: new Date(),
 }) {
   fullName() {
-    return `${this.firstName} ${this.lastName}`;
+    return [this.firstName, this.lastName].filter(isTruly).join(' ');
   }
 }
 

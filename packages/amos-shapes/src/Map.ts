@@ -9,11 +9,13 @@ import {
   Entry,
   fromJS,
   FuncParams,
+  FuncReturn,
   ID,
   isArray,
   JSONSerializable,
   JSONState,
   nullObject,
+  PartialDictionary,
   PartialRecord,
   toArray,
   ToString,
@@ -60,7 +62,7 @@ export class Map<K extends ID, V> implements JSONSerializable<Record<K, V>> {
     return this.reset(nullObject(this.data, { [key]: item } as any));
   }
 
-  setAll(items: PartialRecord<K, V> | ReadonlyArray<Entry<K, V>>): this {
+  setAll(items: PartialDictionary<K, V> | ReadonlyArray<Entry<K, V>>): this {
     const up: PartialRecord<K, V> = {};
     let dirty = false;
     if (Array.isArray(items)) {
@@ -81,7 +83,7 @@ export class Map<K extends ID, V> implements JSONSerializable<Record<K, V>> {
     if (!dirty) {
       return this;
     }
-    return this.reset(nullObject(this.data, items) as any);
+    return this.reset(nullObject(this.data, up) as any);
   }
 
   // only allowed for non-array object item
@@ -90,7 +92,7 @@ export class Map<K extends ID, V> implements JSONSerializable<Record<K, V>> {
   }
 
   mergeAll(
-    items: PartialRecord<K, WellPartial<V>> | ReadonlyArray<Entry<K, WellPartial<V>>>,
+    items: PartialDictionary<K, WellPartial<V>> | ReadonlyArray<Entry<K, WellPartial<V>>>,
   ): this {
     const data = isArray(items) ? items : Object.entries(items);
     return this.setAll(data.map(([k, v]) => [k, clone(this.getItem(k), v)]));
@@ -128,6 +130,9 @@ export class Map<K extends ID, V> implements JSONSerializable<Record<K, V>> {
   }
 
   clear(): this {
+    if (this.size() === 0) {
+      return this;
+    }
     return this.reset({});
   }
 
@@ -165,24 +170,44 @@ export type MapKey<T> = T extends Map<any, any> ? Parameters<T['getItem']>[0] : 
 export type MapValue<T> = T extends Map<any, any> ? ReturnType<T['getItem']> : never;
 export type MapEntry<T> = T extends Map<infer K, infer V> ? Entry<K, V> : never;
 
-export type DelegateMapValueMutations<K extends ID, V, M extends keyof V, KLimiter = V> = {
+export type MapDelegateOperations<
+  K extends ID,
+  V,
+  M extends keyof V,
+  G extends keyof V,
+  KLimiter = V,
+> = {
   [P in keyof KLimiter & M as `${P & string}In`]: <TThis>(
     this: TThis,
     key: K,
     ...args: FuncParams<V[P]>
   ) => TThis;
 } & {
-  delegateMapValueMutations: Record<M, null>;
+  [P in keyof KLimiter & G as `${P & string}In`]: (
+    key: K,
+    ...args: FuncParams<V[P]>
+  ) => FuncReturn<V[P]>;
 };
 
-export function implementMapDelegations<K extends ID, V, M extends keyof V, S extends string>(
-  ctor: Constructor<DelegateMapValueMutations<K, V, M, S>, any[]>,
-  mutations: Record<M, null>,
+export function implementMapDelegations<T, PT = {}>(
+  ctor: Constructor<T, any[]>,
+  mutations: {
+    [P in keyof T as P extends keyof PT ? never : P extends `${infer F}In` ? F : never]:
+      | 'get'
+      | 'set';
+  },
+  p?: Constructor<PT, any[]>,
 ) {
-  ctor.prototype.delegateMapValueMutations = mutations;
   for (const k in mutations) {
-    ctor.prototype[k + 'In'] = function (key: any, ...args: any[]) {
-      return this.setItem(key, this.getItem(key)[k](...args));
-    };
+    Object.defineProperty(ctor.prototype, (k as string) + 'In', {
+      value:
+        mutations[k] === 'set'
+          ? function (this: Map<any, any>, key: any, ...args: any[]) {
+              return this.setItem(key, this.getItem(key)[k](...args));
+            }
+          : function (this: Map<any, any>, key: any, ...args: any[]) {
+              return this.getItem(key)[k](...args);
+            },
+    });
   }
 }

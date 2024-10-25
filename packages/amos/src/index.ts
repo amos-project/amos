@@ -96,7 +96,7 @@ export {
   withPersist,
 } from 'amos-persist';
 export {
-  DelegateMapValueMutations,
+  MapDelegateOperations,
   List,
   ListElement,
   ListMap,

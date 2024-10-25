@@ -37,6 +37,12 @@ export type ToString<T> = T extends string
     : string;
 
 export type PartialRecord<K extends keyof any, V> = { [P in K]+?: V };
+
+export type PartialDictionary<K extends keyof any, V> = PartialRecord<K, V> & {
+  // Force no array
+  readonly [Symbol.iterator]?: unique symbol;
+};
+
 export type PartialRequired<T, K extends keyof T> = Required<Pick<T, K>> & Partial<Omit<T, K>>;
 export type Entry<K, V> = readonly [K, V];
 
@@ -48,8 +54,10 @@ export type Mutable<T> = { -readonly [P in keyof T]: T[P] };
 
 export type AnyFunc = (...args: any[]) => any;
 
-export type FuncParams<T> = T extends (...args: infer A) => infer R ? A : never;
-export type FuncReturn<T> = T extends (...args: infer A) => infer R ? R : never;
+export type FuncParams<T> =
+  IsAny<T> extends true ? any[] : T extends (...args: infer A) => infer R ? A : never;
+export type FuncReturn<T> =
+  IsAny<T> extends true ? any : T extends (...args: infer A) => infer R ? R : never;
 
 export type ArrayElement<T> = T extends readonly (infer U)[] ? U : never;
 

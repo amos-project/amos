@@ -17,7 +17,7 @@ export interface RecordInstance<P extends object> extends Cloneable, JSONSeriali
   get<K extends keyof P>(key: K): P[K];
   set<K extends keyof P>(key: K, value: P[K]): this;
   merge(props: Partial<P>): this;
-  update<K extends keyof P>(key: K, updater: (value: P[K]) => P[K]): this;
+  update<K extends keyof P>(key: K, updater: (v: P[K], t: this) => P[K]): this;
 }
 
 export type Record<P extends object> = Readonly<P> & RecordInstance<P>;
@@ -35,8 +35,8 @@ export interface RecordConstructor<P extends object> {
 
 export function Record<P extends object>(props: P): RecordConstructor<P> {
   return class Record extends Cloneable implements RecordInstance<P> {
-    constructor(data?: Partial<P>, isValid = data !== void 0) {
-      super(isValid);
+    constructor(data?: Partial<P>, isInitial = data === void 0) {
+      super(isInitial);
       Object.assign(this, props, data);
     }
 
@@ -72,10 +72,14 @@ export function Record<P extends object>(props: P): RecordConstructor<P> {
       return this;
     }
 
-    update<K extends keyof P>(key: K, updater: (value: P[K]) => P[K]): this {
-      return this.set(key, updater(this.get(key)));
+    update<K extends keyof P>(key: K, updater: (v: P[K], t: this) => P[K]): this {
+      return this.set(key, updater(this.get(key), this));
     }
   } as any;
 }
 
+/**
+ * RecordObject is an alias for {@link Record} but dropped the types. Used for create
+ * generic records. e,g, {@link PagedList}.
+ */
 export const RecordObject: <T extends object>(props: T) => new () => {} = Record;

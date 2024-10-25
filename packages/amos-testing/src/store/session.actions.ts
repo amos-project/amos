@@ -4,6 +4,7 @@
  */
 
 import { action } from 'amos-core';
+import { userMapBox } from 'amos-testing';
 import { sleep } from '../utils';
 import { sessionIdBox, sessionMapBox } from './session.boxes';
 import { selectSession } from './session.selectors';
@@ -11,7 +12,11 @@ import { LOGIN, LOGOUT } from './session.signals';
 
 export const loginSync = action((dispatch, select, userId: number) => {
   const id = Math.random();
-  dispatch([sessionMapBox.mergeItem(id, { userId }), sessionIdBox.setState(id)]);
+  dispatch([
+    sessionMapBox.mergeItem(id, { userId }),
+    sessionIdBox.setState(id),
+    userMapBox.mergeItem(userId, {}),
+  ]);
   dispatch(LOGIN({ userId, sessionId: id }));
   return id;
 });

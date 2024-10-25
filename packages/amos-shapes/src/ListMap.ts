@@ -5,10 +5,10 @@
 
 import { Entry, ID, isArray, PartialRecord } from 'amos-utils';
 import { List, ListElement } from './List';
-import { DelegateMapValueMutations, implementMapDelegations, Map } from './Map';
+import { MapDelegateOperations, implementMapDelegations, Map } from './Map';
 
 export interface ListMap<K extends ID, L extends List<any>>
-  extends DelegateMapValueMutations<
+  extends MapDelegateOperations<
     K,
     L,
     | 'concat'
@@ -26,8 +26,8 @@ export interface ListMap<K extends ID, L extends List<any>>
     | 'splice'
     | 'delete'
     | 'set'
-    | 'reset'
-    | 'get',
+    | 'reset',
+    'get' | 'has' | 'at',
     List<any>
   > {}
 
@@ -56,21 +56,23 @@ export class ListMap<K extends ID, L extends List<any>> extends Map<K, L> {
 }
 
 implementMapDelegations(ListMap, {
-  concat: null,
-  copyWithin: null,
-  fill: null,
-  filterThis: null,
-  mapThis: null,
-  pop: null,
-  push: null,
-  reverse: null,
-  shift: null,
-  unshift: null,
-  slice: null,
-  sort: null,
-  splice: null,
-  delete: null,
-  set: null,
-  reset: null,
-  get: null,
+  concat: 'set',
+  copyWithin: 'set',
+  fill: 'set',
+  filterThis: 'set',
+  mapThis: 'set',
+  pop: 'set',
+  push: 'set',
+  reverse: 'set',
+  shift: 'set',
+  unshift: 'set',
+  slice: 'set',
+  sort: 'set',
+  splice: 'set',
+  delete: 'set',
+  set: 'set',
+  reset: 'set',
+  get: 'get',
+  has: 'get',
+  at: 'get',
 });

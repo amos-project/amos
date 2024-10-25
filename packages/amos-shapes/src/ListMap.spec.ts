@@ -19,6 +19,8 @@ describe('AmosListDict', () => {
     foo.getItem('');
     foo.getIn(1, 2);
 
+    foo.atIn(1, 1);
+
     // with value type limit
     const bar = new ListMap<number, List<TodoStatus>>(new List(TodoStatus.created));
     // @ts-expect-error

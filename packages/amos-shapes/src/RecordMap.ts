@@ -3,12 +3,26 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { Entry, IDOf, JSONState, PartialRecord } from 'amos-utils';
-import { Map } from './Map';
+import { Entry, IDKeyof, JSONState, PartialDictionary, PartialRecord } from 'amos-utils';
+import { implementMapDelegations, Map, MapDelegateOperations } from './Map';
 import { PartialProps, PartialRequiredProps, Record, RecordProps } from './Record';
 
-export class RecordMap<R extends Record<any>, KF extends keyof RecordProps<R>> extends Map<
-  IDOf<R[KF]>,
+export interface RecordMap<R extends Record<any>, KF extends IDKeyof<RecordProps<R>>>
+  extends MapDelegateOperations<R[KF], R, 'merge', never, Record<{}>> {
+  /** @see Record.set */
+  setIn<K extends keyof RecordProps<R>>(key: R[KF], prop: K, value: RecordProps<R>[K]): this;
+  /** @see Record.update */
+  updateIn<K extends keyof RecordProps<R>>(
+    key: R[KF],
+    prop: K,
+    updater: (v: RecordProps<R>[K], t: R) => RecordProps<R>[K],
+  ): this;
+  /** @see Record.get */
+  getIn<K extends keyof RecordProps<R>>(key: R[KF], prop: K): RecordProps<R>[K];
+}
+
+export class RecordMap<R extends Record<any>, KF extends IDKeyof<RecordProps<R>>> extends Map<
+  R[KF],
   R
 > {
   constructor(
@@ -33,7 +47,7 @@ export class RecordMap<R extends Record<any>, KF extends keyof RecordProps<R>> e
   }
 
   override mergeItem(props: PartialRequiredProps<R, KF>): this;
-  override mergeItem(key: IDOf<R[KF]>, props: PartialProps<R>): this;
+  override mergeItem(key: R[KF], props: PartialProps<R>): this;
   override mergeItem(a: any, b?: any) {
     const props = b ?? a;
     const key = b ? a : a[this.keyField];
@@ -41,33 +55,26 @@ export class RecordMap<R extends Record<any>, KF extends keyof RecordProps<R>> e
     return this.setItem(key, this.getItem(key).merge(props));
   }
 
-  override setAll(
-    items: PartialRecord<IDOf<R[KF]>, R> | ReadonlyArray<R | Entry<IDOf<R[KF]>, R>>,
-  ): this {
+  override setAll(items: PartialDictionary<R[KF], R> | ReadonlyArray<R | Entry<R[KF], R>>): this {
     if (Array.isArray(items)) {
       return super.setAll(items.map((v): any => (Array.isArray(v) ? v : [v[this.keyField], v])));
     } else {
-      return super.setAll(items as PartialRecord<IDOf<R[KF]>, R>);
+      return super.setAll(items as PartialRecord<R[KF], R>);
     }
   }
 
-  // resolve types error
+  // tricky resolve types error
   override mergeAll(
-    items:
-      | ReadonlyArray<Entry<IDOf<R[KF]>, PartialProps<R>>>
-      | PartialRecord<IDOf<R[KF]>, PartialProps<R>>,
+    items: ReadonlyArray<Entry<R[KF], PartialProps<R>>> | PartialDictionary<R[KF], PartialProps<R>>,
+  ): this;
+  override mergeAll(
+    items: ReadonlyArray<PartialRequiredProps<R, KF> | Entry<R[KF], PartialProps<R>>>,
   ): this;
   override mergeAll(
     items:
-      | ReadonlyArray<Entry<IDOf<R[KF]>, PartialProps<R>>>
-      | PartialRecord<IDOf<R[KF]>, PartialProps<R>>
-      | ReadonlyArray<PartialRequiredProps<R, KF> | Entry<IDOf<R[KF]>, PartialProps<R>>>,
-  ): this;
-  override mergeAll(
-    items:
-      | ReadonlyArray<Entry<IDOf<R[KF]>, PartialProps<R>>>
-      | PartialRecord<IDOf<R[KF]>, PartialProps<R>>
-      | ReadonlyArray<PartialRequiredProps<R, KF> | Entry<IDOf<R[KF]>, PartialProps<R>>>,
+      | ReadonlyArray<Entry<R[KF], PartialProps<R>>>
+      | PartialDictionary<R[KF], PartialProps<R>>
+      | ReadonlyArray<PartialRequiredProps<R, KF> | Entry<R[KF], PartialProps<R>>>,
   ): this {
     if (Array.isArray(items)) {
       return super.setAll(
@@ -81,7 +88,7 @@ export class RecordMap<R extends Record<any>, KF extends keyof RecordProps<R>> e
       );
     } else {
       return super.setAll(
-        Object.entries(items).map(([k, v]): any => [k, this.getItem(k as IDOf<R[KF]>).merge(v)]),
+        Object.entries(items).map(([k, v]): any => [k, this.getItem(k as R[KF]).merge(v)]),
       );
     }
   }
@@ -91,3 +98,10 @@ export type RecordMapKeyField<T> = T extends RecordMap<infer R, infer KF> ? KF :
 export type RecordMapKey<T> = T extends RecordMap<infer R, infer KF> ? R[KF] : never;
 export type RecordMapRecord<T> = T extends RecordMap<infer R, infer KF> ? R : never;
 export type RecordMapProps<T> = T extends RecordMap<infer R, infer KF> ? RecordProps<R> : never;
+
+implementMapDelegations(RecordMap, {
+  get: 'get',
+  set: 'set',
+  update: 'set',
+  merge: 'set',
+});

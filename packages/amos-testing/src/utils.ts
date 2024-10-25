@@ -5,15 +5,25 @@
 
 import Mock = jest.Mock;
 import { Mutation } from 'amos-core';
-import { JSONState } from 'amos-utils';
+import { isObject, JSONState } from 'amos-utils';
 
 export function sleep(timeout: number = 0): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, timeout));
 }
 
+export function checkType(fn: () => void) {}
+
 export function expectCalled(fn: (...args: any[]) => any, count = 1) {
   expect(fn).toHaveBeenCalledTimes(count);
   (fn as Mock).mockClear();
+}
+
+export function expectCalledWith(fn: jest.Mock, ...args: any[][]) {
+  expect(fn).toHaveBeenCalledTimes(args.length);
+  for (const [i, a] of args.entries()) {
+    expect(fn).toHaveBeenNthCalledWith(i + 1, ...a);
+  }
+  fn.mockClear();
 }
 
 export function applyMutations<S>(state: S, mutations: readonly Mutation<S>[]) {
@@ -49,3 +59,15 @@ export const FooLabels = enumLabels(Foo, {
   Bar: { hello: 'Bar' },
   Baz: { hello: 'Baz' },
 });
+
+export function isIterable(v: unknown): v is Iterable<any> {
+  return isObject(v) && Symbol.iterator in v;
+}
+
+export function isIterator(v: unknown): v is Iterator<any> {
+  return isObject(v) && 'next' in v;
+}
+
+export function isIterableIterator(v: unknown): v is IterableIterator<any> {
+  return isIterable(v) && isIterator(v);
+}
