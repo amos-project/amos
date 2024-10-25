@@ -3,7 +3,7 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { selectDouble, selectFourfold, select, selectUser } from 'amos-testing';
+import { select, selectDouble, selectFourfold, selectUser } from 'amos-testing';
 import { createAmosObject, is } from 'amos-utils';
 import { Selector, SelectorFactory } from './selector';
 

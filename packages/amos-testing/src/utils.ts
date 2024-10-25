@@ -12,16 +12,13 @@ export function sleep(timeout: number = 0): Promise<void> {
 }
 
 export function expectCalled(fn: (...args: any[]) => any, count = 1) {
-  expect(fn).toBeCalledTimes(count);
+  expect(fn).toHaveBeenCalledTimes(count);
   (fn as Mock).mockClear();
 }
 
-export function applyMutations<S>(state: S, mutations: Mutation<S>[]) {
+export function applyMutations<S>(state: S, mutations: readonly Mutation<S>[]) {
   return mutations
-    .reduce(
-      (prev, mutation) => prev.concat([mutation.mutator.apply(mutation.box, [state])]),
-      [state],
-    )
+    .reduce((prev, mutation) => prev.concat([mutation.mutator(prev.at(-1)!)]), [state])
     .slice(1);
 }
 

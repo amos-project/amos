@@ -49,4 +49,7 @@ export interface Select {
 }
 
 export type CacheKey = ValueOrReadonlyArray<ID>;
-export type CacheOptions<A extends any[]> = ValueOrReadonlyArray<Selectable<string> | Selectable<number>> | SelectorFactory<A, CacheKey> | Compute<A, CacheKey>;
+export type CacheOptions<A extends any[]> =
+  | ValueOrReadonlyArray<Selectable<string> | Selectable<number>>
+  | SelectorFactory<A, CacheKey>
+  | Compute<A, CacheKey>;

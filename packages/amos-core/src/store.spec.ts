@@ -80,7 +80,7 @@ describe('store', () => {
     dispatch(LOGIN({ userId: 1, sessionId: 1 }));
     expect(f1).toHaveBeenCalledTimes(3);
     f1.mockReset();
-    await dispatch(addFourfoldAsync(10))
+    await dispatch(addFourfoldAsync(10));
     expect(f1).toHaveBeenCalledTimes(3);
     f1.mockReset();
     u1();

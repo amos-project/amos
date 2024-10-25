@@ -11,7 +11,11 @@ export type Subscribe = () => void;
 export type Unsubscribe = () => void;
 
 // see {@link https://stackoverflow.com/a/50375286/4380247}
-export type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (k: infer I) => void ? I : never;
+export type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (
+  k: infer I,
+) => void
+  ? I
+  : never;
 
 export type Replace<A, B> = Omit<A, keyof B> & B;
 

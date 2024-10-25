@@ -5,7 +5,7 @@
 
 import { applyMutations, darkModeBox } from 'amos-testing';
 
-describe('BoolBox', function () {
+describe('BoolBox', () => {
   it('should create BoolBox', () => {
     // @ts-expect-error
     darkModeBox.setState(1);

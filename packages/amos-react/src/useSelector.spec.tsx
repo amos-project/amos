@@ -4,7 +4,15 @@
  */
 
 import { act, renderHook, RenderHookResult } from '@testing-library/react-hooks';
-import { createStore, MapSelectables, Select, Selectable, selector, Snapshot, Store } from 'amos-core';
+import {
+  createStore,
+  MapSelectables,
+  Select,
+  Selectable,
+  selector,
+  Snapshot,
+  Store,
+} from 'amos-core';
 import {
   addTwiceAsync,
   countBox,
@@ -13,7 +21,7 @@ import {
   selectDoubleCount,
   selectMultipleCount,
 } from 'amos-testing';
-import  { FC } from 'react';
+import { FC } from 'react';
 import { Provider, useDispatch, useStore } from './context';
 import { useSelector } from './useSelector';
 import fn = jest.fn;

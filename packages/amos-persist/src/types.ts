@@ -3,7 +3,7 @@
  * @author junbao <junbao@mymoement.com>
  */
 
-import { ActionFactory, Box } from 'amos-core';
+import { ActionFactory, Actor, Box } from 'amos-core';
 import { ID } from 'amos-utils';
 
 export interface BoxPersistOptions<S> {
@@ -15,10 +15,12 @@ export interface BoxPersistOptions<S> {
   version: number;
 
   /**
-   * Migration function, should be an `ActionFactory`, which allows
-   * you to use existing state or run some actions.
+   * Migration function, which can be a {@link Actor} or {@link ActionFactory}
+   * to allow you use existing state or run some actions.
    */
-  migrate?: ActionFactory<[version: number, row: ID, state: unknown], S | undefined>;
+  migrate?:
+    | Actor<[version: number, row: ID, state: unknown], S | undefined>
+    | ActionFactory<[version: number, row: ID, state: unknown], S | undefined>;
 }
 
 export type PersistValue = readonly [version: number, value: any];
@@ -48,11 +50,14 @@ export interface PersistOptions {
 
   /**
    * determine the box should be persisted/hydrated or not.
+   * If not set, will determine by a box's {@link BoxOptions.persist} option.
    */
   includes?: (box: Box) => boolean;
 
   /**
-   * determine the box should be persisted/hydrated or not.
+   * Determine the box should be persisted/hydrated or not.
+   *
+   * If not set, will determine by a box's {@link BoxOptions.persist} option.
    *
    * Please note the `excludes` has priority over `includes`.
    */

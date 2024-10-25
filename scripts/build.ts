@@ -4,6 +4,7 @@
  */
 
 import alias from '@rollup/plugin-alias';
+import json from '@rollup/plugin-json';
 import terser from '@rollup/plugin-terser';
 import typescript from '@rollup/plugin-typescript';
 import { createAmosTransformer } from 'amos-typescript';
@@ -15,7 +16,6 @@ import { rollup } from 'rollup';
 import { dts } from 'rollup-plugin-dts';
 import rollupPluginStripBanner from 'rollup-plugin-strip-banner';
 import { autorun } from './utils';
-import json from '@rollup/plugin-json';
 
 export const build = autorun(
   module,

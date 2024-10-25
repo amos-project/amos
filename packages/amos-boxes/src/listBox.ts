@@ -5,6 +5,7 @@
 
 import { Box, ShapeBox } from 'amos-core';
 import { List } from 'amos-shapes';
+import { arrayEqual } from 'amos-utils';
 
 export interface ListBox<L extends List<any>>
   extends Box<L>,
@@ -65,21 +66,23 @@ export const ListBox = Box.extends<ListBox<any>>({
     unshift: null,
   },
   selectors: {
-    some: null,
+    some: null, // cannot be cached because the param is a function
     get: null,
-    flat: null,
-    map: null,
+    flat: { cache: true },
+    map: { equal: arrayEqual as any },
     every: null,
-    filter: null,
+    filter: { equal: arrayEqual as any },
     find: null,
     findIndex: null,
-    indexOf: null,
-    includes: null,
-    lastIndexOf: null,
-    join: null,
+    indexOf: { cache: true },
+    includes: { cache: true },
+    lastIndexOf: { cache: true },
+    join: { cache: true },
     reduce: null,
     reduceRight: null,
-    length: null,
+    length: {
+      derive: (state) => state.length,
+    },
   },
 });
 

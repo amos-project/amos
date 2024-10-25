@@ -112,7 +112,7 @@ export class List<E> extends Cloneable implements JSONSerializable<readonly E[]>
     return new List<FlatArray<readonly E[], D>>(defaultElement, data);
   }
 
-  map<U>(callbackfn: (value: E, index: number) => U): U[] {
+  map<U>(callbackfn: (value: E, index: number) => U): readonly U[] {
     return this.data.map(callbackfn);
   }
 
@@ -124,7 +124,7 @@ export class List<E> extends Cloneable implements JSONSerializable<readonly E[]>
     return new List<R>(defaultValue, this.data.map(callbackfn));
   }
 
-  flatMap<U>(callbackfn: (value: E, index: number) => U | readonly U[]): U[] {
+  flatMap<U>(callbackfn: (value: E, index: number) => U | readonly U[]): readonly U[] {
     return this.data.flatMap(callbackfn);
   }
 

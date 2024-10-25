@@ -3,7 +3,7 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { isNullable, identity, notNullable } from './equals';
+import { identity, isNullable, notNullable } from './equals';
 
 describe('equals', function () {
   it('should verify equals', function () {

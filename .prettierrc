@@ -15,17 +15,5 @@
   "endOfLine": "lf",
   "embeddedLanguageFormatting": "auto",
   "singleAttributePerLine": false,
-  "overrides": [
-    {
-      "files": [
-        "types.ts"
-      ],
-      "options": {
-        "printWidth": 1000
-      }
-    }
-  ],
-  "plugins": [
-    "prettier-plugin-organize-imports"
-  ]
+  "plugins": ["prettier-plugin-organize-imports"]
 }

@@ -2,10 +2,7 @@
   "compilerOptions": {
     "target": "ES2022",
     "module": "ESNext",
-    "lib": [
-      "ES2022",
-      "DOM"
-    ],
+    "lib": ["ES2022", "DOM"],
     "allowJs": false,
     "jsx": "react-jsx",
     "rootDir": ".",
@@ -41,29 +38,15 @@
     "importsNotUsedAsValues": "remove",
     "preserveValueImports": false,
     "paths": {
-      "amos": [
-        "./packages/amos/src"
-      ],
-      "amos/react": [
-        "./packages/amos/src/react"
-      ],
-      "amos-*": [
-        "./packages/amos-*/src"
-      ],
-      "@site/*": [
-        "./website/*"
-      ]
+      "amos": ["./packages/amos/src"],
+      "amos/react": ["./packages/amos/src/react"],
+      "amos-*": ["./packages/amos-*/src"],
+      "@site/*": ["./website/*"]
     },
     "skipLibCheck": true,
     "noImplicitOverride": true
   },
-  "include": [
-    "packages",
-    "scripts",
-    "examples",
-    "website",
-    "jest.setup.ts"
-  ],
+  "include": ["packages", "scripts", "examples", "website", "jest.setup.ts"],
   "exclude": [
     "dist",
     "packages/amos/react",
