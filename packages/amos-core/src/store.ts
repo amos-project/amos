@@ -113,7 +113,7 @@ export function createStore(options: StoreOptions = {}, ...enhancers: StoreEnhan
             let r: any;
             switch (task[$amos]) {
               case 'action':
-                r = task.actor(store.dispatch, store.select, ...task.args);
+                r = task.actor(store.dispatch, store.select);
                 break;
               case 'mutation':
                 const initialState = store.select(task.box);

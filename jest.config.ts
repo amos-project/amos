@@ -1,3 +1,4 @@
+import { TransformerOptions } from 'amos-utils';
 import { JestConfigWithTsJest } from 'ts-jest';
 
 export default async (): Promise<JestConfigWithTsJest> => {
@@ -14,8 +15,8 @@ export default async (): Promise<JestConfigWithTsJest> => {
                 path: './packages/amos/typescript',
                 options: {
                   prefix: 'amos/',
-                  format: 'lower_underscore',
-                },
+                  format: 'original',
+                } satisfies TransformerOptions,
               },
             ],
           },

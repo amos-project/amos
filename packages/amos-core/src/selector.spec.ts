@@ -3,7 +3,7 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { double, fourfold, select, selectUser } from 'amos-testing';
+import { selectDouble, selectFourfold, select, selectUser } from 'amos-testing';
 import { createAmosObject, is } from 'amos-utils';
 import { Selector, SelectorFactory } from './selector';
 
@@ -17,7 +17,7 @@ describe('selector', () => {
     );
   });
   it('should create selector', () => {
-    const s = double(3);
+    const s = selectDouble(3);
     expect(s).toEqual(
       createAmosObject<Selector>('selector', {
         compute: expect.any(Function),
@@ -28,6 +28,8 @@ describe('selector', () => {
       }),
     );
     expect(s.compute(select)).toEqual(6);
-    expect(fourfold(3).compute(select)).toEqual(12);
+    expect(selectFourfold(3).compute(select)).toEqual(12);
+    expect(s.id).toEqual(selectDouble(4).id);
+    expect(selectFourfold(1).id).not.toEqual(s.id);
   });
 });

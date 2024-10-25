@@ -3,27 +3,36 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { addPost } from 'amos-testing';
-import { $amos } from 'amos-utils';
-import { Action } from './action';
+import { addFourfoldAsync, addTwiceAsync } from 'amos-testing';
+import { createAmosObject } from 'amos-utils';
+import { Action, ActionFactory } from './action';
+import { createStore } from './store';
 
 describe('action', () => {
   it('should create action factory', () => {
-    const props = { ...addPost };
-    expect(props).toEqual<typeof props>({
-      [$amos]: 'action_factory',
-      id: expect.any(String),
-      select: expect.any(Function),
-    });
-
-    const action = addPost({ title: 'Hello world!', content: 'First article.' });
-    expect(action).toEqual<Action>({
-      [$amos]: 'action',
-      id: '',
-      type: '',
-      conflictPolicy: 'always',
-      args: [{ title: 'Hello world!', content: 'First article.' }],
-      actor: expect.any(Function),
-    });
+    expect(addTwiceAsync).toBeInstanceOf(Function);
+    expect({ ...addTwiceAsync }).toEqual(
+      createAmosObject<ActionFactory>('action_factory', {
+        id: expect.any(String),
+        select: expect.any(Function),
+      }),
+    );
+  });
+  it('should create action', async () => {
+    const a0 = addFourfoldAsync(1);
+    const action = addFourfoldAsync(2);
+    expect(action).toEqual<Action>(
+      createAmosObject<Action>('action', {
+        id: a0.id,
+        type: 'amos/addFourfoldAsync',
+        conflictPolicy: 'always',
+        conflictKey: void 0,
+        args: [2],
+        actor: expect.any(Function),
+      }),
+    );
+    const store = createStore();
+    expect(action.actor(store.dispatch, store.select)).toBeInstanceOf(Promise);
+    expect(await action.actor(store.dispatch, store.select)).toEqual(8);
   });
 });

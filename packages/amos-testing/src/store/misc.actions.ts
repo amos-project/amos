@@ -5,7 +5,7 @@
  * keep atomic boxes
  */
 
-import { action, selector } from 'amos-core';
+import { action } from 'amos-core';
 import { sleep } from '../utils';
 import { countBox } from './misc.boxes';
 
@@ -15,5 +15,11 @@ export const addTwiceAsync = action(async (dispatch, select, value: number) => {
   dispatch(countBox.add(value));
 });
 
-export const double = selector((select, v: number) => v * 2);
-export const fourfold = selector((select, v: number) => select(double(v)) * 2);
+export const addFourfoldAsync = action(async (dispatch, select, value: number) => {
+  dispatch(countBox.add(value));
+  dispatch(countBox.setState((state) => state + value));
+  await sleep();
+  dispatch(countBox.setState(select(countBox) + value));
+  dispatch(countBox.add(value));
+  return value * 4;
+});

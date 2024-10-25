@@ -15,17 +15,12 @@ export type Actor<A extends any[] = any, R = any> = (
 
 export interface ActionOptions<A extends any[] = any, R = any> {
   type: string;
-  actor: Actor<A, R>;
 
   /**
    * How to handle conflicted action dispatch.
    * - always: will always dispatch.
    * - leading: only take first to dispatch.
    * The default value is always when no conflictKey is set.
-   *
-   * TODO: do we need tail? If so, we should consider introduce DispatchContext to
-   *  Actor to simplify the arguments.
-   *  As for now, we discard that, but the API is hard to change.
    */
   conflictPolicy: 'always' | 'leading';
 
@@ -42,7 +37,8 @@ export interface ActionOptions<A extends any[] = any, R = any> {
 export interface Action<A extends any[] = any, R = any>
   extends AmosObject<'action'>,
     Readonly<ActionOptions<A, R>> {
-  readonly args: A;
+  readonly actor: (dispatch: Dispatch, select: Select) => R;
+  readonly args: readonly unknown[];
 }
 
 export interface ActionFactory<A extends any[] = any, R = any>
@@ -50,20 +46,19 @@ export interface ActionFactory<A extends any[] = any, R = any>
   (...args: A): Action<A, R>;
 }
 
-export const enhanceAction = enhancerCollector<[ActionOptions], ActionFactory>();
+export const enhanceAction = enhancerCollector<[Actor, ActionOptions], ActionFactory>();
 
 export function action<A extends any[], R>(
   actor: Actor<A, R>,
   options: Partial<ActionOptions<A, R>> = {},
 ): ActionFactory<A, R> {
-  const finalOptions = { ...options } as ActionOptions;
-  finalOptions.type ||= '';
-  finalOptions.actor = actor;
+  const finalOptions = { type: '', ...options } as ActionOptions;
   finalOptions.conflictPolicy ??= options.conflictKey ? 'leading' : 'always';
-  return enhanceAction.apply([finalOptions], (options) => {
+  return enhanceAction.apply([actor, finalOptions], (actor, options) => {
     const factory = createAmosObject<ActionFactory>('action_factory', ((...args: any[]) => {
       return createAmosObject<Action>('action', {
         ...options,
+        actor: (dispatch, select) => actor(dispatch, select, ...args),
         id: factory.id,
         args: args,
       });
@@ -93,8 +88,8 @@ export interface SelectableActionFactory<A extends any[] = any, R = any, S = any
   (...args: A): SelectableAction<A, R, S>;
 }
 
-enhanceAction((next) => (options) => {
-  const factory = next(options);
+enhanceAction((next) => (actor, options) => {
+  const factory = next(actor, options);
   return Object.assign(factory, {
     select: (selector: SelectorFactory) => {
       Object.assign(options, { selector });

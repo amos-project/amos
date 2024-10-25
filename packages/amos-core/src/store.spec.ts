@@ -4,6 +4,7 @@
  */
 
 import {
+  addFourfoldAsync,
   addTodo,
   countBox,
   LOGIN,
@@ -65,7 +66,7 @@ describe('store', () => {
     expect(select(selectTodoList()).toJSON()).toEqual([id]);
   });
 
-  it('should dispatch event', () => {
+  it('should dispatch event', async () => {
     const { select, dispatch, subscribe } = createStore();
     const f1 = jest.fn();
     const u1 = subscribe(f1);
@@ -79,8 +80,11 @@ describe('store', () => {
     dispatch(LOGIN({ userId: 1, sessionId: 1 }));
     expect(f1).toHaveBeenCalledTimes(3);
     f1.mockReset();
+    await dispatch(addFourfoldAsync(10))
+    expect(f1).toHaveBeenCalledTimes(3);
+    f1.mockReset();
     u1();
-    dispatch(LOGOUT({ userId: 1, sessionId: 1 }));
     expect(f1).toHaveBeenCalledTimes(0);
+    dispatch(LOGOUT({ userId: 1, sessionId: 1 }));
   });
 });

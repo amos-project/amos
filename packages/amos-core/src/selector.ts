@@ -49,8 +49,8 @@ export interface SelectorOptions<A extends any[] = any, R = any> {
 export interface Selector<A extends any[] = any, R = any>
   extends AmosObject<'selector'>,
     SelectorOptions<A, R> {
-  args: readonly unknown[];
-  compute: (select: Select) => R;
+  readonly args: readonly unknown[];
+  readonly compute: (select: Select) => R;
 }
 
 export interface SelectorFactory<A extends any[] = any, R = any>
