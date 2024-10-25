@@ -25,6 +25,6 @@ export class SessionRecord extends Record<SessionModel>({
 }
 
 export const sessionMapBox = recordMapBox('sessions', SessionRecord, 'id');
-sessionMapBox.subscribe(LOGOUT, (state, data) => state.removeItem(data.userId));
+sessionMapBox.subscribe(LOGOUT, (state, data) => state.removeItem(data.sessionId));
 
 export const sessionIdBox = box('sessions.currentId', 0);

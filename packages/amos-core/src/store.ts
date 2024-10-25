@@ -148,7 +148,7 @@ export function createStore(options: StoreOptions = {}, ...enhancers: StoreEnhan
             }
             return store.state[selectable.key];
           }
-          return selectable.compute(store.select, ...selectable.args);
+          return selectable.compute(store.select);
         },
       };
     },

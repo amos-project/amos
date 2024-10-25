@@ -23,6 +23,7 @@ export interface RecordMapBox<RM extends RecordMap<any, any> = RecordMap<any, an
     ShapeBox<RM, 'setAll' | 'mergeAll', never, RecordMap<Record<{}>, never>> {
   setItem(key: MapKey<RM>, value: MapValue<RM>): Mutation<RM>;
   setItem(value: MapValue<RM>): Mutation<RM>;
+  /** {@link RecordMap.mergeItem} */
   mergeItem(props: PartialRequiredProps<MapValue<RM>, RecordMapKeyField<RM>>): Mutation<RM>;
   mergeItem(key: MapKey<RM>, props: PartialProps<MapValue<RM>>): Mutation<RM>;
 }

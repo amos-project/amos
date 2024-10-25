@@ -19,6 +19,7 @@ export const is: (x: any, y: any) => boolean = Object.is || shimObjectIs;
  * @param v
  */
 export const identity = <T>(v: T) => v;
+export const second = <T>(a: any, b: T) => b;
 export const notNullable = <T>(v: T): v is Exclude<T, undefined | null> => v != null;
 export const isNullable = (v: unknown): v is undefined | null => v == null;
 export const isTruly = <T>(v: T): v is Exclude<T, undefined | null | '' | 0 | false> => !!v;

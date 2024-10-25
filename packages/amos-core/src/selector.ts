@@ -18,7 +18,6 @@ export type Compute<A extends any[] = any, R = any> = (select: Select, ...args: 
 
 export interface SelectorOptions<A extends any[] = any, R = any> {
   type: string;
-  compute: Compute<A, R>;
 
   /**
    * The equal fn, which is used for check the result is updated or not. If the fn
@@ -50,7 +49,8 @@ export interface SelectorOptions<A extends any[] = any, R = any> {
 export interface Selector<A extends any[] = any, R = any>
   extends AmosObject<'selector'>,
     SelectorOptions<A, R> {
-  args: A;
+  args: readonly unknown[];
+  compute: (select: Select) => R;
 }
 
 export interface SelectorFactory<A extends any[] = any, R = any>
@@ -58,7 +58,7 @@ export interface SelectorFactory<A extends any[] = any, R = any>
   (...args: A): Selector<A, R>;
 }
 
-export const enhanceSelector = enhancerCollector<[SelectorOptions], SelectorFactory>();
+export const enhanceSelector = enhancerCollector<[Compute, SelectorOptions], SelectorFactory>();
 
 export function selector<A extends any[], R>(
   compute: Compute<A, R>,
@@ -67,11 +67,11 @@ export function selector<A extends any[], R>(
   const finalOptions = { ...options } as SelectorOptions;
   finalOptions.type ??= '';
   finalOptions.equal ??= is;
-  finalOptions.compute = compute;
-  return enhanceSelector.apply([finalOptions], (options) => {
+  return enhanceSelector.apply([compute, finalOptions], (compute, options) => {
     const factory = createAmosObject<SelectorFactory>('selector_factory', ((...args: A) => {
       return createAmosObject<Selector<A, R>>('selector', {
         ...options,
+        compute: (select) => compute(select, ...args),
         id: factory.id,
         args,
       });

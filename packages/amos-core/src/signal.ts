@@ -9,7 +9,7 @@ import {
   createEventCenter,
   enhancerCollector,
   EventCenter,
-  identity,
+  second,
 } from 'amos-utils';
 import { Dispatch, Select } from './types';
 
@@ -64,7 +64,7 @@ export function signal(a: any, b?: any, c?: any): SignalFactory {
   const bIsFunc = typeof b === 'function';
   const options: SignalOptions = (bIsFunc ? c : b) || {};
   options.type = a;
-  options.creator = (bIsFunc && b) || identity;
+  options.creator = (bIsFunc && b) || second;
   const factory = enhanceSignal.apply([options as SignalOptions], (options) => {
     return Object.assign((...args: any[]) => {
       return createAmosObject<Signal>('signal', {

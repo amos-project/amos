@@ -37,6 +37,7 @@ export class RecordMap<R extends Record<any>, KF extends keyof RecordProps<R>> e
   override mergeItem(a: any, b?: any) {
     const props = b ?? a;
     const key = b ? a : a[this.keyField];
+    props[this.keyField] = key;
     return this.setItem(key, this.getItem(key).merge(props));
   }
 
@@ -69,7 +70,15 @@ export class RecordMap<R extends Record<any>, KF extends keyof RecordProps<R>> e
       | ReadonlyArray<PartialRequiredProps<R, KF> | Entry<IDOf<R[KF]>, PartialProps<R>>>,
   ): this {
     if (Array.isArray(items)) {
-      return super.setAll(items.map((v): any => (Array.isArray(v) ? v : [v[this.keyField], v])));
+      return super.setAll(
+        items.map((v): any => {
+          if (Array.isArray(v)) {
+            v[1][this.keyField] = v[0];
+            return v;
+          }
+          return [v[this.keyField], v];
+        }),
+      );
     } else {
       return super.setAll(
         Object.entries(items).map(([k, v]): any => [k, this.getItem(k as IDOf<R[KF]>).merge(v)]),

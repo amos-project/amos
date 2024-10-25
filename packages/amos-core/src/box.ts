@@ -87,6 +87,10 @@ export interface BoxFactory<B extends Box = Box> extends BoxFactoryStatic<B> {
   new (key: string, initialState: BoxState<B>): B;
 }
 
+export interface BoxFactoryMutationOptions<B extends Box, A extends any[] = any> {
+  update: (box: B, state: BoxState<B>, ...args: A) => BoxState<B>;
+}
+
 export interface BoxFactorySelectorOptions<S = any, A extends any[] = any, R = any>
   extends Omit<Partial<SelectorOptions<A, R>>, 'type' | 'compute'> {
   derive?: (state: S, ...args: A) => R;
@@ -102,7 +106,10 @@ export interface BoxFactoryOptions<TBox extends Box, TParentBox = {}> {
           ? never
           : P
         : never]: TBox[P] extends MutationFactory<infer A, BoxState<TBox>>
-      ? null | ((state: BoxState<TBox>, ...args: A) => BoxState<TBox>)
+      ?
+          | null
+          | ((state: BoxState<TBox>, ...args: A) => BoxState<TBox>)
+          | BoxFactoryMutationOptions<TBox, A>
       : never;
   };
   selectors: {
@@ -152,12 +159,15 @@ function createBoxFactory<B extends Box, SB = {}>(
         }
       };
   for (const k in mutations) {
-    const fn =
-      typeof mutations[k] === 'function'
-        ? mutations[k]
-        : (state: any, ...args: any[]) => state[k](...args);
     Object.defineProperty(Box.prototype, k, {
-      value: function (this: Box, ...args: any[]): Mutation {
+      value: function (this: B, ...args: any[]): Mutation {
+        const fn: (state: any, ...args: any[]) => any =
+          typeof mutations[k] === 'function'
+            ? mutations[k]
+            : !mutations[k]
+              ? (state: any, ...args: any[]) => state[k](...args)
+              : (state: any, ...args: any[]) =>
+                  (mutations[k] as BoxFactoryMutationOptions<B>).update(this, state, ...args);
         return createAmosObject<Mutation>('mutation', {
           type: `${this.key}/${k as string}`,
           mutator: (state: any) => fn(state, ...args),
@@ -178,7 +188,7 @@ function createBoxFactory<B extends Box, SB = {}>(
           ...resolvedOptions,
           id: this.id,
           type: `${this.key}/${k as string}`,
-          compute: (select: Select, ...args) => derive(select(this), ...args),
+          compute: (select: Select) => derive(select(this), ...args),
           args: args,
         });
       },
@@ -194,7 +204,11 @@ function createBoxFactory<B extends Box, SB = {}>(
 export const Box: BoxFactory = createBoxFactory<Box>({
   name: 'Box',
   mutations: {
-    setState: (state, next) => resolveFuncValue(next, state),
+    setState: {
+      update: (box, state, ...args) => {
+        return args.length ? resolveFuncValue(args[0], state) : box.initialState;
+      },
+    },
   },
   selectors: {},
 });

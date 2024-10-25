@@ -18,5 +18,6 @@ export const addTodo = action(
     await sleep();
     const id = Math.random();
     dispatch([todoMapBox.mergeItem(id, input), userTodoListBox.unshiftIn(userId, id)]);
+    return id;
   },
 );

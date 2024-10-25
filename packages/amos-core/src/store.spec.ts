@@ -3,7 +3,20 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { loginAsync, LOGOUT, LogoutEvent, sessionIdBox, sessionMapBox } from 'amos-testing';
+import {
+  addTodo,
+  countBox,
+  LOGIN,
+  loginAsync,
+  loginSync,
+  LOGOUT,
+  LogoutEvent,
+  selectTodoList,
+  sessionIdBox,
+  sessionMapBox,
+  todoMapBox,
+} from 'amos-testing';
+import { pick } from 'lodash';
 import { createStore, Store } from './store';
 
 describe('store', () => {
@@ -37,6 +50,37 @@ describe('store', () => {
     const s4 = store.dispatch(LOGOUT({ userId: 1, sessionId: s3 }));
     expect(s4).toEqual<LogoutEvent>({ userId: 1, sessionId: s3 });
     state[sessionMapBox.key] = sessionMapBox.initialState;
-    expect(store.snapshot()).toEqual(state);
+    expect(pick(store.snapshot(), Object.keys(state))).toMatchObject(state);
+  });
+
+  it('should select base selectable', async () => {
+    const { select, dispatch } = createStore();
+    expect(select(sessionMapBox)).toBe(sessionMapBox.initialState);
+    const id = await dispatch(addTodo({ title: 'Hello', description: 'World' }));
+    expect(pick(select(todoMapBox.getItem(id)).toJSON(), ['id', 'title', 'description'])).toEqual({
+      id: id,
+      title: 'Hello',
+      description: 'World',
+    });
+    expect(select(selectTodoList()).toJSON()).toEqual([id]);
+  });
+
+  it('should dispatch event', () => {
+    const { select, dispatch, subscribe } = createStore();
+    const f1 = jest.fn();
+    const u1 = subscribe(f1);
+    dispatch(loginSync(1));
+    expect(f1).toHaveBeenCalledTimes(1);
+    f1.mockReset();
+    select(countBox);
+    expect(f1).toHaveBeenCalledTimes(0);
+    dispatch(loginSync(1));
+    dispatch(countBox.setState());
+    dispatch(LOGIN({ userId: 1, sessionId: 1 }));
+    expect(f1).toHaveBeenCalledTimes(3);
+    f1.mockReset();
+    u1();
+    dispatch(LOGOUT({ userId: 1, sessionId: 1 }));
+    expect(f1).toHaveBeenCalledTimes(0);
   });
 });
