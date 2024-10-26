@@ -20,7 +20,7 @@ export function withConcurrent(): StoreEnhancer {
         if (d.conflictPolicy !== 'leading') {
           throw new NotImplemented();
         }
-        const key = resolveCacheKey(store, d.id, d.args, d.conflictKey);
+        const key = resolveCacheKey(store, d, d.conflictKey);
         if (pending.has(key)) {
           return pending.get(key)!;
         }

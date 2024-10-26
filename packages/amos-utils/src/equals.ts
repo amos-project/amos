@@ -84,3 +84,15 @@ export function isPlainObject(v: unknown): v is object {
   const proto = Object.getPrototypeOf(v);
   return proto === null || proto === Object.prototype;
 }
+
+export function everyEntry<K extends keyof any, V>(
+  r: Record<K, V>,
+  fn: (value: V, key: K) => boolean,
+): boolean {
+  for (const k in r) {
+    if (!fn(r[k], k)) {
+      return false;
+    }
+  }
+  return true;
+}

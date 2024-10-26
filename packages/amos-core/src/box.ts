@@ -260,6 +260,7 @@ function createBoxFactory<B extends Box, SB = {}>(
               : (state: any, ...args: any[]) =>
                   (mutations[k] as BoxFactoryMutationOptions<B>).update(this, state, ...args);
         return createAmosObject<Mutation>('mutation', {
+          id: `${this.id}/${k as string}`,
           type: `${this.key}/${k as string}`,
           mutator: (state: any) => fn(state, ...args),
           args: args,
@@ -277,7 +278,7 @@ function createBoxFactory<B extends Box, SB = {}>(
         return createAmosObject<Selector>('selector', {
           equal: is,
           ...resolvedOptions,
-          id: this.id,
+          id: `${this.id}/${k as string}`,
           type: `${this.key}/${k as string}`,
           compute: (select: Select) => derive(select(this), ...args),
           args: args,

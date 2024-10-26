@@ -3,7 +3,16 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { isAmosObject, isObject, isPlainObject, isToJSON, toArray, toType } from 'amos-utils';
+import {
+  __DEV__,
+  isAmosObject,
+  isObject,
+  isPlainObject,
+  isToJSON,
+  toArray,
+  toType,
+} from 'amos-utils';
+import { Action } from './action';
 import { Box } from './box';
 import { Selector, SelectorFactory } from './selector';
 import { Store } from './store';
@@ -43,10 +52,10 @@ export function stringify(data: any): string {
 
 export function resolveCacheKey(
   store: Store,
-  id: string,
-  args: readonly any[],
+  v: Action | Selector,
   key: CacheOptions<any> | undefined,
 ): string {
+  let args = v.args;
   if (key) {
     if (isAmosObject<Box>(key, 'box') || isAmosObject<Selector>(key, 'selector')) {
       args = [...args, store.select(key)];
@@ -58,5 +67,9 @@ export function resolveCacheKey(
       args = toArray(key(store.select, ...args) as any);
     }
   }
-  return id + ':' + stringify(args);
+  const ck = v.id + ':' + stringify(args);
+  if (__DEV__) {
+    return v.type + ':' + ck;
+  }
+  return ck;
 }

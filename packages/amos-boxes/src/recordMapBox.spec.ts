@@ -3,10 +3,14 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { applyMutations, postMapBox, PostRecord, select, toJS } from 'amos-testing';
+import { applyMutations, checkType, postMapBox, PostRecord, select, toJS } from 'amos-testing';
 
 describe('RecordMapBox', function () {
   it('should create RecordMapBox', function () {
+    checkType(() => {
+      // @ts-expect-error
+      postMapBox.mergeAll([{ title: 'Ninth' }]);
+    });
     expect(select(postMapBox.size())).toEqual(0);
     expect(
       toJS(
@@ -19,7 +23,6 @@ describe('RecordMapBox', function () {
           postMapBox.setAll([[6, new PostRecord({ id: 6, title: 'Sixth' })]]),
           postMapBox.mergeAll([{ id: 7, title: 'Seventh' }]),
           postMapBox.mergeAll([[8, new PostRecord({ id: 8, title: 'Eighth' })]]),
-          postMapBox.mergeAll([{ title: 'Ninth' }]),
         ]).pop(),
       ),
     ).toEqual({

@@ -1,6 +1,6 @@
 {
   "name": "amos",
-  "version": "0.3.0-beta.25",
+  "version": "0.3.0-beta.27",
   "description": "An out-of-the-box state management library designed for your large-scale projects.",
   "keywords": [
     "amos",
@@ -9,6 +9,7 @@
     "decentralized",
     "shape"
   ],
+  "scripts": {},
   "author": "acrazing <joking.young@gmail.com>",
   "homepage": "https://github.com/amos-project/amos",
   "license": "MIT",
@@ -21,7 +22,6 @@
     "babel",
     "typescript"
   ],
-  "scripts": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/amos-project/amos.git"

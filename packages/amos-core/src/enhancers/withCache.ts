@@ -3,9 +3,11 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { Box, Selectable, Selector } from 'amos-core';
-import { Entry, isAmosObject, override } from 'amos-utils';
+import { append, Entry, isAmosObject, override } from 'amos-utils';
+import { Box, box } from '../box';
+import { Selector } from '../selector';
 import { StoreEnhancer } from '../store';
+import { Selectable } from '../types';
 import { resolveCacheKey } from '../utils';
 
 export type SelectEntry<R = any> = Entry<Selectable<R>, R>;
@@ -17,12 +19,27 @@ export function isSelectValueEqual<R>(s: Selectable<R>, a: R, b: R) {
   return s.equal(a, b);
 }
 
+export interface CachesState {
+  caches: Map<string, readonly [value: any, deps: readonly SelectEntry[]]>;
+  stack: Array<SelectEntry[] | null>;
+}
+
+export const cachesBox = box<CachesState | undefined>('amos/caches', void 0);
+
 export const withCache: () => StoreEnhancer = () => {
   return (next) => (options) => {
     const store = next(options);
-    const cacheMap = new Map<string, readonly [value: any, deps: readonly SelectEntry[]]>();
-    const stack: Array<SelectEntry[] | null> = [];
+    const cacheMap: CachesState['caches'] = new Map();
+    const stack: CachesState['stack'] = [];
     const peak = () => stack[stack.length - 1];
+    append(store, 'init', () => {
+      store.dispatch(
+        cachesBox.setState({
+          caches: cacheMap,
+          stack: stack,
+        }),
+      );
+    });
     override(store, 'select', (select) => {
       return (s: any) => {
         const isSelector = isAmosObject<Selector>(s, 'selector');
@@ -30,23 +47,32 @@ export const withCache: () => StoreEnhancer = () => {
         if (!isSelector && !isBox) {
           return select(s);
         }
+        const parent = peak();
         if (!isSelector || !s.cache) {
-          const deps = peak();
-          deps && stack.push(null);
+          parent && stack.push(null);
           try {
             const v = select(s);
-            deps?.push([s, v]);
+            parent?.push([s, v]);
             return v;
           } finally {
-            deps && stack.pop();
+            parent && stack.pop();
           }
         }
         // should check the cache now
-        const key = resolveCacheKey(store, s.id, s.args, void 0);
+        const key = resolveCacheKey(store, s, void 0);
         const cache = cacheMap.get(key);
         if (cache) {
-          if (cache[1].every(([s, v]) => isSelectValueEqual(s, v, store.select(v)))) {
-            return cache[0];
+          try {
+            // make sure the cache compute is not collected to the deps
+            stack.push(null);
+            if (cache[1].every(([s, v]) => isSelectValueEqual(s, v, store.select(s)))) {
+              parent?.push([s, cache[0]]);
+              return cache[0];
+            } else {
+              cacheMap.delete(key);
+            }
+          } finally {
+            stack.pop();
           }
         }
         stack.push([]);
@@ -55,6 +81,7 @@ export const withCache: () => StoreEnhancer = () => {
           if (cache && isSelectValueEqual(s, cache[0], v)) {
             v = cache[0];
           }
+          parent?.push([s, v]);
           cacheMap.set(key, [v, peak()!]);
           return v;
         } finally {

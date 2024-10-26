@@ -28,17 +28,19 @@ export interface RecordMapBox<RM extends RecordMap<any, any> = RecordMap<any, an
   extends Omit<MapBox<RM>, 'setItem' | 'mergeItem' | 'mergeAll' | 'setAll' | keyof Box>,
     Box<RM>,
     ShapeBox<RM, never, never, RecordMap<any, any>> {
+  /** @see RecordMap.setItem */
   setItem(key: RecordMapKey<RM>, value: RecordMapRecord<RM>): Mutation<RM>;
   setItem(value: RecordMapRecord<RM>): Mutation<RM>;
-  /** {@link RecordMap.mergeItem} */
+  /** @see RecordMap.mergeItem */
   mergeItem(props: PartialRequiredProps<RecordMapRecord<RM>, RecordMapKeyField<RM>>): Mutation<RM>;
   mergeItem(key: RecordMapKey<RM>, props: PartialProps<RecordMapRecord<RM>>): Mutation<RM>;
-  /** {@link RecordMap.setAll} */
+  /** @see RecordMap.setAll */
   setAll(
     items:
       | PartialDictionary<RecordMapKey<RM>, RecordMapRecord<RM>>
-      | ReadonlyArray<RecordMapKey<RM> | Entry<RecordMapKey<RM>, RecordMapRecord<RM>>>,
+      | ReadonlyArray<RecordMapRecord<RM> | Entry<RecordMapKey<RM>, RecordMapRecord<RM>>>,
   ): Mutation<RM>;
+  /** @see RecordMap.mergeAll */
   mergeAll(
     items:
       | PartialDictionary<RecordMapKey<RM>, PartialProps<RecordMapRecord<RM>>>
@@ -47,20 +49,21 @@ export interface RecordMapBox<RM extends RecordMap<any, any> = RecordMap<any, an
           | Entry<RecordMapKey<RM>, PartialProps<RecordMapRecord<RM>>>
         >,
   ): Mutation<RM>;
+  /** @see Record.set */
   setIn<K extends keyof RecordMapProps<RM>>(
     key: RecordMapKey<RM>,
     prop: K,
     value: RecordMapProps<RM>[K],
   ): Mutation<RM>;
+  /** @see Record.update */
   updateIn<K extends keyof RecordMapProps<RM>>(
     key: RecordMapKey<RM>,
     prop: K,
     updater: (value: RecordMapProps<RM>[K]) => RecordMapProps<RM>[K],
   ): Mutation<RM>;
-  mergeIn<K extends keyof RecordMapProps<RM>>(
-    key: RecordMapKey<RM>,
-    props: PartialProps<RecordMapRecord<RM>>,
-  ): Mutation<RM>;
+  /** @see Record.merge */
+  mergeIn(key: RecordMapKey<RM>, props: PartialProps<RecordMapRecord<RM>>): Mutation<RM>;
+  /** @see Record.get */
   getIn<K extends keyof RecordMapProps<RM>>(
     key: RecordMapKey<RM>,
     prop: K,

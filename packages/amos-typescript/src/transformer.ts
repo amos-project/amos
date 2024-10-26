@@ -24,7 +24,7 @@ function visitAmos(node: ts.Node, options: Required<TransformerOptions>) {
   if (!identifier) {
     return node;
   }
-  if (!ts.isFunctionLike(node.initializer.arguments[0])) {
+  if (node.initializer.arguments.length < 1 || node.initializer.arguments.length > 2) {
     return node;
   }
   const arg2 = node.initializer.arguments[1];
