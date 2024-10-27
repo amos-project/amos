@@ -27,6 +27,9 @@ export interface StoreOptions {
   /**
    * The preloaded state, which will be loaded to the store with {@link fromJS}.
    * This is effective for {@link withPreload}, which is always loaded.
+   *
+   * Known issue: built in classes like Date cannot be loaded. Maybe `class-transformer`
+   * is required.
    */
   preloadedState?: Snapshot;
 
@@ -74,9 +77,9 @@ export interface EnhanceableStore extends Store {
   state: Snapshot;
 
   /**
-   * Get initial state for box, default is {@link Box#initialState}.
-   * If {@link StoreOptions#preloadedState} is set, will be parsed by
-   * {@link import('amos-utils').fromJS}.
+   * Get initial state for box, default is {@link Box.initialState}.
+   * If {@link StoreOptions.preloadedState} is set, will be parsed by
+   * {@link fromJS} via {@link withPreload}.
    */
   getInitialState: <S>(box: Box<S>) => S;
 

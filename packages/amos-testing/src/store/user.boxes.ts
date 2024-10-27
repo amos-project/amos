@@ -7,6 +7,8 @@ import { listBox, recordMapBox } from 'amos-boxes';
 import { Record } from 'amos-shapes';
 import { isTruly } from 'amos-utils';
 
+(Date.prototype as any).fromJS = (v: string) => new Date(v);
+
 export interface UserModel {
   id: number;
   firstName: string;
