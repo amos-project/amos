@@ -11,7 +11,7 @@ import { selectSession } from './session.selectors';
 import { LOGIN, LOGOUT } from './session.signals';
 
 export const loginSync = action((dispatch, select, userId: number) => {
-  const id = Math.random();
+  const id = userId + 10000;
   dispatch([
     sessionMapBox.mergeItem(id, { userId }),
     sessionIdBox.setState(id),
@@ -22,7 +22,7 @@ export const loginSync = action((dispatch, select, userId: number) => {
 });
 
 export const loginAsync = action(async (dispatch, select, userId: number) => {
-  await sleep();
+  await sleep(5);
   return dispatch(loginSync(userId));
 });
 

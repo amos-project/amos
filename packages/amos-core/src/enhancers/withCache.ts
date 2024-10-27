@@ -3,8 +3,8 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { append, Entry, isAmosObject, override } from 'amos-utils';
-import { Box, box } from '../box';
+import { Entry, isAmosObject, override } from 'amos-utils';
+import { Box } from '../box';
 import { Selector } from '../selector';
 import { StoreEnhancer } from '../store';
 import { Selectable } from '../types';
@@ -24,22 +24,12 @@ export interface CachesState {
   stack: Array<SelectEntry[] | null>;
 }
 
-export const cachesBox = box<CachesState | undefined>('amos/caches', void 0);
-
 export const withCache: () => StoreEnhancer = () => {
   return (next) => (options) => {
     const store = next(options);
     const cacheMap: CachesState['caches'] = new Map();
     const stack: CachesState['stack'] = [];
     const peak = () => stack[stack.length - 1];
-    append(store, 'init', () => {
-      store.dispatch(
-        cachesBox.setState({
-          caches: cacheMap,
-          stack: stack,
-        }),
-      );
-    });
     override(store, 'select', (select) => {
       return (s: any) => {
         const isSelector = isAmosObject<Selector>(s, 'selector');

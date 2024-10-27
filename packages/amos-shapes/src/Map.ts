@@ -25,7 +25,7 @@ import {
 } from 'amos-utils';
 
 export class Map<K extends ID, V> implements JSONSerializable<Record<K, V>> {
-  protected readonly data: Record<K, V> = nullObject();
+  protected readonly data: Readonly<Record<K, V>> = nullObject();
 
   constructor(readonly defaultValue: V) {}
 

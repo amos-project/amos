@@ -6,10 +6,16 @@
 import { $amos, __DEV__, append, isAmosObject, override } from 'amos-utils';
 import { Action, Box, Mutation, Signal, StoreEnhancer } from '../index';
 
+export interface DevAction {
+  type: string;
+  args: any[];
+  root: DevAction | undefined;
+}
+
 export interface ReduxDevtoolsExtension {
   connect(options?: { name?: string }): {
     init(state: any): void;
-    send(action: { type: string; [P: string]: any }, state: any): void;
+    send(action: DevAction, state: any): void;
   };
 }
 
@@ -51,6 +57,7 @@ export function withDevtools(): StoreEnhancer {
     }
 
     const dev = extension.connect({ name: options.name });
+    let root: DevAction | undefined;
     override(store, 'select', (select) => {
       return (s: any): any => {
         const isPreload = isAmosObject<Box>(s, 'box') && !store.state.hasOwnProperty(s.key);
@@ -60,8 +67,9 @@ export function withDevtools(): StoreEnhancer {
             {
               type: `P:${s.key}`,
               args: [result],
+              root: root,
             },
-            { ...store.state },
+            { ...store.snapshot() },
           );
         }
         return result;
@@ -69,24 +77,33 @@ export function withDevtools(): StoreEnhancer {
     });
     override(store, 'dispatch', (dispatch) => {
       return (task: any): any => {
-        const result = dispatch(task);
         if (
-          isAmosObject<Mutation>(task, 'mutation') ||
-          isAmosObject<Action>(task, 'action') ||
-          isAmosObject<Signal>(task, 'signal')
+          !isAmosObject<Mutation>(task, 'mutation') &&
+          !isAmosObject<Action>(task, 'action') &&
+          !isAmosObject<Signal>(task, 'signal')
         ) {
-          dev.send(
-            {
-              type: `${task[$amos].charAt(0).toUpperCase()}:${task.type}`,
-              args: task.args,
-            },
-            { ...store.state },
-          );
+          return dispatch(task);
         }
-        return result;
+        const action: DevAction = {
+          type: `${task[$amos].charAt(0).toUpperCase()}:${task.type}`,
+          args: task.args,
+          root: root,
+        };
+        root ??= action;
+        try {
+          const result = dispatch(task);
+          // we should not be aware the return type is promise or not.
+          // we have no dispatch tree at this moment.
+          dev.send(action, { ...store.snapshot() });
+          return result;
+        } finally {
+          if (root === action) {
+            root = void 0;
+          }
+        }
       };
     });
-    append(store, 'init', () => dev.init(store.state));
+    append(store, 'init', () => dev.init({ ...store.snapshot() }));
     return store;
   };
 }

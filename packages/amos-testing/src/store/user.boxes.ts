@@ -22,7 +22,7 @@ export class UserRecord extends Record<UserModel>({
   lastName: '',
   fatherId: 0,
   motherId: 0,
-  createdAt: new Date(),
+  createdAt: new Date(2020, 0, 1),
 }) {
   fullName() {
     return [this.firstName, this.lastName].filter(isTruly).join(' ');
@@ -37,8 +37,7 @@ export const Jessica = Jerry.set('id', 4).set('firstName', 'Jessica').set('fathe
 export const Morty = Jerry.merge({ id: 5, firstName: 'Morty' });
 export const users = [Rick, Beth, Jerry, Jessica, Morty];
 
-export const userMapBox = recordMapBox('user.userMap', new UserRecord(), 'id').config((b) => ({
-  initialState: b.initialState.setAll(users),
-}));
+export const userMapBox = recordMapBox('user.userMap', new UserRecord(), 'id');
+userMapBox.initialState = userMapBox.initialState.setAll(users);
 
 export const onlineUserListBox = listBox<number>('users.onlineList');

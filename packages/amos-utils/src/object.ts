@@ -14,7 +14,7 @@ export interface AmosObject<T extends string> {
 }
 
 let nextId = 0;
-const prefix = Date.now() + '-';
+const prefix = (typeof jest === 'undefined' ? Date.now() : 'T') + '-';
 
 export function createAmosObject<T extends AmosObject<any>>(
   key: T[typeof $amos],

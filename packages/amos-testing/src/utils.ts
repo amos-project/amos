@@ -19,10 +19,10 @@ export function expectCalled(fn: (...args: any[]) => any, count = 1) {
 }
 
 export function expectCalledWith(fn: jest.Mock, ...args: any[][]) {
-  expect(fn).toHaveBeenCalledTimes(args.length);
   for (const [i, a] of args.entries()) {
-    expect(fn).toHaveBeenNthCalledWith(i + 1, ...a);
+    expect(fn.mock.calls[i]).toEqual(a);
   }
+  expect(fn).toHaveBeenCalledTimes(args.length);
   fn.mockClear();
 }
 

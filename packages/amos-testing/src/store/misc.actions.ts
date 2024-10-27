@@ -18,7 +18,7 @@ export const addTwiceAsync = action(async (dispatch, select, value: number) => {
 export const addFourfoldAsync = action(async (dispatch, select, value: number) => {
   dispatch(countBox.add(value));
   dispatch(countBox.setState((state) => state + value));
-  await sleep();
+  await sleep(1);
   dispatch(countBox.setState(select(countBox) + value));
   dispatch(countBox.add(value));
   return value * 4;

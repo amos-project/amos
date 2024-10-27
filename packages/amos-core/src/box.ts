@@ -94,7 +94,7 @@ export interface BoxOptions<S = any> {
   persist?: BoxPersistOptions<S> | false;
 }
 
-export interface Box<S = any> extends AmosObject<'box'>, Readonly<BoxOptions<S>> {
+export interface Box<S = any> extends AmosObject<'box'>, BoxOptions<S> {
   /**
    * The key of the box, all the boxes in a system should have a unique key.
    * We recommend `appName.moduleName.typeName` style keys. For example:
