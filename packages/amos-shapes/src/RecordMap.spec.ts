@@ -62,7 +62,7 @@ describe('RecordMap', () => {
 
   it('should call on item', () => {
     // @ts-expect-error
-    m3.setIn(1, 'firstName', 1)
+    m3.setIn(1, 'firstName', 1);
     expect([
       m3.setIn(1, 'firstName', 'B').toJSON(),
       m3.updateIn(3, 'lastName', (v, t) => t.lastName + ':' + v + ':C').toJSON(),

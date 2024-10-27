@@ -4,6 +4,7 @@
  */
 
 import {
+  type ArraySource,
   clone,
   Constructor,
   Entry,
@@ -12,6 +13,7 @@ import {
   FuncReturn,
   ID,
   isArray,
+  isIterable,
   JSONSerializable,
   JSONState,
   nullObject,
@@ -62,10 +64,10 @@ export class Map<K extends ID, V> implements JSONSerializable<Record<K, V>> {
     return this.reset(nullObject(this.data, { [key]: item } as any));
   }
 
-  setAll(items: PartialDictionary<K, V> | ReadonlyArray<Entry<K, V>>): this {
+  setAll(items: PartialDictionary<K, V> | ArraySource<Entry<K, V>>): this {
     const up: PartialRecord<K, V> = {};
     let dirty = false;
-    if (Array.isArray(items)) {
+    if (Array.isArray(items) || isIterable(items)) {
       for (const [k, v] of items) {
         if (v !== this.getItem(k)) {
           dirty ||= true;
@@ -92,9 +94,13 @@ export class Map<K extends ID, V> implements JSONSerializable<Record<K, V>> {
   }
 
   mergeAll(
-    items: PartialDictionary<K, WellPartial<V>> | ReadonlyArray<Entry<K, WellPartial<V>>>,
+    items: PartialDictionary<K, WellPartial<V>> | ArraySource<Entry<K, WellPartial<V>>>,
   ): this {
-    const data = isArray(items) ? items : Object.entries(items);
+    const data = isArray(items)
+      ? items
+      : isIterable(items)
+        ? Array.from(items)
+        : Object.entries(items);
     return this.setAll(data.map(([k, v]) => [k, clone(this.getItem(k), v)]));
   }
 

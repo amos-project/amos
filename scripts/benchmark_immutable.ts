@@ -157,7 +157,7 @@ benches.push([
   },
   (size) => {
     return () => {
-      return new N.List<number>(0, range(size));
+      return new N.List<number>(range(size));
     };
   },
 ]);
@@ -171,7 +171,7 @@ benches.push([
     };
   },
   (size) => {
-    const v = new N.List<number>(0, range(size));
+    const v = new N.List<number>(range(size));
     return (i) => {
       return v.push(...range(i));
     };
@@ -187,7 +187,7 @@ benches.push([
     };
   },
   (size) => {
-    const v = new N.List<number>(0, range(size));
+    const v = new N.List<number>(range(size));
     return () => {
       return v.pop();
     };
@@ -203,7 +203,7 @@ benches.push([
     };
   },
   (size) => {
-    const v = new N.List<number>(0, range(size));
+    const v = new N.List<number>(range(size));
     return (i) => {
       return v.unshift(...range(i));
     };
@@ -219,7 +219,7 @@ benches.push([
     };
   },
   (size) => {
-    const v = new N.List<number>(0, range(size));
+    const v = new N.List<number>(range(size));
     return () => {
       return v.shift();
     };
@@ -235,7 +235,7 @@ benches.push([
     };
   },
   (size) => {
-    const v = new N.List<number>(0, range(size));
+    const v = new N.List<number>(range(size));
     return (i) => {
       return v.concat(range(i));
     };
@@ -251,7 +251,7 @@ benches.push([
     };
   },
   (size) => {
-    const v = new N.List<number>(0, range(size));
+    const v = new N.List<number>(range(size));
     return (i) => {
       return v.map((v, i2) => v + i + i2);
     };
@@ -267,7 +267,7 @@ benches.push([
     };
   },
   (size) => {
-    const v = new N.List<number>(0, range(size));
+    const v = new N.List<number>(range(size));
     return (i) => {
       return v.includes(i);
     };
@@ -283,7 +283,7 @@ benches.push([
     };
   },
   (size) => {
-    const v = new N.List<number>(0, range(size));
+    const v = new N.List<number>(range(size));
     return (i) => {
       return v.some((v) => v === i % size);
     };
@@ -299,7 +299,7 @@ benches.push([
     };
   },
   (size) => {
-    const v = new N.List<number>(0, range(size));
+    const v = new N.List<number>(range(size));
     return (i) => {
       return v.every((v) => v === i % size);
     };
@@ -315,7 +315,7 @@ benches.push([
     };
   },
   (size) => {
-    const v = new N.List<number>(0, range(size));
+    const v = new N.List<number>(range(size));
     return (i) => {
       return v.set(i % size, i);
     };
@@ -331,7 +331,7 @@ benches.push([
     };
   },
   (size) => {
-    const v = new N.List<number>(0, range(size));
+    const v = new N.List<number>(range(size));
     return (i) => {
       return v.splice((i % size) / 2, (i % size) / 4, ...range(i % size));
     };
@@ -347,7 +347,7 @@ benches.push([
     };
   },
   (size) => {
-    const v = new N.List<number>(0, range(size));
+    const v = new N.List<number>(range(size));
     return (i) => {
       return v.get(i % size);
     };
@@ -363,7 +363,7 @@ benches.push([
     };
   },
   (size) => {
-    const v = new N.List<number>(0, range(size));
+    const v = new N.List<number>(range(size));
     return (i) => {
       return v.entries();
     };

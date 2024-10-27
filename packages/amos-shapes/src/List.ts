@@ -6,12 +6,12 @@
 import { arrayEqual, clone, Cloneable, JSONSerializable, JSONState, MustNever } from 'amos-utils';
 
 export class List<E> extends Cloneable implements JSONSerializable<readonly E[]> {
-  constructor(
-    protected readonly defaultElement: E,
-    protected readonly data: readonly E[] = [],
-    isInitial: boolean = !data.length,
-  ) {
-    super(isInitial);
+  protected readonly data: readonly E[];
+
+  constructor(data?: ArrayLike<E> | Iterable<E>, isInitial?: boolean) {
+    const items = data ? Array.from(data) : [];
+    super(isInitial ?? !items.length);
+    this.data = items;
   }
 
   get length() {
@@ -19,7 +19,7 @@ export class List<E> extends Cloneable implements JSONSerializable<readonly E[]>
   }
 
   fromJS(state: JSONState<readonly E[]>): this {
-    return clone(this, { data: state.map((v) => clone(this.defaultElement, v as any)) } as any);
+    return clone(this, { data: state } as any);
   }
 
   toJSON(): readonly E[] {
@@ -32,8 +32,8 @@ export class List<E> extends Cloneable implements JSONSerializable<readonly E[]>
     return index > -1 && this.data.length > index;
   }
 
-  get(index: number): E {
-    return this.has(index) ? this.data[index] : this.defaultElement;
+  get(index: number): E | undefined {
+    return this.data[index];
   }
 
   at(index: number): E | undefined {
@@ -74,11 +74,7 @@ export class List<E> extends Cloneable implements JSONSerializable<readonly E[]>
 
   // move
 
-  filter(predicate: (value: E, index: number) => boolean): readonly E[] {
-    return this.data.filter(predicate);
-  }
-
-  filterThis(predicate: (value: E, index: number) => boolean): this {
+  filter(predicate: (value: E, index: number) => boolean): this {
     return this.reset(this.data.filter(predicate));
   }
 
@@ -100,43 +96,17 @@ export class List<E> extends Cloneable implements JSONSerializable<readonly E[]>
     return this.data.reduceRight(callbackfn, initialValue);
   }
 
-  flat<D extends number = 1>(depth?: D): FlatArray<readonly E[], D>[] {
-    return this.data.flat<readonly E[], D>(depth);
-  }
-
-  flatList<D extends number>(
-    depth: D,
-    defaultElement: FlatArray<readonly E[], D>,
-  ): List<FlatArray<readonly E[], D>> {
+  flat<D extends number = 1>(depth?: D): List<FlatArray<readonly E[], D>> {
     const data = this.data.flat<readonly E[], D>(depth);
-    return new List<FlatArray<readonly E[], D>>(defaultElement, data);
+    return new List<FlatArray<readonly E[], D>>(data);
   }
 
-  map<U>(callbackfn: (value: E, index: number) => U): readonly U[] {
-    return this.data.map(callbackfn);
+  map<R>(callbackfn: (value: E, index: number) => R): List<R> {
+    return new List<R>(this.data.map(callbackfn));
   }
 
-  mapThis(callbackfn: (value: E, index: number) => E): this {
-    return this.reset(this.data.map(callbackfn));
-  }
-
-  mapList<R>(defaultValue: R, callbackfn: (value: E, index: number) => R): List<R> {
-    return new List<R>(defaultValue, this.data.map(callbackfn));
-  }
-
-  flatMap<U>(callbackfn: (value: E, index: number) => U | readonly U[]): readonly U[] {
-    return this.data.flatMap(callbackfn);
-  }
-
-  flatMapThis(callbackfn: (value: E, index: number) => E | readonly E[]): this {
-    return this.reset(this.data.flatMap(callbackfn));
-  }
-
-  flatMapList<R>(
-    defaultValue: R,
-    callbackfn: (value: E, index: number) => R | readonly R[],
-  ): List<R> {
-    return new List<R>(defaultValue, this.data.flatMap(callbackfn));
+  flatMap<R>(callbackfn: (value: E, index: number) => R | readonly R[]): List<R> {
+    return new List<R>(this.data.flatMap(callbackfn));
   }
 
   slice(start?: number, end?: number): this {
@@ -212,11 +182,19 @@ export class List<E> extends Cloneable implements JSONSerializable<readonly E[]>
 
   // iterators
 
-  entries(): IterableIterator<[number, E]> {
+  entries(): ArrayIterator<[number, E]> {
     return this.data.entries();
   }
 
-  [Symbol.iterator](): IterableIterator<E> {
+  keys(): ArrayIterator<number> {
+    return this.data.keys();
+  }
+
+  values(): ArrayIterator<E> {
+    return this.data.values();
+  }
+
+  [Symbol.iterator](): ArrayIterator<E> {
     return this.data[Symbol.iterator]();
   }
 }
@@ -226,13 +204,7 @@ export type ListElement<L> = L extends List<infer E> ? E : never;
 // check if List<T> implements all array methods
 declare type MissedKeys = Exclude<
   keyof Array<any>,
-  | number
-  | 'toString'
-  | 'toLocaleString'
-  | 'keys'
-  | 'values'
-  | (typeof Symbol)['unscopables']
-  | keyof List<any>
+  number | 'toString' | 'toLocaleString' | (typeof Symbol)['unscopables'] | keyof List<any>
 >;
 declare type CheckMissedKeys = MustNever<MissedKeys>;
 

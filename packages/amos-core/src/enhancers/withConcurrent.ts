@@ -3,7 +3,7 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { isAmosObject, NotImplemented, override } from 'amos-utils';
+import { isAmosObject, override } from 'amos-utils';
 import { Action } from '../action';
 import { StoreEnhancer } from '../store';
 import { resolveCacheKey } from '../utils';
@@ -14,11 +14,8 @@ export function withConcurrent(): StoreEnhancer {
     const pending = new Map<any, Promise<any>>();
     override(store, 'dispatch', (dispatch) => {
       return (d: any) => {
-        if (!isAmosObject<Action>(d, 'action') || d.conflictPolicy === 'always') {
+        if (!isAmosObject<Action>(d, 'action') || d.conflictPolicy !== 'leading') {
           return dispatch(d);
-        }
-        if (d.conflictPolicy !== 'leading') {
-          throw new NotImplemented();
         }
         const key = resolveCacheKey(store, d, d.conflictKey);
         if (pending.has(key)) {

@@ -3,9 +3,9 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { Entry, ID, isArray, PartialRecord } from 'amos-utils';
+import { type ArraySource, Entry, ID, isArray, isIterable, PartialRecord } from 'amos-utils';
 import { List, ListElement } from './List';
-import { MapDelegateOperations, implementMapDelegations, Map } from './Map';
+import { implementMapDelegations, Map, MapDelegateOperations } from './Map';
 
 export interface ListMap<K extends ID, L extends List<any>>
   extends MapDelegateOperations<
@@ -14,8 +14,7 @@ export interface ListMap<K extends ID, L extends List<any>>
     | 'concat'
     | 'copyWithin'
     | 'fill'
-    | 'filterThis'
-    | 'mapThis'
+    | 'filter'
     | 'pop'
     | 'push'
     | 'reverse'
@@ -27,7 +26,7 @@ export interface ListMap<K extends ID, L extends List<any>>
     | 'delete'
     | 'set'
     | 'reset',
-    'get' | 'has' | 'at',
+    'get' | 'has' | 'at' | 'map' | 'flat' | 'flatMap' | 'entries' | 'keys' | 'values',
     List<any>
   > {}
 
@@ -43,9 +42,13 @@ export class ListMap<K extends ID, L extends List<any>> extends Map<K, L> {
   override setAll(
     items:
       | PartialRecord<K, L | readonly ListElement<L>[]>
-      | ReadonlyArray<Entry<K, L | readonly ListElement<L>[]>>,
+      | ArraySource<Entry<K, L | readonly ListElement<L>[]>>,
   ): this {
-    const data = Array.isArray(items) ? items : Object.entries(items);
+    const data = Array.isArray(items)
+      ? items
+      : isIterable(items)
+        ? Array.from(items)
+        : Object.entries(items);
     data.forEach((d) => {
       if (Array.isArray(d[1])) {
         d[1] = this.defaultValue.reset(d[1]);
@@ -59,8 +62,7 @@ implementMapDelegations(ListMap, {
   concat: 'set',
   copyWithin: 'set',
   fill: 'set',
-  filterThis: 'set',
-  mapThis: 'set',
+  filter: 'set',
   pop: 'set',
   push: 'set',
   reverse: 'set',
@@ -75,4 +77,10 @@ implementMapDelegations(ListMap, {
   get: 'get',
   has: 'get',
   at: 'get',
+  map: 'get',
+  flat: 'get',
+  flatMap: 'get',
+  entries: 'get',
+  values: 'get',
+  keys: 'get',
 });

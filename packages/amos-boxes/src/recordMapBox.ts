@@ -16,6 +16,7 @@ import {
   RecordProps,
 } from 'amos-shapes';
 import {
+  type ArraySource,
   Entry,
   IDKeyof,
   PartialDictionary,
@@ -38,13 +39,13 @@ export interface RecordMapBox<RM extends RecordMap<any, any> = RecordMap<any, an
   setAll(
     items:
       | PartialDictionary<RecordMapKey<RM>, RecordMapRecord<RM>>
-      | ReadonlyArray<RecordMapRecord<RM> | Entry<RecordMapKey<RM>, RecordMapRecord<RM>>>,
+      | ArraySource<RecordMapRecord<RM> | Entry<RecordMapKey<RM>, RecordMapRecord<RM>>>,
   ): Mutation<RM>;
   /** @see RecordMap.mergeAll */
   mergeAll(
     items:
       | PartialDictionary<RecordMapKey<RM>, PartialProps<RecordMapRecord<RM>>>
-      | ReadonlyArray<
+      | ArraySource<
           | PartialRequiredProps<RecordMapRecord<RM>, RecordMapKeyField<RM>>
           | Entry<RecordMapKey<RM>, PartialProps<RecordMapRecord<RM>>>
         >,

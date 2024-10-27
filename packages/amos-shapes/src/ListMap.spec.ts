@@ -10,11 +10,11 @@ import { ListMap } from './ListMap';
 describe('AmosListDict', () => {
   it('should create ListMap', () => {
     // default list map
-    const foo = new ListMap<number, List<number>>(new List(0));
+    const foo = new ListMap<number, List<number>>(new List());
     foo.setIn(1, 2, 3);
     foo.setItem(0, [0]);
     foo.getItem(0);
-    foo.getItem(0).get(0).toExponential();
+    foo.getItem(0).get(0)!.toExponential();
     // @ts-expect-error
     foo.getItem('');
     foo.getIn(1, 2);
@@ -22,7 +22,7 @@ describe('AmosListDict', () => {
     foo.atIn(1, 1);
 
     // with value type limit
-    const bar = new ListMap<number, List<TodoStatus>>(new List(TodoStatus.created));
+    const bar = new ListMap<number, List<TodoStatus>>(new List());
     // @ts-expect-error
     expect(bar.getItem(0).get(0) === 10).toBeFalsy();
 
@@ -30,14 +30,14 @@ describe('AmosListDict', () => {
       fine() {}
     }
 
-    const l1 = new ListMap<number, EList<TodoStatus>>(new EList(TodoStatus.created));
+    const l1 = new ListMap<number, EList<TodoStatus>>(new EList());
     l1.getItem(0).fine();
 
     class NList extends List<number> {
       fine() {}
     }
 
-    const l2 = new ListMap<number, NList>(new NList(0));
+    const l2 = new ListMap<number, NList>(new NList());
     l2.getItem(0).fine();
   });
 });

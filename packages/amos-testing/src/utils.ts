@@ -5,7 +5,7 @@
 
 import Mock = jest.Mock;
 import { Mutation } from 'amos-core';
-import { isObject, JSONState } from 'amos-utils';
+import { JSONState } from 'amos-utils';
 
 export function sleep(timeout: number = 0): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, timeout));
@@ -59,15 +59,3 @@ export const FooLabels = enumLabels(Foo, {
   Bar: { hello: 'Bar' },
   Baz: { hello: 'Baz' },
 });
-
-export function isIterable(v: unknown): v is Iterable<any> {
-  return isObject(v) && Symbol.iterator in v;
-}
-
-export function isIterator(v: unknown): v is Iterator<any> {
-  return isObject(v) && 'next' in v;
-}
-
-export function isIterableIterator(v: unknown): v is IterableIterator<any> {
-  return isIterable(v) && isIterator(v);
-}

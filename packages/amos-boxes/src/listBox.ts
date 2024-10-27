@@ -14,8 +14,7 @@ export interface ListBox<L extends List<any>>
       | 'concat'
       | 'copyWithin'
       | 'fill'
-      | 'filterThis'
-      | 'mapThis'
+      | 'filter'
       | 'pop'
       | 'push'
       | 'reverse'
@@ -55,8 +54,7 @@ export const ListBox = Box.extends<ListBox<any>>({
     splice: null,
     delete: null,
     fill: null,
-    filterThis: null,
-    mapThis: null,
+    filter: null,
     pop: null,
     push: null,
     reverse: null,
@@ -86,6 +84,9 @@ export const ListBox = Box.extends<ListBox<any>>({
   },
 });
 
-export function listBox<E>(key: string, defaultElement: E): ListBox<List<E>> {
-  return new ListBox(key, new List(defaultElement));
+export function listBox<E>(
+  key: string,
+  initialItems?: ArrayLike<E> | Iterable<E>,
+): ListBox<List<E>> {
+  return new ListBox(key, new List(initialItems));
 }

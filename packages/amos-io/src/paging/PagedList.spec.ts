@@ -3,6 +3,6 @@
  * @author junbao <junbao@moego.pet>
  */
 
-describe('PagedListBox', () => {
-  it('should create PagedListBox', () => {});
+describe('PagedList', () => {
+  it('should create PagedList', () => {});
 });

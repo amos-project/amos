@@ -4,7 +4,7 @@
  */
 
 import { listMapBox, recordMapBox } from 'amos-boxes';
-import { createPagedListMapBox } from 'amos-io';
+import { pagedListMapBox } from 'amos-io';
 import { Record } from 'amos-shapes';
 
 export interface PostModel {
@@ -25,7 +25,7 @@ export class PostRecord extends Record<PostModel>({
 
 export const postMapBox = recordMapBox('posts', PostRecord, 'id');
 
-export const userPostListBox = createPagedListMapBox('posts.userPostList', 0, 0, 0);
+export const userPostListBox = pagedListMapBox('posts.userPostList', 0, 0, 0);
 
 export interface MediaModel {
   id: number;

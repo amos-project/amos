@@ -3,7 +3,15 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { Entry, IDKeyof, JSONState, PartialDictionary, PartialRecord } from 'amos-utils';
+import {
+  type ArraySource,
+  Entry,
+  IDKeyof,
+  isIterable,
+  JSONState,
+  PartialDictionary,
+  PartialRecord,
+} from 'amos-utils';
 import { implementMapDelegations, Map, MapDelegateOperations } from './Map';
 import { PartialProps, PartialRequiredProps, Record, RecordProps } from './Record';
 
@@ -55,7 +63,10 @@ export class RecordMap<R extends Record<any>, KF extends IDKeyof<RecordProps<R>>
     return this.setItem(key, this.getItem(key).merge(props));
   }
 
-  override setAll(items: PartialDictionary<R[KF], R> | ReadonlyArray<R | Entry<R[KF], R>>): this {
+  override setAll(items: PartialDictionary<R[KF], R> | ArraySource<R | Entry<R[KF], R>>): this {
+    if (isIterable(items)) {
+      items = Array.from(items);
+    }
     if (Array.isArray(items)) {
       return super.setAll(items.map((v): any => (Array.isArray(v) ? v : [v[this.keyField], v])));
     } else {
@@ -65,16 +76,16 @@ export class RecordMap<R extends Record<any>, KF extends IDKeyof<RecordProps<R>>
 
   // tricky resolve types error
   override mergeAll(
-    items: ReadonlyArray<Entry<R[KF], PartialProps<R>>> | PartialDictionary<R[KF], PartialProps<R>>,
+    items: ArraySource<Entry<R[KF], PartialProps<R>>> | PartialDictionary<R[KF], PartialProps<R>>,
   ): this;
   override mergeAll(
-    items: ReadonlyArray<PartialRequiredProps<R, KF> | Entry<R[KF], PartialProps<R>>>,
+    items: ArraySource<PartialRequiredProps<R, KF> | Entry<R[KF], PartialProps<R>>>,
   ): this;
   override mergeAll(
     items:
-      | ReadonlyArray<Entry<R[KF], PartialProps<R>>>
+      | ArraySource<Entry<R[KF], PartialProps<R>>>
       | PartialDictionary<R[KF], PartialProps<R>>
-      | ReadonlyArray<PartialRequiredProps<R, KF> | Entry<R[KF], PartialProps<R>>>,
+      | ArraySource<PartialRequiredProps<R, KF> | Entry<R[KF], PartialProps<R>>>,
   ): this {
     if (Array.isArray(items)) {
       return super.setAll(

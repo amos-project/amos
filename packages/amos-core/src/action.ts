@@ -22,7 +22,7 @@ export interface ActionOptions<A extends any[] = any, R = any> {
    * - leading: only take first to dispatch.
    * The default value is always when no conflictKey is set.
    */
-  conflictPolicy: 'always' | 'leading';
+  conflictPolicy: 'always' | 'leading' | 'trailing';
 
   /**
    * Use for checking if the action is equal to another one, if so,
@@ -41,8 +41,10 @@ export interface Action<A extends any[] = any, R = any>
   readonly args: readonly unknown[];
 }
 
-export interface ActionFactory<A extends any[] = any, R = any>
-  extends AmosObject<'action_factory'> {
+export interface ActionFactoryStatic<A extends any[] = any, R = any>
+  extends AmosObject<'action_factory'> {}
+
+export interface ActionFactory<A extends any[] = any, R = any> extends ActionFactoryStatic<A, R> {
   (...args: A): Action<A, R>;
 }
 
@@ -79,7 +81,7 @@ export interface SelectableAction<A extends any[] = any, R = any, S = any>
   extends Action<A, R>,
     SelectableActionOptions<A, S> {}
 
-export interface ActionFactory<A extends any[] = any, R = any> {
+export interface ActionFactoryStatic<A extends any[] = any, R = any> {
   select<S>(selector: SelectorFactory<A, S>): SelectableActionFactory<A, R, S>;
 }
 

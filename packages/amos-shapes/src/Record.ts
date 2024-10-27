@@ -8,7 +8,7 @@ import {
   Cloneable,
   fromJS,
   JSONSerializable,
-  JSONState,
+  JSONState, type NoArray,
   PartialRequired,
   WellPartial,
 } from 'amos-utils';
@@ -23,7 +23,7 @@ export interface RecordInstance<P extends object> extends Cloneable, JSONSeriali
 export type Record<P extends object> = Readonly<P> & RecordInstance<P>;
 
 export type RecordProps<T> = T extends Record<infer P> ? P : T;
-export type PartialProps<T> = WellPartial<RecordProps<T>>;
+export type PartialProps<T> = WellPartial<RecordProps<T>> & NoArray;
 export type PartialRequiredProps<T, K extends keyof RecordProps<T>> = PartialRequired<
   RecordProps<T>,
   K

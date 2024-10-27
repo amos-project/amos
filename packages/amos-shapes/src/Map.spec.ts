@@ -3,8 +3,8 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { checkType, expectCalledWith, isIterable, isIterableIterator } from 'amos-testing';
-import { identity } from 'amos-utils';
+import { checkType, expectCalledWith } from 'amos-testing';
+import { identity, isIterable, isIterableIterator } from 'amos-utils';
 import { Map } from './Map';
 
 describe('Map', () => {

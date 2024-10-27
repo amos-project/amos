@@ -41,4 +41,4 @@ export const userMapBox = recordMapBox('user.userMap', new UserRecord(), 'id').c
   initialState: b.initialState.setAll(users),
 }));
 
-export const onlineUserListBox = listBox('users.onlineList', 0);
+export const onlineUserListBox = listBox<number>('users.onlineList');

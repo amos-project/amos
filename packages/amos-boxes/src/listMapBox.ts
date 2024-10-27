@@ -17,8 +17,7 @@ export interface ListMapBox<LM extends ListMap<any, any>>
       | 'concatIn'
       | 'copyWithinIn'
       | 'fillIn'
-      | 'filterThisIn'
-      | 'mapThisIn'
+      | 'filterIn'
       | 'popIn'
       | 'pushIn'
       | 'reverseIn'
@@ -30,7 +29,15 @@ export interface ListMapBox<LM extends ListMap<any, any>>
       | 'deleteIn'
       | 'setIn'
       | 'resetIn',
-      never,
+      | 'getIn'
+      | 'hasIn'
+      | 'atIn'
+      | 'mapIn'
+      | 'flatIn'
+      | 'flatMapIn'
+      | 'entriesIn'
+      | 'keysIn'
+      | 'valuesIn',
       ListMap<any, any>
     > {}
 
@@ -40,8 +47,7 @@ export const ListMapBox = MapBox.extends<ListMapBox<any>>({
     concatIn: null,
     copyWithinIn: null,
     fillIn: null,
-    filterThisIn: null,
-    mapThisIn: null,
+    filterIn: null,
     popIn: null,
     pushIn: null,
     reverseIn: null,
@@ -54,7 +60,17 @@ export const ListMapBox = MapBox.extends<ListMapBox<any>>({
     setIn: null,
     resetIn: null,
   },
-  selectors: {},
+  selectors: {
+    getIn: null,
+    hasIn: null,
+    atIn: null,
+    mapIn: null,
+    flatIn: null,
+    flatMapIn: null,
+    entriesIn: null,
+    keysIn: null,
+    valuesIn: null,
+  },
 });
 
 export function listMapBox<K, E>(
@@ -62,5 +78,5 @@ export function listMapBox<K, E>(
   inferKey: K,
   defaultElement: E,
 ): ListMapBox<ListMap<IDOf<K>, List<E>>> {
-  return new ListMapBox(key, new ListMap(new List(defaultElement)));
+  return new ListMapBox(key, new ListMap(new List()));
 }

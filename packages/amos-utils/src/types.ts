@@ -38,10 +38,12 @@ export type ToString<T> = T extends string
 
 export type PartialRecord<K extends keyof any, V> = { [P in K]+?: V };
 
-export type PartialDictionary<K extends keyof any, V> = PartialRecord<K, V> & {
+export interface NoArray {
   // Force no array
   readonly [Symbol.iterator]?: unique symbol;
-};
+}
+
+export type PartialDictionary<K extends keyof any, V> = PartialRecord<K, V> & NoArray;
 
 export type PartialRequired<T, K extends keyof T> = Required<Pick<T, K>> & Partial<Omit<T, K>>;
 export type Entry<K, V> = readonly [K, V];
@@ -68,3 +70,5 @@ export type IsAny<T> = 0 extends 1 & T ? true : false;
 export type IsUnknown<T> = unknown extends T ? (T extends unknown ? true : false) : false;
 
 export type OmitKeys<T, K extends keyof T> = Omit<T, K>;
+
+export type ArraySource<T> = ArrayLike<T> | Iterable<T>;
