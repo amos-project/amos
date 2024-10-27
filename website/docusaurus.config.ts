@@ -30,6 +30,10 @@ const config: Config = {
     locales: ['en'],
   },
 
+  themes: [
+    '@docusaurus/theme-live-codeblock',
+  ],
+
   presets: [
     [
       'classic',
@@ -39,6 +43,15 @@ const config: Config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl: 'https://github.com/amos-project/amos/tree/main/website/',
+          remarkPlugins: [
+            [
+              require('@docusaurus/remark-plugin-npm2yarn'),
+              {
+                sync: true,
+                converters: ['yarn', 'pnpm'],
+              },
+            ],
+          ],
         },
         theme: {
           customCss: './src/css/custom.css',

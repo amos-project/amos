@@ -41,6 +41,8 @@ jobs:
           cache-dependency-path: yarn.lock
       - name: Install dependencies
         run: yarn --immutable
+      - name: Build packages
+        run: yarn build
       - name: Build Website
         run: yarn workspace amos-website build
       - name: Setup Pages
