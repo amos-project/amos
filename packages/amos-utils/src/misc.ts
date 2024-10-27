@@ -3,6 +3,7 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
+import { isIterable } from './equals';
 import { ValueOrConstructor, ValueOrFunc } from './types';
 
 export function must<T>(value: T, message: string): asserts value {
@@ -41,8 +42,8 @@ export function toArray<T>(items: T[] | Iterable<T> | T): T[] {
   if (Array.isArray(items)) {
     return items;
   }
-  if (items && (items as any)[Symbol.iterator]) {
-    return Array.from(items as Iterable<T>);
+  if (isIterable(items)) {
+    return Array.from(items);
   }
   return [items as T];
 }

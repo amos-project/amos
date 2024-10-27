@@ -3,13 +3,21 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { arrayEqual, clone, Cloneable, JSONSerializable, JSONState, MustNever } from 'amos-utils';
+import {
+  arrayEqual,
+  clone,
+  Cloneable,
+  isArray, isIterable,
+  JSONSerializable,
+  JSONState,
+  MustNever,
+} from 'amos-utils';
 
 export class List<E> extends Cloneable implements JSONSerializable<readonly E[]> {
   protected readonly data: readonly E[];
 
   constructor(data?: ArrayLike<E> | Iterable<E>, isInitial?: boolean) {
-    const items = data ? Array.from(data) : [];
+    const items = isArray(data) ? data : isIterable(data) ? Array.from(data) : [];
     super(isInitial ?? !items.length);
     this.data = items;
   }
@@ -166,6 +174,9 @@ export class List<E> extends Cloneable implements JSONSerializable<readonly E[]>
   }
 
   set(index: number, value: E): this {
+    if(this.get(index) === value) {
+      return this;
+    }
     const data = this.data.slice();
     data[index] = value;
     return this.reset(data);

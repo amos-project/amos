@@ -3,7 +3,7 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { applyMutations } from 'amos-testing';
+import { runMutations } from 'amos-testing';
 import { objectBox } from './objectBox';
 
 const objBox = objectBox('unit.box.obj', { foo: 'bar', bar: 1 });
@@ -15,7 +15,7 @@ describe('objectBox', () => {
       baa: 3,
     });
     expect(
-      applyMutations(objBox.initialState, [
+      runMutations(objBox.initialState, [
         objBox.setState({ foo: 'baz', bar: 2 }),
         objBox.mergeState({ bar: 3 }),
         objBox.setState(),
@@ -23,12 +23,11 @@ describe('objectBox', () => {
         objBox.mergeState((state) => ({ bar: state.bar * 5 })),
       ]),
     ).toEqual([
-      { foo: 'bar', bar: 1 },
       { foo: 'baz', bar: 2 },
-      { foo: 'baz', bar: 3 },
-      { foo: 'bar', bar: 1 },
+      { foo: 'bar', bar: 3 },
+      void 0,
       { foo: 'bar', bar: 4 },
-      { foo: 'bar', bar: 20 },
+      { foo: 'bar', bar: 5 },
     ]);
   });
 });

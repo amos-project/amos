@@ -29,15 +29,7 @@ export interface ListMapBox<LM extends ListMap<any, any>>
       | 'deleteIn'
       | 'setIn'
       | 'resetIn',
-      | 'getIn'
-      | 'hasIn'
-      | 'atIn'
-      | 'mapIn'
-      | 'flatIn'
-      | 'flatMapIn'
-      | 'entriesIn'
-      | 'keysIn'
-      | 'valuesIn',
+      'getIn' | 'hasIn' | 'atIn' | 'mapIn' | 'flatIn' | 'flatMapIn',
       ListMap<any, any>
     > {}
 
@@ -65,11 +57,8 @@ export const ListMapBox = MapBox.extends<ListMapBox<any>>({
     hasIn: null,
     atIn: null,
     mapIn: null,
-    flatIn: null,
+    flatIn: { cache: true },
     flatMapIn: null,
-    entriesIn: null,
-    keysIn: null,
-    valuesIn: null,
   },
 });
 

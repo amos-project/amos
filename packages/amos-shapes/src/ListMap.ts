@@ -3,7 +3,14 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { type ArraySource, Entry, ID, isArray, isIterable, PartialRecord } from 'amos-utils';
+import {
+  type ArraySource,
+  Entry,
+  ID,
+  isArray,
+  isIterable,
+  type PartialDictionary,
+} from 'amos-utils';
 import { List, ListElement } from './List';
 import { implementMapDelegations, Map, MapDelegateOperations } from './Map';
 
@@ -41,7 +48,7 @@ export class ListMap<K extends ID, L extends List<any>> extends Map<K, L> {
 
   override setAll(
     items:
-      | PartialRecord<K, L | readonly ListElement<L>[]>
+      | PartialDictionary<K, L | readonly ListElement<L>[]>
       | ArraySource<Entry<K, L | readonly ListElement<L>[]>>,
   ): this {
     const data = Array.isArray(items)

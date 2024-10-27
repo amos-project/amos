@@ -10,11 +10,11 @@ import { resolveConstructorValue, ValueOrConstructor } from 'amos-utils';
 export interface RecordBox<R extends Record<any>>
   extends Box<R>,
     ShapeBox<R, 'merge', 'isInitial', Record<{}>> {
-  /** @see {Record#get} */
+  /** @see Record#get */
   get<K extends keyof RecordProps<R>>(key: K): Selector<R[K]>;
-  /** @see {Record#set} */
+  /** @see Record#set */
   set<K extends keyof RecordProps<R>>(key: K, value: R[K]): Mutation<R>;
-  /** @see {Record#update} */
+  /** @see Record#update */
   update<K extends keyof RecordProps<R>>(
     key: K,
     updater: (value: R[K], record: R) => R[K],

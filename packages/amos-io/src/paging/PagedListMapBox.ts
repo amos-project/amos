@@ -5,7 +5,7 @@
 
 import { RecordMapBox } from 'amos-boxes';
 import { ShapeBox } from 'amos-core';
-import type { IDOf } from 'amos-utils/src/index';
+import type { IDOf } from 'amos-utils';
 import { PagedList } from './PagedList';
 import { PagedListMap } from './PagedListMap';
 

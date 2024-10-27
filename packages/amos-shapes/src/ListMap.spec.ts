@@ -14,7 +14,7 @@ describe('AmosListDict', () => {
     foo.setIn(1, 2, 3);
     foo.setItem(0, [0]);
     foo.getItem(0);
-    foo.getItem(0).get(0)!.toExponential();
+    foo.getItem(0).get(0)?.toExponential();
     // @ts-expect-error
     foo.getItem('');
     foo.getIn(1, 2);

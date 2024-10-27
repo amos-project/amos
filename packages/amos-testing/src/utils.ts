@@ -32,6 +32,13 @@ export function applyMutations<S>(state: S, mutations: readonly Mutation<S>[]) {
     .slice(1);
 }
 
+export function runMutations<S>(state: S, mutations: readonly Mutation<S>[]) {
+  return mutations.map((m) => {
+    const v = m.mutator(state);
+    return v === state ? void 0 : v;
+  });
+}
+
 export function toJS<T>(v: T): JSONState<T> {
   return JSON.parse(JSON.stringify(v));
 }

@@ -4,7 +4,8 @@ import { JestConfigWithTsJest } from 'ts-jest';
 export default async (): Promise<JestConfigWithTsJest> => {
   return {
     setupFiles: ['<rootDir>/jest.setup.ts'],
-    testEnvironment: 'node',
+    testMatch: ['<rootDir>/packages/*/src/**/*.spec.ts?(x)'],
+    testEnvironment: 'jest-environment-jsdom',
     transform: {
       '^.+.tsx?$': [
         'ts-jest',
@@ -25,6 +26,7 @@ export default async (): Promise<JestConfigWithTsJest> => {
     },
     moduleNameMapper: {
       '^amos-([^/]+)$': '<rootDir>/packages/amos-$1/src',
+      '^amos$': '<rootDir>/packages/amos/src',
     },
   };
 };

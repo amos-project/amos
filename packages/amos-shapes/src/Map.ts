@@ -89,10 +89,21 @@ export class Map<K extends ID, V> implements JSONSerializable<Record<K, V>> {
   }
 
   // only allowed for non-array object item
+  /**
+   * Merge properties to the existing or default value.
+   *
+   * Note: only allowed for non-array object item.
+   * Note: built-in objects like Date/Map cannot be merged.
+   */
   mergeItem(key: K, props: WellPartial<V>): this {
     return this.setItem(key, clone(this.getItem(key), props));
   }
 
+  /**
+   * Merge properties for multiple targets.
+   *
+   * @see mergeItem
+   */
   mergeAll(
     items: PartialDictionary<K, WellPartial<V>> | ArraySource<Entry<K, WellPartial<V>>>,
   ): this {

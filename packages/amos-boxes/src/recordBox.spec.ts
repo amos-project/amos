@@ -3,28 +3,33 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { dispatch, exampleBox, select } from 'amos-testing';
+import { createStore } from 'amos-core/src/index';
+import { exampleBox, ExampleRecord, runMutations } from 'amos-testing';
 
-describe('RecordBox', function () {
-  it('should create RecordBox', function () {
-    expect([
-      select(exampleBox.isInitial()),
-      dispatch(exampleBox.set('title', 'Hello world')).title,
-      dispatch(exampleBox.set('count', 1)).count,
-      dispatch(exampleBox.merge({ content: 'First', count: 2 })).count,
-      dispatch(exampleBox.update('count', (count, record) => count * record.count)).count,
-      select(exampleBox.get('count')),
-      select(exampleBox.isInitial()),
-      select(exampleBox).toJSON(),
-    ]).toEqual([
-      false,
-      'Hello world',
-      1,
-      2,
-      4,
-      4,
-      true,
-      { title: 'Hello world', count: 4, link: '', content: 'First' },
+describe('RecordBox', () => {
+  it('should create mutations', () => {
+    expect(
+      runMutations(exampleBox.initialState, [
+        exampleBox.set('title', 'A'),
+        exampleBox.merge({ title: 'B' }),
+        exampleBox.update('title', (v, t) => v + ':' + t.title + ':' + 'C'),
+        exampleBox.set('title', ''),
+        exampleBox.merge({ title: '' }),
+        exampleBox.update('title', (v, t) => v + ''),
+      ]),
+    ).toEqual([
+      new ExampleRecord({ title: 'A' }),
+      new ExampleRecord({ title: 'B' }),
+      new ExampleRecord({ title: '::C' }),
+      void 0,
+      void 0,
+      void 0,
     ]);
+  });
+  it('should create selectors', () => {
+    const store = createStore();
+    expect(store.select([exampleBox.get('title'), exampleBox.isInitial()])).toEqual(['', true]);
+    store.dispatch(exampleBox.merge({ title: 'A' }));
+    expect(store.select([exampleBox.get('title'), exampleBox.isInitial()])).toEqual(['A', false]);
   });
 });

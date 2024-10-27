@@ -32,9 +32,11 @@ export interface RecordMapBox<RM extends RecordMap<any, any> = RecordMap<any, an
   /** @see RecordMap.setItem */
   setItem(key: RecordMapKey<RM>, value: RecordMapRecord<RM>): Mutation<RM>;
   setItem(value: RecordMapRecord<RM>): Mutation<RM>;
+
   /** @see RecordMap.mergeItem */
   mergeItem(props: PartialRequiredProps<RecordMapRecord<RM>, RecordMapKeyField<RM>>): Mutation<RM>;
   mergeItem(key: RecordMapKey<RM>, props: PartialProps<RecordMapRecord<RM>>): Mutation<RM>;
+
   /** @see RecordMap.setAll */
   setAll(
     items:
@@ -50,20 +52,24 @@ export interface RecordMapBox<RM extends RecordMap<any, any> = RecordMap<any, an
           | Entry<RecordMapKey<RM>, PartialProps<RecordMapRecord<RM>>>
         >,
   ): Mutation<RM>;
+
   /** @see Record.set */
   setIn<K extends keyof RecordMapProps<RM>>(
     key: RecordMapKey<RM>,
     prop: K,
     value: RecordMapProps<RM>[K],
   ): Mutation<RM>;
+
   /** @see Record.update */
   updateIn<K extends keyof RecordMapProps<RM>>(
     key: RecordMapKey<RM>,
     prop: K,
     updater: (value: RecordMapProps<RM>[K]) => RecordMapProps<RM>[K],
   ): Mutation<RM>;
+
   /** @see Record.merge */
   mergeIn(key: RecordMapKey<RM>, props: PartialProps<RecordMapRecord<RM>>): Mutation<RM>;
+
   /** @see Record.get */
   getIn<K extends keyof RecordMapProps<RM>>(
     key: RecordMapKey<RM>,

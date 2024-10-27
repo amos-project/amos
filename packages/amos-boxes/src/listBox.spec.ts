@@ -3,45 +3,47 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { applyMutations, onlineUserListBox } from 'amos-testing';
+import { onlineUserListBox, runMutations } from 'amos-testing';
 
-describe('ListBox', function () {
-  it('should create ListBox', function () {
+describe('ListBox', () => {
+  it('should create mutation', () => {
     expect(
-      applyMutations(onlineUserListBox.initialState.reset([0]), [
-        onlineUserListBox.concat([1, 2], [3, 4]),
-        onlineUserListBox.copyWithin(2, 0, 1),
-        onlineUserListBox.fill(5),
-        onlineUserListBox.filter((v, index) => v === 5 && index > 0),
+      runMutations(onlineUserListBox.initialState.reset([0, 1, 3, 2]), [
+        onlineUserListBox.concat([1, 2, 3]),
+        onlineUserListBox.copyWithin(2, 0, 2),
+        onlineUserListBox.fill(-1, 1, 3),
         onlineUserListBox.pop(),
-        onlineUserListBox.push(-1),
+        onlineUserListBox.push(1, 2),
         onlineUserListBox.reverse(),
         onlineUserListBox.shift(),
-        onlineUserListBox.unshift(-2),
-        onlineUserListBox.slice(1),
+        onlineUserListBox.unshift(1, 2),
+        onlineUserListBox.slice(1, 2),
         onlineUserListBox.sort(),
-        onlineUserListBox.splice(1, 2, 1),
-        onlineUserListBox.delete(1),
-        onlineUserListBox.set(1, -3),
-        onlineUserListBox.reset([1]),
-      ]).map((s) => s.toJSON()),
+        onlineUserListBox.splice(1, 2, -1),
+        onlineUserListBox.delete(3),
+        onlineUserListBox.set(1, 2),
+        onlineUserListBox.set(1, 1),
+        onlineUserListBox.reset([1, 2]),
+      ]).map((s) => s?.toJSON()),
     ).toEqual([
-      [0, 1, 2, 3, 4],
-      [0, 1, 0, 3, 4],
-      [5, 5, 5, 5, 5],
-      [5, 5, 5, 5],
-      [0, 5, 10, 15],
-      [0, 5, 10],
-      [0, 5, 10, -1],
-      [-1, 10, 5, 0],
-      [10, 5, 0],
-      [-2, 10, 5, 0],
-      [10, 5, 0],
-      [0, 5, 10],
-      [0, 1],
+      [0, 1, 3, 2, 1, 2, 3],
+      [0, 1, 0, 1],
+      [0, -1, -1, 2],
+      [0, 1, 3],
+      [0, 1, 3, 2, 1, 2],
+      [2, 3, 1, 0],
+      [1, 3, 2],
+      [1, 2, 0, 1, 3, 2],
       [1],
-      [1, -3],
-      [1],
+      [0, 1, 2, 3],
+      [0, -1, 2],
+      [0, 1, 2],
+      [0, 2, 3, 2],
+      void 0,
+      [1, 2],
     ]);
+  });
+  it('should create selectors', () => {
+
   });
 });

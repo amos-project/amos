@@ -84,10 +84,10 @@ export const check_deps = autorun(
       };
       const checkNoSrcAndExternalPkgDeps = () => {
         for (const d of deps) {
+          if (d.includes('src')) {
+            console.error('%s import bad path %s', pkg, d);
+          }
           if (d.startsWith('./') || d.startsWith('../')) {
-            if (d.includes('src')) {
-              console.error('%s import bad path %s', pkg, d);
-            }
             continue;
           }
           if (d.startsWith('amos')) {
@@ -98,10 +98,10 @@ export const check_deps = autorun(
           }
         }
         for (const d of devDeps) {
+          if (d.includes('src')) {
+            console.error('%s import bad path %s', pkg, d);
+          }
           if (d.startsWith('./') || d.startsWith('../')) {
-            if (d.includes('src')) {
-              console.error('%s import bad path %s', pkg, d);
-            }
             continue;
           }
           if (d.startsWith('amos')) {

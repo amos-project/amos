@@ -16,6 +16,7 @@ import {
   sessionIdBox,
   sessionMapBox,
   todoMapBox,
+  userMapBox,
 } from 'amos-testing';
 import { pick } from 'lodash';
 import { createStore, Store } from './store';
@@ -45,6 +46,7 @@ describe('store', () => {
     const s3 = await s2;
     state[sessionIdBox.key] = s3;
     state[sessionMapBox.key] = sessionMapBox.initialState.mergeItem(s3, { userId: 1 });
+    state[userMapBox.key] = userMapBox.initialState;
     expect(store.snapshot()).toEqual(state);
 
     // signal

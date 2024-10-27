@@ -3,7 +3,7 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { recordBox, type RecordBox } from 'amos-boxes/src/index';
+import { recordBox, type RecordBox } from 'amos-boxes';
 import { PagedList } from './PagedList';
 
 export function pagedListBox<TElement, TCursor, TOwner>(

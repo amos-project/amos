@@ -21,7 +21,7 @@ describe('selector', () => {
     expect(s).toEqual(
       createAmosObject<Selector>('selector', {
         compute: expect.any(Function),
-        type: 'amos/double',
+        type: 'amos/selectDouble',
         equal: is,
         args: [3],
         id: expect.any(String),

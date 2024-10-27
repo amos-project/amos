@@ -7,10 +7,12 @@ import {
   type ArraySource,
   Entry,
   IDKeyof,
+  isArray,
   isIterable,
   JSONState,
   PartialDictionary,
   PartialRecord,
+  toArray,
 } from 'amos-utils';
 import { implementMapDelegations, Map, MapDelegateOperations } from './Map';
 import { PartialProps, PartialRequiredProps, Record, RecordProps } from './Record';
@@ -87,14 +89,14 @@ export class RecordMap<R extends Record<any>, KF extends IDKeyof<RecordProps<R>>
       | PartialDictionary<R[KF], PartialProps<R>>
       | ArraySource<PartialRequiredProps<R, KF> | Entry<R[KF], PartialProps<R>>>,
   ): this {
-    if (Array.isArray(items)) {
+    if (isArray(items) || isIterable(items)) {
       return super.setAll(
-        items.map((v): any => {
+        toArray(items).map((v): any => {
           if (Array.isArray(v)) {
-            v[1][this.keyField] = v[0];
-            return v;
+            const v1 = this.keyField in v[1] ? v[1] : { [this.keyField]: v[0], ...v[1] };
+            return [v[0], this.getItem(v[0]).merge(v1)];
           }
-          return [v[this.keyField], v];
+          return [v[this.keyField], this.getItem(v[this.keyField]).merge(v)];
         }),
       );
     } else {
