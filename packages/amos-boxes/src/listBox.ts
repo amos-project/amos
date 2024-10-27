@@ -4,8 +4,7 @@
  */
 
 import { Box, ShapeBox } from 'amos-core';
-import { List } from 'amos-shapes';
-import { arrayEqual } from 'amos-utils';
+import { isSameList, List } from 'amos-shapes';
 
 export interface ListBox<L extends List<any>>
   extends Box<L>,
@@ -14,7 +13,6 @@ export interface ListBox<L extends List<any>>
       | 'concat'
       | 'copyWithin'
       | 'fill'
-      | 'filter'
       | 'pop'
       | 'push'
       | 'reverse'
@@ -54,7 +52,6 @@ export const ListBox = Box.extends<ListBox<any>>({
     splice: null,
     delete: null,
     fill: null,
-    filter: null,
     pop: null,
     push: null,
     reverse: null,
@@ -67,9 +64,9 @@ export const ListBox = Box.extends<ListBox<any>>({
     some: null, // cannot be cached because the param is a function
     get: null,
     flat: { cache: true },
-    map: { equal: arrayEqual as any },
+    map: { equal: isSameList as any },
     every: null,
-    filter: { equal: arrayEqual as any },
+    filter: { equal: isSameList as any },
     find: null,
     findIndex: null,
     indexOf: { cache: true },

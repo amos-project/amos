@@ -212,9 +212,6 @@ export function isSameList<T>(a: List<T> | readonly T[], b: List<T> | readonly T
   if (a === b) {
     return true;
   }
-  if (a instanceof List && b instanceof List) {
-    return false;
-  }
   const aa = a instanceof List ? a.toJSON() : a;
   const ab = b instanceof List ? b.toJSON() : b;
   return arrayEqual(aa, ab);

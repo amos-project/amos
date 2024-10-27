@@ -21,8 +21,11 @@ export interface ActionOptions<A extends any[] = any, R = any> {
    * - always: will always dispatch.
    * - leading: only take first to dispatch.
    * The default value is always when no conflictKey is set.
+   *
+   * Note: we have no plan to implement `trailing` mode,
+   * it should be controlled by user space.
    */
-  conflictPolicy: 'always' | 'leading' | 'trailing';
+  conflictPolicy: 'always' | 'leading';
 
   /**
    * Use for checking if the action is equal to another one, if so,
