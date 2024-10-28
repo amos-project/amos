@@ -55,8 +55,8 @@ describe('Box', () => {
     expect([
       todoMapBox.table?.toRows(todoMapBox.initialState),
       countBox.table?.toRows(0),
-      mapBox('', 1, 1).config({ table: void 0 }).table,
-      mapBox('', 1, 1).table === todoMapBox.table,
+      mapBox('m1', 1, 1).config({ table: void 0 }).table,
+      mapBox('m2', 1, 1).table === todoMapBox.table,
       !!todoMapBox.table,
     ]).toEqual([{}, void 0, void 0, true, true]);
   });
@@ -68,7 +68,7 @@ describe('Box', () => {
       methods: { foo: () => 1 },
     });
     expect([
-      new MyBox('', '').foo(),
+      new MyBox('my', '').foo(),
       Box.prototype.hasOwnProperty('foo'),
       MyBox.prototype.hasOwnProperty('foo'),
     ]).toEqual([1, false, true]);

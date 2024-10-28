@@ -4,7 +4,8 @@
  */
 
 import { ValueOrPromise } from 'amos-utils';
-import { PersistEntry, PersistValue, StorageEngine } from '../types';
+import { PersistEntry, PersistValue } from '../types';
+import type { StorageEngine } from './Storage';
 
 // compat with Web Storage and React Native AsyncStorage
 export interface Storage {
@@ -20,11 +21,10 @@ export class SimpleStorage implements StorageEngine {
   constructor(
     readonly prefix: string,
     readonly storage: Storage,
-    readonly delimiter: string = ':',
   ) {}
 
   async getMulti(items: readonly string[]): Promise<readonly (PersistValue | null)[]> {
-    return Promise.all(items.map((key) => this.getItem(this.genKey(key))));
+    return Promise.all(items.map((key) => this.getItem(key)));
   }
 
   async getPrefix(prefix: string): Promise<readonly PersistEntry[]> {
@@ -44,10 +44,13 @@ export class SimpleStorage implements StorageEngine {
   }
 
   async removePrefix(prefix: string): Promise<void> {
-    const keys = await this.allKeys(this.genKey(prefix));
-    await Promise.all(keys.map((k) => this.storage.removeItem(k)));
+    const keys = await this.allKeys(prefix);
+    await Promise.all(keys.map((k) => this.storage.removeItem(this.genKey(k))));
   }
 
+  /**
+   * Get item with key without {@link prefix}.
+   */
   private async getItem(key: string): Promise<PersistValue | null> {
     const v = await this.storage.getItem(this.genKey(key));
     if (!v) {
@@ -56,6 +59,9 @@ export class SimpleStorage implements StorageEngine {
     return JSON.parse(v);
   }
 
+  /**
+   * Get all keys start with prefix, without {@link prefix}.
+   */
   private async allKeys(prefix: string) {
     const keyPrefix = this.genKey(prefix);
     const headSize = this.genKey('').length;
@@ -76,6 +82,6 @@ export class SimpleStorage implements StorageEngine {
   }
 
   private genKey(key: string) {
-    return `${this.prefix}${this.delimiter}${key}`;
+    return `${this.prefix}${key}`;
   }
 }

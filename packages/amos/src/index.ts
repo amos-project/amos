@@ -82,7 +82,7 @@ export { OptimisticOptions, withOptimistic } from 'amos-io';
 export {
   BoxPersistOptions,
   IDBStorage,
-  LoadBoxes,
+  HydrateState,
   MemoryStorage,
   PersistEntry,
   PersistModel,
@@ -92,7 +92,7 @@ export {
   SimpleStorage,
   Storage,
   StorageEngine,
-  loadBoxes,
+  hydrateState,
   withPersist,
 } from 'amos-persist';
 export {

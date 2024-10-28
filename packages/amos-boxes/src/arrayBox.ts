@@ -7,12 +7,9 @@ import { Box, Mutation, ShapeBox } from 'amos-core';
 import { removeElement } from 'amos-utils';
 
 export interface ArrayBox<E>
-  extends Box<E>,
-    ShapeBox<
-      readonly E[],
-      'slice' | 'filter',
-      'at' | 'includes' | 'indexOf' | 'lastIndexOf' | 'find' | 'findIndex' | 'some' | 'every'
-    > {
+  extends Box<readonly E[]>,
+    ShapeBox<readonly E[], 'slice' | 'filter', 'at' | 'includes' | 'indexOf' | 'lastIndexOf', Array<any>> {
+  map(fn: (value: E, index: number, array: readonly E[]) => E): Mutation<readonly E[]>;
   push(...items: E[]): Mutation<readonly E[]>;
   pop(): Mutation<readonly E[]>;
   unshift(...items: E[]): Mutation<readonly E[]>;
@@ -25,6 +22,7 @@ export interface ArrayBox<E>
 export const ArrayBox = Box.extends<ArrayBox<any>>({
   name: 'ArrayBox',
   mutations: {
+    map: null,
     push: (state, ...items) => state.concat(items),
     pop: (state) => state.slice(0, state.length - 1),
     unshift: (state, ...items) => items.concat(state),
@@ -44,10 +42,6 @@ export const ArrayBox = Box.extends<ArrayBox<any>>({
     includes: null,
     indexOf: null,
     lastIndexOf: null,
-    find: null,
-    findIndex: null,
-    some: null,
-    every: null,
   },
 });
 

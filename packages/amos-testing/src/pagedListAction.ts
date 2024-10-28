@@ -3,7 +3,7 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { createPagedListActionFactory, PagedListActionOptions } from 'amos-io';
+import { pagedListActionFactory, PagedListActionOptions } from 'amos-io';
 import { HttpEndpoints } from './HttpEndpoints';
 
 export interface HttpPagedListActionOptions<
@@ -16,4 +16,4 @@ export interface HttpPagedListActionOptions<
   key: K;
 }
 
-export const createPagedListAction = createPagedListActionFactory({});
+export const pagedListAction = pagedListActionFactory({});

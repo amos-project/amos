@@ -91,5 +91,6 @@ export function toString(s: unknown) {
 }
 
 export const __DEV__ = typeof process === 'object' && process.env.NODE_ENV === 'development';
+export const __TEST__ = __DEV__ && typeof jest !== 'undefined';
 
 export function noop() {}

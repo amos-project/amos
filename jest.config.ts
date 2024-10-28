@@ -1,4 +1,5 @@
 import { TransformerOptions } from 'amos-utils';
+import * as path from 'node:path';
 import { JestConfigWithTsJest } from 'ts-jest';
 
 export default async (): Promise<JestConfigWithTsJest> => {
@@ -6,6 +7,8 @@ export default async (): Promise<JestConfigWithTsJest> => {
     setupFiles: ['<rootDir>/jest.setup.ts'],
     testMatch: ['<rootDir>/packages/*/src/**/*.spec.ts?(x)'],
     testEnvironment: 'jest-environment-jsdom',
+    cache: true,
+    cacheDirectory: path.join(process.cwd(), '.cache', 'jest'),
     transform: {
       '^.+.tsx?$': [
         'ts-jest',

@@ -4,11 +4,11 @@
  */
 
 import { createHttpAction } from '../createHttpAction';
-import { createPagedListAction } from '../createPagedListAction';
+import { pagedListAction } from '../pagedListAction';
 import { mediaMapBox, postMapBox, postMediaListBox, userPostListBox } from './post.boxes';
 import { selectUserId } from './session.selectors';
 
-export const getUserPostList = createPagedListAction({});
+export const getUserPostList = pagedListAction({});
 
 export const addPost = createHttpAction({
   key: 'POST/posts.addPost',

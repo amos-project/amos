@@ -16,7 +16,12 @@ export interface HttpActionOptions<K extends keyof HttpEndpoints> {
 export const createHttpAction: <K extends keyof HttpEndpoints>(
   options: HttpActionOptions<K>,
 ) => ActionFactory<[input: HttpEndpoints[K]['Req']], Promise<HttpEndpoints[K]['Res']>> = () => {
-  return action(() => {
-    throw new NotImplemented();
-  }) as any;
+  return action(
+    () => {
+      throw new NotImplemented();
+    },
+    {
+      type: Math.random() + '',
+    },
+  ) as any;
 };

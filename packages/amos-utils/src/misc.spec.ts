@@ -25,7 +25,7 @@ describe('utils', () => {
 
   it('should strict compare', () => {
     expect(is(Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER)).toBe(true);
-    expect(is(NaN, NaN)).toBe(false);
+    expect(is(NaN, NaN)).toBe(true);
     expect(is({}, {})).toBe(false);
     expect(is('abc', 'abc')).toBe(true);
   });

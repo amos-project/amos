@@ -48,6 +48,7 @@ export interface ActionFactoryStatic<A extends any[] = any, R = any>
   extends AmosObject<'action_factory'> {}
 
 export interface ActionFactory<A extends any[] = any, R = any> extends ActionFactoryStatic<A, R> {
+  type: string;
   (...args: A): Action<A, R>;
 }
 
@@ -60,14 +61,22 @@ export function action<A extends any[], R>(
   const finalOptions = { type: '', ...options } as ActionOptions;
   finalOptions.conflictPolicy ??= options.conflictKey ? 'leading' : 'always';
   return enhanceAction.apply([actor, finalOptions], (actor, options) => {
-    const factory = createAmosObject<ActionFactory>('action_factory', ((...args: any[]) => {
-      return createAmosObject<Action>('action', {
-        ...options,
-        actor: (dispatch, select) => actor(dispatch, select, ...args),
-        id: factory.id,
-        args: args,
-      });
-    }) as ActionFactory);
+    const factory = createAmosObject<ActionFactory>(
+      'action_factory',
+      Object.assign(
+        (...args: any[]) => {
+          return createAmosObject<Action>('action', {
+            ...options,
+            actor: (dispatch, select) => actor(dispatch, select, ...args),
+            id: factory.id,
+            args: args,
+          });
+        },
+        {
+          type: finalOptions.type,
+        },
+      ) as ActionFactory,
+    );
     return factory;
   });
 }

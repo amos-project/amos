@@ -5,6 +5,8 @@
 
 import { PersistEntry, PersistModel, PersistValue, StorageEngine } from 'amos-persist';
 
+const version = 1;
+
 export class IDBStorage implements StorageEngine {
   private db!: IDBDatabase;
 
@@ -15,7 +17,7 @@ export class IDBStorage implements StorageEngine {
 
   init() {
     return new Promise<void>((resolve, reject) => {
-      const req = indexedDB.open(this.database, 1);
+      const req = indexedDB.open(this.database, version);
       req.onerror = reject;
       req.onupgradeneeded = () => {
         req.result.onerror = reject;
@@ -62,9 +64,9 @@ export class IDBStorage implements StorageEngine {
   }
 
   setMulti(items: readonly PersistEntry[]): Promise<void> {
-    return new Promise<any>((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
       let transaction = this.db.transaction([this.table], 'readwrite');
-      transaction.oncomplete = resolve;
+      transaction.oncomplete = () => resolve();
       transaction.onerror = reject;
       let objectStore = transaction.objectStore(this.table);
       items.forEach(([key, version, value]) => {
@@ -75,9 +77,9 @@ export class IDBStorage implements StorageEngine {
   }
 
   removeMulti(items: readonly string[]): Promise<void> {
-    return new Promise<any>((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
       let transaction = this.db.transaction([this.table], 'readwrite');
-      transaction.oncomplete = resolve;
+      transaction.oncomplete = () => resolve();
       transaction.onerror = reject;
       let objectStore = transaction.objectStore(this.table);
       items.forEach((item) => {
@@ -88,9 +90,9 @@ export class IDBStorage implements StorageEngine {
   }
 
   removePrefix(prefix: string): Promise<void> {
-    return new Promise<any>((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
       let transaction = this.db.transaction([this.table], 'readwrite');
-      transaction.oncomplete = resolve;
+      transaction.oncomplete = () => resolve();
       transaction.onerror = reject;
       const os = transaction.objectStore(this.table);
       const req = os.delete(IDBKeyRange.bound(prefix, prefix + '\uFFFF', false, true));

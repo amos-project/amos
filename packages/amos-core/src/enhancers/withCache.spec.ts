@@ -10,20 +10,21 @@ const store = createStore();
 const f1 = jest.fn((select, v: number) => {
   return v * 2 * select(countBox);
 });
-const selectDouble = selector(f1);
-const f2 = jest.fn((select, v: number) => select(selectDouble(v)) * 2);
-const selectFourfold = selector(f2, { cache: true });
+const selectDouble2 = selector(f1);
+const f2 = jest.fn((select, v: number) => select(selectDouble2(v)) * 2);
+const selectFourfold2 = selector(f2, { cache: true });
 const f3 = jest.fn((select, plus: number = 0) => {
   const id = select(sessionIdBox);
   return (
-    select(selectDouble(id)) * select(selectFourfold(id)) * select(selectFourfold(id + plus)) + plus
+    select(selectDouble2(id)) * select(selectFourfold2(id)) * select(selectFourfold2(id + plus)) +
+    plus
   );
 });
-const selectEightTimesCount = selector(f3, { cache: true });
+const selectEightTimes2 = selector(f3, { cache: true });
 const f4 = jest.fn((select, plus: number = 0) => {
-  return select(countBox) * select(selectEightTimesCount(plus)) * 2;
+  return select(countBox) * select(selectEightTimes2(plus)) * 2;
 });
-const selectEightTwice = selector(f4);
+const selectEightTwice2 = selector(f4);
 
 describe('withCache', () => {
   it('should prepare for cache', () => {
@@ -48,7 +49,7 @@ describe('withCache', () => {
       return v11 * v21 * v22 + v;
     };
     const assert = (v: number, c1: number, c2: number, c3: number) => {
-      expect(store.select(selectEightTimesCount(v))).toBe(eight(v));
+      expect(store.select(selectEightTimes2(v))).toBe(eight(v));
       expectCalled(f1, c1);
       expectCalled(f2, c2);
       expectCalled(f3, c3);
@@ -83,7 +84,7 @@ describe('withCache', () => {
     //      -> f(1) -> d(1) -> c(1)
     //      -> f(2) -> d(2) -> c(1)
     assert(1, 4, 1, 1);
-    expect(store.select([selectDouble(1), selectEightTimesCount(1), selectEightTwice(1)])).toEqual([
+    expect(store.select([selectDouble2(1), selectEightTimes2(1), selectEightTwice2(1)])).toEqual([
       2,
       eight(1),
       eight(1) * 2,

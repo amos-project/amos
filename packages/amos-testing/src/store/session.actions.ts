@@ -4,11 +4,11 @@
  */
 
 import { action } from 'amos-core';
-import { userMapBox } from 'amos-testing';
 import { sleep } from '../utils';
 import { sessionIdBox, sessionMapBox } from './session.boxes';
 import { selectSession } from './session.selectors';
 import { LOGIN, LOGOUT } from './session.signals';
+import { userMapBox } from './user.boxes';
 
 export const loginSync = action((dispatch, select, userId: number) => {
   const id = userId + 10000;

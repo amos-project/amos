@@ -3,31 +3,33 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { PersistEntry, PersistModel, PersistValue, StorageEngine } from '../types';
+import { PersistEntry, PersistModel, PersistValue } from '../types';
+import type { StorageEngine } from './Storage';
 
-export interface Database {
+export interface SQLiteDatabase {
   runAsync(sql: string, values?: any[]): Promise<void>;
   getAllAsync<T>(sql: string, values?: any[]): Promise<T[]>;
 }
 
 export class SQLiteStorage implements StorageEngine {
-  private db!: Database;
+  private db!: SQLiteDatabase;
 
   constructor(
     readonly database: string,
     readonly table: string,
-    readonly open: (db: string) => Promise<Database>,
+    readonly open: (db: string) => Promise<SQLiteDatabase>,
   ) {}
 
   async init() {
     this.db = await this.open(this.database);
+    await this.db.runAsync('PRAGMA journal_mode = WAL');
     await this.db.runAsync(
       `CREATE TABLE IF NOT EXISTS ${this.table}
        (
          key     TEXT    NOT NULL PRIMARY KEY,
          version INTEGER NOT NULL,
          value   TEXT
-       );`,
+       )`,
     );
   }
 
@@ -44,7 +46,7 @@ export class SQLiteStorage implements StorageEngine {
         (r) => [r.key, [r.version, r.value === null ? void 0 : JSON.parse(r.value)]] as const,
       ),
     );
-    return items.map((key) => map[key]);
+    return items.map((key) => map[key] || null);
   }
 
   async getPrefix(prefix: string): Promise<readonly PersistEntry[]> {
@@ -54,7 +56,7 @@ export class SQLiteStorage implements StorageEngine {
        WHERE key LIKE ? ESCAPE '\\'`,
       [this.like(prefix)],
     );
-    return result.map((r) => [r.key, r.version, r.value]);
+    return result.map((r) => [r.key, r.version, r.value === null ? void 0 : JSON.parse(r.value)]);
   }
 
   async setMulti(items: readonly PersistEntry[]): Promise<void> {

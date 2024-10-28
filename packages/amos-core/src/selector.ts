@@ -76,6 +76,7 @@ export interface Selector<A extends any[] = any, R = any>
  */
 export interface SelectorFactory<A extends any[] = any, R = any>
   extends AmosObject<'selector_factory'> {
+  type: string;
   (...args: A): Selector<A, R>;
 }
 
@@ -112,14 +113,22 @@ export function selector<A extends any[], R>(
   finalOptions.type ??= '';
   finalOptions.equal ??= is;
   return enhanceSelector.apply([compute, finalOptions], (compute, options) => {
-    const factory = createAmosObject<SelectorFactory>('selector_factory', ((...args: A) => {
-      return createAmosObject<Selector<A, R>>('selector', {
-        ...options,
-        compute: (select) => compute(select, ...args),
-        id: factory.id,
-        args,
-      });
-    }) as SelectorFactory<A, R>);
+    const factory = createAmosObject<SelectorFactory>(
+      'selector_factory',
+      Object.assign(
+        (...args: A) => {
+          return createAmosObject<Selector<A, R>>('selector', {
+            ...options,
+            compute: (select) => compute(select, ...args),
+            id: factory.id,
+            args,
+          });
+        },
+        {
+          type: finalOptions.type,
+        },
+      ) as SelectorFactory<A, R>,
+    );
     return factory;
   });
 }

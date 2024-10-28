@@ -66,6 +66,17 @@ export interface TableOptions<S = any> {
    * TODO: optimize to get the updated rows exactly.
    */
   toRows: (state: S) => Readonly<Record<string, unknown>>;
+
+  /**
+   * Is the state already has the row or not.
+   */
+  hasRow: (state: S, key: string) => boolean;
+
+  /**
+   * Merge the persisted state to current state.
+   * Please note the incoming rows are JSON serialized and deserialized.
+   */
+  hydrate: (current: S, incoming: Readonly<Record<string, unknown>>) => S;
 }
 
 export interface BoxOptions<S = any> {

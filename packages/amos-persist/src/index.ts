@@ -11,3 +11,4 @@ export * from './storages/MemoryStorage';
 export * from './storages/SimpleStorage';
 export * from './storages/SQLiteStorage';
 export * from './types';
+export { StorageEngine } from './storages/Storage';

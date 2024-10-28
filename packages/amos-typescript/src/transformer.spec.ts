@@ -23,6 +23,7 @@ describe('typescript plugin', () => {
     expect(transform('export const foo = action(() => null)')).toEqual(
       `export const foo = action(() => null, { type: "foo" });\n`,
     );
+    expect(transform('export const foo = action()')).toEqual(`export const foo = action();\n`);
     expect(transform('export const foo = foo.action(() => null)')).toEqual(
       `export const foo = foo.action(() => null, { type: "foo" });\n`,
     );
@@ -31,6 +32,16 @@ describe('typescript plugin', () => {
     );
     expect(transform('export const foo = foo.selector(() => null, { type: `my type` })')).toEqual(
       `export const foo = foo.selector(() => null, Object.assign({ type: "foo" }, { type: \`my type\` }));\n`,
+    );
+    expect(
+      transform(
+        'export const foo = (foo.selector(() => null, { type: `my type` }) as unknown) as any as any',
+      ),
+    ).toEqual(
+      `export const foo = foo.selector(() => null, Object.assign({ type: "foo" }, { type: \`my type\` }));\n`,
+    );
+    expect(transform('export const request: Request = action(doRequest) as Request;')).toEqual(
+      `export const request = action(doRequest, { type: "request" });\n`,
     );
     expect(transform('export const foo = foo.selector1(() => null, { debug: "" })')).toEqual(
       `export const foo = foo.selector1(() => null, { debug: "" });\n`,

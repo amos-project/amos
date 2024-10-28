@@ -5,6 +5,7 @@
 
 import { ActionFactory, Actor, Box } from 'amos-core';
 import { ID } from 'amos-utils';
+import type { StorageEngine } from './storages/Storage';
 
 export interface BoxPersistOptions<S> {
   /**
@@ -17,28 +18,24 @@ export interface BoxPersistOptions<S> {
   /**
    * Migration function, which can be a {@link Actor} or {@link ActionFactory}
    * to allow you use existing state or run some actions.
+   *
+   * Note: The migrate function should convert the persisted value to the state
+   * that can be merged by the state's {@link FromJS.fromJS}, not to the state
+   * directly.
    */
   migrate?:
-    | Actor<[version: number, row: ID, state: unknown], S | undefined>
-    | ActionFactory<[version: number, row: ID, state: unknown], S | undefined>;
+    | Actor<[version: number, row: ID, state: unknown], unknown | undefined>
+    | ActionFactory<[version: number, row: ID, state: unknown], unknown | undefined>;
 }
 
+export type PersistKey<T> = Box<T> | [box: Box<T>, rows: ID | ID[]];
 export type PersistValue = readonly [version: number, value: any];
-export type PersistEntry = readonly [key: string, ...PersistValue];
+export type PersistEntry = readonly [key: string, version: number, value: any];
 
 export interface PersistModel {
   key: string;
   version: number;
   value: any;
-}
-
-export interface StorageEngine {
-  init?(): Promise<void>;
-  getMulti(items: readonly string[]): Promise<readonly (PersistValue | null)[]>;
-  getPrefix(prefix: string): Promise<readonly PersistEntry[]>;
-  setMulti(items: readonly PersistEntry[]): Promise<void>;
-  removeMulti(items: readonly string[]): Promise<void>;
-  removePrefix(prefix: string): Promise<void>;
 }
 
 export interface PersistOptions {

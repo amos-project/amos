@@ -7,57 +7,84 @@ import { formatType, TransformerOptions } from 'amos-utils';
 import ts from 'typescript';
 
 function visitAmos(node: ts.Node, options: Required<TransformerOptions>) {
-  if (
-    !ts.isVariableDeclaration(node) ||
-    !ts.isIdentifier(node.name) ||
-    !node.initializer ||
-    !ts.isCallExpression(node.initializer)
-  ) {
+  if (!ts.isVariableDeclaration(node) || !ts.isIdentifier(node.name)) {
     return node;
   }
-  const identifier = ts.isIdentifier(node.initializer.expression)
-    ? node.initializer.expression
-    : ts.isPropertyAccessExpression(node.initializer.expression) &&
-        ts.isIdentifier(node.initializer.expression.name)
-      ? node.initializer.expression.name
-      : void 0;
-  if (!identifier) {
-    return node;
-  }
-  if (node.initializer.arguments.length < 1 || node.initializer.arguments.length > 2) {
-    return node;
-  }
-  const arg2 = node.initializer.arguments[1];
-  const name = node.name.text;
-  const args = node.initializer.arguments.slice();
-  const addType = () => {
-    const type = options.prefix + formatType(name, options.format);
-    const obj = ts.factory.createObjectLiteralExpression([
-      ts.factory.createPropertyAssignment('type', ts.factory.createStringLiteral(type)),
-    ]);
-    if (!arg2) {
-      return obj;
+
+  const findCallExpression = <T extends ts.Expression | undefined>(expr: T): T => {
+    if (!expr) {
+      return void 0 as T;
     }
-    return ts.factory.createCallExpression(
-      ts.factory.createPropertyAccessExpression(ts.factory.createIdentifier('Object'), 'assign'),
-      void 0,
-      [obj, arg2],
-    );
-  };
-  if (['action', 'selector'].includes(identifier.escapedText as string)) {
+    const ifNotEqual = <U extends ts.Expression | undefined>(
+      n: U,
+      fn: (n: U) => ts.Expression,
+    ): T => {
+      const u = findCallExpression(n);
+      if (u === n) {
+        return expr;
+      }
+      return fn(u) as T;
+    };
+
+    if (ts.isAsExpression(expr)) {
+      return ifNotEqual(expr.expression, (e) => {
+        return ts.factory.createAsExpression(e, expr.type);
+      });
+    }
+
+    if (ts.isParenthesizedExpression(expr)) {
+      return ifNotEqual(expr.expression, (e) => {
+        return ts.factory.createParenthesizedExpression(e);
+      });
+    }
+
+    if (!ts.isCallExpression(expr)) {
+      return expr;
+    }
+
+    const identifier = ts.isIdentifier(expr.expression)
+      ? expr.expression
+      : ts.isPropertyAccessExpression(expr.expression) && ts.isIdentifier(expr.expression.name)
+        ? expr.expression.name
+        : void 0;
+    if (!identifier) {
+      return expr;
+    }
+
+    if (!['action', 'selector'].includes(identifier.escapedText as string)) {
+      return expr;
+    }
+
+    if (expr.arguments.length < 1 || expr.arguments.length > 2) {
+      return expr;
+    }
+
+    const arg2 = expr.arguments[1];
+    const name = (node.name as ts.Identifier).text;
+    const args = expr.arguments.slice();
+    const addType = () => {
+      const type = options.prefix + formatType(name, options.format);
+      const obj = ts.factory.createObjectLiteralExpression([
+        ts.factory.createPropertyAssignment('type', ts.factory.createStringLiteral(type)),
+      ]);
+      if (!arg2) {
+        return obj;
+      }
+      return ts.factory.createCallExpression(
+        ts.factory.createPropertyAccessExpression(ts.factory.createIdentifier('Object'), 'assign'),
+        void 0,
+        [obj, arg2],
+      );
+    };
     args[1] = addType();
-    return ts.factory.createVariableDeclaration(
-      node.name,
-      void 0,
-      void 0,
-      ts.factory.createCallExpression(
-        node.initializer.expression,
-        node.initializer.typeArguments,
-        args,
-      ),
-    );
+    return ts.factory.createCallExpression(expr.expression, expr.typeArguments, args) as any;
+  };
+
+  const expr = findCallExpression(node.initializer);
+  if (expr === node.initializer) {
+    return node;
   }
-  return node;
+  return ts.factory.createVariableDeclaration(node.name, node.exclamationToken, node.type, expr);
 }
 
 export function createAmosTransformer(

@@ -4,7 +4,7 @@
  */
 
 export * from './optimistic';
-export * from './paging/createPagedListActionFactory';
+export * from './paging/pagedListActionFactory';
 export * from './paging/PagedList';
 export * from './paging/PagedListBox';
 export * from './paging/PagedListMap';

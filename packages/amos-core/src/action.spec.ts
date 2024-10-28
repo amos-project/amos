@@ -4,19 +4,19 @@
  */
 
 import { addFourfoldAsync, addTwiceAsync } from 'amos-testing';
-import { createAmosObject } from 'amos-utils';
-import { Action, ActionFactory } from './action';
+import { $amos, createAmosObject } from 'amos-utils';
+import { Action } from './action';
 import { createStore } from './store';
 
 describe('action', () => {
   it('should create action factory', () => {
     expect(addTwiceAsync).toBeInstanceOf(Function);
-    expect({ ...addTwiceAsync }).toEqual(
-      createAmosObject<ActionFactory>('action_factory', {
-        id: expect.any(String),
-        select: expect.any(Function),
-      }),
-    );
+    expect({ ...addTwiceAsync }).toEqual({
+      [$amos]: 'action_factory',
+      id: expect.any(String),
+      select: expect.any(Function),
+      type: 'amos/addTwiceAsync',
+    });
   });
   it('should create action', async () => {
     const a0 = addFourfoldAsync(1);

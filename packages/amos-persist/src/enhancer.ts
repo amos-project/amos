@@ -4,7 +4,7 @@
  */
 
 import { StoreEnhancer } from 'amos-core';
-import { NotImplemented, override, PartialRequired } from 'amos-utils';
+import { append, NotImplemented, override, PartialRequired } from 'amos-utils';
 import { persistBox } from './boxes';
 import { PersistOptions } from './types';
 
@@ -18,16 +18,13 @@ export function withPersist(options: PartialRequired<PersistOptions, 'storage'>)
       ...options,
     };
 
-    override(store, 'init', (init) => {
-      return () => {
-        init();
-        store.dispatch(
-          persistBox.setState({
-            options: finalOptions,
-            loading: loading,
-          }),
-        );
-      };
+    append(store, 'init', () => {
+      store.dispatch(
+        persistBox.setState({
+          options: finalOptions,
+          loading: loading,
+        }),
+      );
     });
 
     override(store, 'select', (select) => {

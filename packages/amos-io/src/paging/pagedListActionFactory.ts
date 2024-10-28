@@ -16,10 +16,15 @@ export interface PagedListActionFactory<S extends AnyFunc> {
   (options: PagedListActionOptions<any[], any>): PagedListAction<S>;
 }
 
-export function createPagedListActionFactory(
+export function pagedListActionFactory(
   config: PagedListActionFactoryOptions,
 ): PagedListActionFactory<AnyFunc> {
-  return action(() => {
-    throw new NotImplemented();
-  });
+  return action(
+    () => {
+      throw new NotImplemented();
+    },
+    {
+      type: Math.random() + '',
+    },
+  );
 }

@@ -4,17 +4,17 @@
  */
 
 import { select, selectDouble, selectFourfold, selectUser } from 'amos-testing';
-import { createAmosObject, is } from 'amos-utils';
-import { Selector, SelectorFactory } from './selector';
+import { $amos, createAmosObject, is } from 'amos-utils';
+import { Selector } from './selector';
 
 describe('selector', () => {
   it('should create selector factory', () => {
     expect(selectUser).toEqual(expect.any(Function));
-    expect({ ...selectUser }).toEqual(
-      createAmosObject<SelectorFactory>('selector_factory', {
-        id: expect.any(String),
-      }),
-    );
+    expect({ ...selectUser }).toEqual({
+      [$amos]: 'selector_factory',
+      id: expect.any(String),
+      type: 'amos/selectUser',
+    });
   });
   it('should create selector', () => {
     const s = selectDouble(3);

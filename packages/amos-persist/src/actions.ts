@@ -3,16 +3,34 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { Action, action, Box, Dispatch, MapSelectables, Select } from 'amos-core';
-import { NotImplemented } from 'amos-utils';
+import {
+  type Action,
+  action,
+  type ActionFactoryStatic,
+  type Box,
+  type Dispatch,
+  type Select,
+} from 'amos-core';
+import { isAmosObject, NotImplemented, toArray } from 'amos-utils';
+import type { PersistKey } from './types';
 
-export interface LoadBoxes {
-  <A extends Box[]>(...boxes: A): Action<A, Promise<MapSelectables<A>>>;
+export interface HydrateState extends ActionFactoryStatic {
+  <K extends PersistKey<any>[]>(...keys: K): Action<K, Promise<void>>;
 }
 
-export const loadBoxes: LoadBoxes = action(
-  async <A extends Box[]>(dispatch: Dispatch, select: Select, ...boxes: A) => {
+export const hydrateState: HydrateState = action(
+  async (dispatch: Dispatch, select: Select, ...keys: PersistKey<any>[]) => {
     throw new NotImplemented();
   },
-  {},
-);
+  {
+    conflictKey: (select: Select, ...keys: PersistKey<any>[]) => {
+      return keys
+        .map((k) => {
+          return isAmosObject<Box>(k, 'box')
+            ? [k.key]
+            : toArray(k[1]).map((id) => k[0].key + ':' + id);
+        })
+        .flat();
+    },
+  },
+) as HydrateState;
