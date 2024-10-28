@@ -3,9 +3,10 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { createStore } from 'amos-core/src/index';
+import { createStore } from 'amos-core';
 import { List } from 'amos-shapes';
-import { postMediaListBox, runMutations, toJS } from 'amos-testing';
+import { postMediaListBox, runMutations } from 'amos-testing';
+import { toJS } from 'amos-utils';
 
 describe('ListMapBox', () => {
   it('should create mutations', () => {

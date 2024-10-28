@@ -7,7 +7,8 @@ import {
   arrayEqual,
   clone,
   Cloneable,
-  isArray, isIterable,
+  isArray,
+  isIterable,
   JSONSerializable,
   JSONState,
   MustNever,
@@ -57,15 +58,15 @@ export class List<E> extends Cloneable implements JSONSerializable<readonly E[]>
   }
 
   indexOf(searchElement: E, fromIndex?: number): number {
-    return this.data.indexOf(searchElement, fromIndex);
+    return this.data.indexOf(...(arguments as unknown as [E]));
   }
 
   lastIndexOf(searchElement: E, fromIndex?: number): number {
-    return this.data.lastIndexOf(searchElement, fromIndex);
+    return this.data.lastIndexOf(...(arguments as unknown as [E]));
   }
 
   includes(searchElement: E, fromIndex?: number): boolean {
-    return this.data.includes(searchElement, fromIndex);
+    return this.data.includes(...(arguments as unknown as [E, number]));
   }
 
   some(predicate: (value: E, index: number) => boolean): boolean {
@@ -76,8 +77,8 @@ export class List<E> extends Cloneable implements JSONSerializable<readonly E[]>
     return this.data.every(predicate);
   }
 
-  forEach(callbackfn: (value: E, index: number) => void): void {
-    this.data.forEach(callbackfn);
+  forEach(callbackfn: (value: E, index: number, list: this) => void): void {
+    this.data.forEach((v, i) => callbackfn(v, i, this));
   }
 
   // move
@@ -105,7 +106,7 @@ export class List<E> extends Cloneable implements JSONSerializable<readonly E[]>
   }
 
   flat<D extends number = 1>(depth?: D): List<FlatArray<readonly E[], D>> {
-    const data = this.data.flat<readonly E[], D>(depth);
+    const data = this.data.flat<readonly E[], D>(...arguments);
     return new List<FlatArray<readonly E[], D>>(data);
   }
 
@@ -118,7 +119,7 @@ export class List<E> extends Cloneable implements JSONSerializable<readonly E[]>
   }
 
   slice(start?: number, end?: number): this {
-    return this.reset(this.data.slice(start, end));
+    return this.reset(this.data.slice(...arguments));
   }
 
   // update
@@ -174,7 +175,7 @@ export class List<E> extends Cloneable implements JSONSerializable<readonly E[]>
   }
 
   set(index: number, value: E): this {
-    if(this.get(index) === value) {
+    if (this.get(index) === value) {
       return this;
     }
     const data = this.data.slice();

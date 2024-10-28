@@ -3,7 +3,7 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { Box, ShapeBox } from 'amos-core';
+import { Box, type Selector, ShapeBox } from 'amos-core';
 import { isSameList, List } from 'amos-shapes';
 
 export interface ListBox<L extends List<any>>
@@ -25,22 +25,20 @@ export interface ListBox<L extends List<any>>
       | 'set'
       | 'reset',
       | 'some'
-      | 'reduce'
-      | 'reduceRight'
       | 'findIndex'
       | 'flat'
       | 'includes'
       | 'indexOf'
       | 'join'
       | 'lastIndexOf'
-      | 'map'
       | 'find'
       | 'filter'
       | 'get'
-      | 'length'
       | 'every',
       List<any>
-    > {}
+    > {
+  length(): Selector<[], number>;
+}
 
 export const ListBox = Box.extends<ListBox<any>>({
   name: 'ListBox',
@@ -64,7 +62,6 @@ export const ListBox = Box.extends<ListBox<any>>({
     some: null, // cannot be cached because the param is a function
     get: null,
     flat: { cache: true },
-    map: { equal: isSameList as any },
     every: null,
     filter: { equal: isSameList as any },
     find: null,
@@ -73,8 +70,6 @@ export const ListBox = Box.extends<ListBox<any>>({
     includes: { cache: true },
     lastIndexOf: { cache: true },
     join: { cache: true },
-    reduce: null,
-    reduceRight: null,
     length: {
       derive: (state) => state.length,
     },

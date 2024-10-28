@@ -48,8 +48,8 @@ export function toJS<T>(v: T): JSONState<T> {
   if (Array.isArray(v)) {
     return v.map((e) => toJS(e)) as any;
   }
-  if ('toJSON' in v) {
-    return toJS((v as any).toJSON());
+  if (isToJSON(v)) {
+    return toJS(v.toJSON());
   }
   const o: any = {};
   for (const k in v) {

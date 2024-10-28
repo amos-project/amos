@@ -121,13 +121,18 @@ export class Map<K extends ID, V> implements JSONSerializable<Record<K, V>> {
 
   updateAll(updater: (v: V, key: ToString<K>) => V): this {
     const up: PartialRecord<K, V> = {};
+    let bad = false;
     for (const k in this.data) {
       const v = updater(this.getItem(k), k);
       if (v !== this.getItem(k)) {
+        bad ||= true;
         up[k as K] = v;
       }
     }
-    return this.reset(nullObject(this.data, up) as any);
+    if (bad) {
+      return this.reset(nullObject(this.data, up) as any);
+    }
+    return this;
   }
 
   removeItem(key: K): this {

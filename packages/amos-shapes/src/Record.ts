@@ -6,9 +6,11 @@
 import {
   clone,
   Cloneable,
+  type Constructor,
   fromJS,
   JSONSerializable,
-  JSONState, type NoArray,
+  JSONState,
+  type NoArray,
   PartialRequired,
   WellPartial,
 } from 'amos-utils';
@@ -30,6 +32,7 @@ export type PartialRequiredProps<T, K extends keyof RecordProps<T>> = PartialReq
 >;
 
 export interface RecordConstructor<P extends object> {
+  defaultInstance<T>(this: Constructor<T>): T;
   new (props?: Partial<P>, isValid?: boolean): Record<P>;
 }
 
@@ -38,6 +41,19 @@ export function Record<P extends object>(props: P): RecordConstructor<P> {
     constructor(data?: Partial<P>, isInitial = data === void 0) {
       super(isInitial);
       Object.assign(this, props, data);
+    }
+
+    static defaultInstance<T>(this: Constructor<T>): T {
+      const k = '_defaultInstance';
+      if (!this.hasOwnProperty(k)) {
+        Object.defineProperty(this, k, {
+          value: new this(),
+          configurable: false,
+          enumerable: false,
+          writable: false,
+        });
+      }
+      return (this as any)[k];
     }
 
     toJSON(): P {

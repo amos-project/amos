@@ -3,7 +3,7 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { createStore } from 'amos-core/src/index';
+import { createStore } from 'amos-core';
 import { exampleBox, ExampleRecord, runMutations } from 'amos-testing';
 
 describe('RecordBox', () => {

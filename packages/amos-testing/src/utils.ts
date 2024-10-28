@@ -5,13 +5,15 @@
 
 import Mock = jest.Mock;
 import { Mutation } from 'amos-core';
-import { JSONState } from 'amos-utils';
+import { JSONState, noop } from 'amos-utils';
 
 export function sleep(timeout: number = 0): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, timeout));
 }
 
-export function checkType(fn: () => void) {}
+export function checkType(fn: () => void) {
+  return noop;
+}
 
 export function expectCalled(fn: (...args: any[]) => any, count = 1) {
   expect(fn).toHaveBeenCalledTimes(count);

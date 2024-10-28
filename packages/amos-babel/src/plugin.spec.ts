@@ -14,6 +14,12 @@ const transform = (input: string) => {
 
 describe('babel plugin', () => {
   it('should add type', () => {
+    expect(transform('export const foo = action()')).toEqual(`export const foo = action();`);
+    expect(transform('export const [foo] = action()')).toEqual(`export const [foo] = action();`);
+    expect(transform('export const foo = action')).toEqual(`export const foo = action;`);
+    expect(transform('export const foo = action(1, 1, 1)')).toEqual(
+      `export const foo = action(1, 1, 1);`,
+    );
     expect(transform('export const foo = action(null)')).toEqual(
       `
 export const foo = action(null, {

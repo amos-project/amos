@@ -3,6 +3,8 @@
  * @author junbao <junbao@moego.pet>
  */
 
+import { createStore } from 'amos-core';
+import { List } from 'amos-shapes';
 import { onlineUserListBox, runMutations } from 'amos-testing';
 
 describe('ListBox', () => {
@@ -44,6 +46,36 @@ describe('ListBox', () => {
     ]);
   });
   it('should create selectors', () => {
-
+    const store = createStore();
+    store.dispatch(onlineUserListBox.reset([0, 1, 3, 1, 2]));
+    expect(
+      store.select([
+        onlineUserListBox.length(),
+        onlineUserListBox.some((v) => v > 1),
+        onlineUserListBox.findIndex((v) => v === 1),
+        onlineUserListBox.flat(),
+        onlineUserListBox.includes(1),
+        onlineUserListBox.indexOf(4),
+        onlineUserListBox.join(''),
+        onlineUserListBox.lastIndexOf(1),
+        onlineUserListBox.find((v) => v > 2),
+        onlineUserListBox.filter((v) => v > 2),
+        onlineUserListBox.get(1),
+        onlineUserListBox.every((v) => v > 2),
+      ]),
+    ).toEqual([
+      5,
+      true,
+      1,
+      new List([0, 1, 3, 1, 2]),
+      true,
+      -1,
+      '01312',
+      3,
+      3,
+      new List([3]),
+      1,
+      false,
+    ]);
   });
 });
