@@ -34,9 +34,8 @@ export function createAmosObject<T extends AmosObject<string>>(
     }
     seenTypes.add(type);
     (props as any).id ??= type;
-  } else {
-    (props as Mutable<T>).id ??= prefix + ++nextId;
   }
+  (props as Mutable<T>).id ??= prefix + ++nextId;
   return props as T;
 }
 

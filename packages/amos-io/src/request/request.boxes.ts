@@ -5,4 +5,4 @@
 import { objectBox } from 'amos-boxes';
 import { RequestOptions } from './fetch.request';
 
-export const requestConfigBox = objectBox<Partial<RequestOptions<any>>>('amos/request.config', {});
+export const requestConfigBox = objectBox<Partial<RequestOptions<any>>>('amos.request.config', {});

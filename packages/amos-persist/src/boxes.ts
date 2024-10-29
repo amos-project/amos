@@ -3,15 +3,14 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { objectBox } from 'amos-boxes';
+import { box } from 'amos-core';
 import { PersistOptions } from './types';
 
-export interface PersistModel2 {
-  options: PersistOptions | null;
-  loading: Map<string, Promise<any>> | null;
+export interface PersistState {
+  options: PersistOptions;
+  hydrating: Map<string, Promise<void>>;
+  persisted: Record<string, unknown>;
+  persisting: Map<string, Promise<void>>;
 }
 
-export const persistBox = objectBox<PersistModel2>('amos.persist', {
-  options: null,
-  loading: null,
-});
+export const persistBox = box<PersistState | null>('amos.persist', null);

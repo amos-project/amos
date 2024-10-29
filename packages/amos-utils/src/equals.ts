@@ -3,23 +3,15 @@
  * @author junbao <junbao@moego.pet>
  */
 
-/** @internal */
-export function shimObjectIs(x: any, y: any) {
-  if (x === y) {
-    return x !== 0 || 1 / x === 1 / y;
-  } else {
-    return x !== x && y !== y;
-  }
-}
-
-export const is: (x: any, y: any) => boolean = Object.is || shimObjectIs;
+export const is: (x: any, y: any) => boolean = Object.is;
 
 /**
  * Returns the first argument
  * @param v
  */
-export const identity = <T>(v: T) => v;
-export const second = <T>(a: any, b: T) => b;
+export const takeFirst = <T>(v: T) => v;
+export const takeSecond = <T>(a: any, b: T) => b;
+
 export const notNullable = <T>(v: T): v is Exclude<T, undefined | null> => v != null;
 export const isNullable = (v: unknown): v is undefined | null => v == null;
 export const isTruly = <T>(v: T): v is Exclude<T, undefined | null | '' | 0 | false> => !!v;
@@ -41,17 +33,6 @@ export function shallowEqual<T>(a: T, b: T): boolean {
     return false;
   }
   return ka.every((k) => a[k] === b[k]);
-}
-
-export function shallowContainEqual<T>(a: T, b: Partial<T>): boolean {
-  if (is(a, b)) {
-    return true;
-  }
-  if (!isObject(a) || !isObject(b)) {
-    return false;
-  }
-  const kb = Object.keys(b) as Array<keyof T>;
-  return kb.every((k) => is(a[k], b[k]));
 }
 
 /**
@@ -83,18 +64,6 @@ export function isPlainObject(v: unknown): v is object {
   }
   const proto = Object.getPrototypeOf(v);
   return proto === null || proto === Object.prototype;
-}
-
-export function everyEntry<K extends keyof any, V>(
-  r: Record<K, V>,
-  fn: (value: V, key: K) => boolean,
-): boolean {
-  for (const k in r) {
-    if (!fn(r[k], k)) {
-      return false;
-    }
-  }
-  return true;
 }
 
 export function isIterable(v: unknown): v is Iterable<any> {

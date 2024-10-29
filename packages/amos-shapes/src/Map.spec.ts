@@ -4,7 +4,7 @@
  */
 
 import { checkType, expectCalledWith } from 'amos-testing';
-import { identity, isIterable, isIterableIterator } from 'amos-utils';
+import { takeFirst, isIterable, isIterableIterator } from 'amos-utils';
 import { Map } from './Map';
 
 describe('Map', () => {
@@ -29,8 +29,8 @@ describe('Map', () => {
       m1.mergeItem(3, -1),
       m1.mergeAll({ 3: -1 }),
       m1.mergeAll([[3, -1]]),
-      m1.updateItem(3, identity),
-      m1.updateAll(identity),
+      m1.updateItem(3, takeFirst),
+      m1.updateAll(takeFirst),
       m1.removeItem(4),
       m1.removeAll([4, 5]),
     ]).toEqual([m1, m1, m1, m1, m1, m1, m1, m1, m1, m1, m1]);

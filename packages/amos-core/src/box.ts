@@ -9,6 +9,7 @@ import {
   createAmosObject,
   is,
   IsAny,
+  must,
   resolveFuncValue,
   toFunc,
   Unsubscribe,
@@ -68,9 +69,9 @@ export interface TableOptions<S = any> {
   toRows: (state: S) => Readonly<Record<string, unknown>>;
 
   /**
-   * Is the state already has the row or not.
+   * Get a row from current state
    */
-  hasRow: (state: S, key: string) => boolean;
+  getRow: (state: S, key: string) => boolean;
 
   /**
    * Merge the persisted state to current state.
@@ -110,6 +111,8 @@ export interface Box<S = any> extends AmosObject<'box'>, BoxOptions<S> {
    * The key of the box, all the boxes in a system should have a unique key.
    * We recommend `appName.moduleName.typeName` style keys. For example:
    * 'myApp.blogs.userBlogList'.
+   *
+   * Note: you cannot use the following chars in box key: ":/".
    *
    * Please note amos has some internal boxes, whose keys are started with 'amos.'.
    */
@@ -243,6 +246,7 @@ function createBoxFactory<B extends Box, SB = {}>(
           public key: string,
           public initialState: any,
         ) {
+          must(!key.includes(':') && !key.includes('/'), 'box key should not contain `:/`');
           createAmosObject('box', this);
         }
 

@@ -211,6 +211,7 @@ __metadata:
   resolution: "@amos/root@workspace:."
   dependencies:
     "@babel/core": "npm:^7.25.9"
+    "@babel/plugin-transform-typescript": "npm:^7.25.9"
     "@babel/types": "npm:^7.25.9"
     "@docusaurus/remark-plugin-npm2yarn": "npm:^3.5.2"
     "@docusaurus/theme-live-codeblock": "npm:^3.5.2"

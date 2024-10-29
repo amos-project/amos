@@ -29,6 +29,10 @@ export interface BoxPersistOptions<S> {
 }
 
 export type PersistKey<T> = Box<T> | [box: Box<T>, rows: ID | ID[]];
+export type PersistKeyState<T> = T extends PersistKey<infer S> ? S : never;
+export type MapPersistKeys<K extends readonly PersistKey<any>[]> = {
+  [P in keyof K]: PersistKeyState<K[P]>;
+};
 export type PersistValue = readonly [version: number, value: any];
 export type PersistEntry = readonly [key: string, version: number, value: any];
 

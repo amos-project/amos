@@ -53,7 +53,7 @@ export function toJS<T>(v: T): JSONState<T> {
   }
   const o: any = {};
   for (const k in v) {
-    if (v.hasOwnProperty(k)) {
+    if (!v.hasOwnProperty || v.hasOwnProperty(k)) {
       o[k] = toJS(v[k]);
     }
   }

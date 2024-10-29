@@ -4,8 +4,42 @@
  */
 
 import { Box } from 'amos-core';
-import { must } from 'amos-utils';
+import { type ID, isObject, must } from 'amos-utils';
 import { BoxPersistOptions, PersistOptions } from './types';
+
+export const defaultVersion = 1;
+export const delimiter = ':';
+
+/**
+ * Generate key in storage
+ * @param box
+ * @param rowId three types
+ *      - null: generate multi-row prefix
+ *      - undefined: generate single-row key
+ *      - ID: generate multi-row key
+ */
+export function toKey(box: Box, rowId: ID | undefined | null) {
+  if (rowId === void 0) {
+    return box.key;
+  }
+  return box.key + delimiter + (rowId === null ? '' : rowId);
+}
+
+export function fromKey(key: string): string | undefined {
+  const pos = key.indexOf(delimiter);
+  if (pos === -1) {
+    return void 0;
+  }
+  return key.substring(pos + 1);
+}
+
+const defaultOptions: BoxPersistOptions<any> = {
+  version: defaultVersion,
+};
+
+export function toPersistOptions(box: Box): BoxPersistOptions<any> {
+  return isObject(box.persist) ? box.persist : defaultOptions;
+}
 
 export function shouldPersist(options: PersistOptions, box: Box) {
   if (box.persist === false) {

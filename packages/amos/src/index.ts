@@ -85,7 +85,7 @@ export {
   HydrateState,
   MemoryStorage,
   PersistEntry,
-  PersistModel,
+  PersistState,
   PersistOptions,
   PersistValue,
   SQLiteStorage,

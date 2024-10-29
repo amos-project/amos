@@ -4,7 +4,7 @@
  */
 
 import { expectCalledWith } from 'amos-testing';
-import { identity, isIterableIterator, isNullable, notNullable } from 'amos-utils';
+import { takeFirst, isIterableIterator, isNullable, notNullable } from 'amos-utils';
 import { isSameList, List } from './List';
 
 describe('AmosList', () => {
@@ -67,7 +67,7 @@ describe('AmosList', () => {
         list.indexOf(4),
         list.join(','),
         list.lastIndexOf(5),
-        list.map(identity),
+        list.map(takeFirst),
         list.pop(),
         list.push(6),
         list.reduce((p, c) => p + c, 7),

@@ -3,8 +3,8 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { removeElement } from './misc';
-import { FuncParams, FuncReturn, Unsubscribe } from './types';
+import { must, removeElement } from './misc';
+import { FuncParams, Unsubscribe } from './types';
 
 export type Enhancer<A extends any[], V> = (next: (...args: A) => V) => (...args: A) => V;
 
@@ -27,6 +27,7 @@ export function enhancerCollector<A extends any[], V>(): EnhancerCollector<A, V>
   const enhancers: Enhancer<A, V>[] = [];
   return Object.assign(
     (e: Enhancer<A, V>) => {
+      must(!enhancers.includes(e), 'enhancer is already exists');
       enhancers.push(e);
       return () => {
         removeElement(enhancers, e);
@@ -45,7 +46,7 @@ export function override<T, K extends keyof T>(obj: T, key: K, override: (origin
 export function append<T, K extends keyof T>(
   obj: T,
   key: K,
-  fn: (...args: FuncParams<T[K]>) => FuncReturn<T[K]>,
+  fn: (...args: FuncParams<T[K]>) => void,
 ) {
   return override(obj, key, ((original: any) => {
     return (...args: any[]) => {

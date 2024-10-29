@@ -16,8 +16,11 @@ export function must<T>(value: T, message: string): asserts value {
 
 export const ANY: any = void 0;
 
-export function resolveConstructorValue<V>(value: ValueOrConstructor<V>): V {
-  return typeof value === 'function' ? new (value as any)() : value;
+export function resolveConstructorValue<V, A extends any[]>(
+  value: ValueOrConstructor<V, A>,
+  ...args: A
+): V {
+  return typeof value === 'function' ? new (value as any)(...args) : value;
 }
 
 export function toFunc<V, A extends any[]>(value: ValueOrFunc<V, A>): (...args: A) => V {
@@ -74,23 +77,41 @@ export function toType(s: unknown) {
   if (s == null) {
     return s + '';
   }
+  const typ = typeof s;
+  if (typ !== 'object') {
+    return typ;
+  }
   if (typeof s.constructor === 'function') {
     return s.constructor.name;
   }
   return Object.prototype.toString.call(s);
 }
 
-export function toString(s: unknown) {
-  if (s == null) {
-    return s + '';
-  }
-  if (typeof s.toString === 'function') {
-    return s.toString();
-  }
-  return toType(s);
-}
-
 export const __DEV__ = typeof process === 'object' && process.env.NODE_ENV === 'development';
 export const __TEST__ = __DEV__ && typeof jest !== 'undefined';
 
 export function noop() {}
+
+export function defer<T = void>() {
+  let resolve: (value: T | PromiseLike<T>) => void;
+  let reject: (reason?: any) => void;
+  const p = new Promise<T>((_resolve, _reject) => {
+    resolve = _resolve;
+    reject = _reject;
+  });
+  return Object.assign(p, {
+    resolve: resolve!,
+    reject: reject!,
+    exec: async (fn: () => PromiseLike<T> | T) => {
+      resolve(fn());
+      return p;
+    },
+  });
+}
+
+export class NotImplemented extends Error {
+  constructor() {
+    super('not implemented');
+    Object.setPrototypeOf(this, new.target.prototype);
+  }
+}

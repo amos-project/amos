@@ -21,6 +21,10 @@ describe('object utils', () => {
     expect(o2).toEqual({ [$amos]: 'o2', id: 'A', key: null, type: 'o2' });
     const o3 = createAmosObject<any>('o1', { type: 'o3' });
     expect(o1.id).not.toEqual(o3.id);
+
+    expect(() => createAmosObject('foo', {})).toThrow();
+    createAmosObject<any>('foo_factory', { type: 'a' });
+    expect(() => createAmosObject<any>('foo_factory', { type: 'a' })).toThrow();
   });
   it('should check is amos object', () => {
     const o1 = createAmosObject<any>('o1', { type: 'o1' });

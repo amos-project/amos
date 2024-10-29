@@ -148,13 +148,13 @@ describe('MapBox', () => {
   });
   it('should should init options', () => {
     expect([
-      unitMapBox.table!.hasRow(unitMapBox.initialState, '1'),
-      unitMapBox.table!.hasRow(unitMapBox.initialState, '3'),
+      unitMapBox.table!.getRow(unitMapBox.initialState, '1'),
+      unitMapBox.table!.getRow(unitMapBox.initialState, '3'),
       unitMapBox.table!.toRows(unitMapBox.initialState),
       unitMapBox.table!.hydrate(unitMapBox.initialState, { 1: 2, 3: Jessica.toJSON() }),
     ]).toEqual([
-      true,
-      false,
+      1,
+      Rick,
       { 1: 1, 2: Morty },
       unitMapBox.initialState.setAll({ 1: UserRecord.defaultInstance(), 3: Jessica }),
     ]);

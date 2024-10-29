@@ -18,11 +18,15 @@ export interface TransformerOptions {
 export function formatType(type: string, format: TypeFormat) {
   switch (format) {
     case 'lower_underscore':
-      return type.replace(/([A-Z]+)/g, ($0, $1) => '_' + $1.toLowerCase()).replace(/^_+/, '');
+      return type
+        .replace(/([A-Z]+)/g, ($0, $1) => '_' + $1.toLowerCase())
+        .replace(/^_+/, '')
+        .replace(/_+/, '_');
     case 'UPPER_UNDERSCORE':
       return type
         .replace(/([A-Z]+)/g, ($0, $1) => '_' + $1)
         .replace(/^_+/, '')
+        .replace(/_+/, '_')
         .toUpperCase();
     case 'lowerCamelCase':
       return type

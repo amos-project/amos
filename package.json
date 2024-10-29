@@ -10,6 +10,7 @@
   ],
   "devDependencies": {
     "@babel/core": "^7.25.9",
+    "@babel/plugin-transform-typescript": "^7.25.9",
     "@babel/types": "^7.25.9",
     "@react-native-async-storage/async-storage": "^2.0.0",
     "@redux-devtools/extension": "^3.3.0",

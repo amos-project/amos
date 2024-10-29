@@ -12,19 +12,15 @@ export function withPersist(options: PartialRequired<PersistOptions, 'storage'>)
   return (next) => (_options) => {
     const store = next(_options);
     const loading = new Map<string, Promise<any>>();
+    const persisted: Record<string, any> = {};
 
-    const finalOptions: PersistOptions = {
+    const final: PersistOptions = {
       onError: (e) => console.error(`[Amos]: failed to persist.`, e),
       ...options,
     };
 
     append(store, 'init', () => {
-      store.dispatch(
-        persistBox.setState({
-          options: finalOptions,
-          loading: loading,
-        }),
-      );
+      store.dispatch(persistBox.setState({ options: final, hydrating: loading, persisted }));
     });
 
     override(store, 'select', (select) => {

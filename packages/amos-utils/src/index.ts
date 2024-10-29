@@ -10,6 +10,5 @@ export * from './equals';
 export * from './event';
 export * from './json';
 export * from './misc';
-export * from './NotImplemented';
 export * from './object';
 export * from './types';
