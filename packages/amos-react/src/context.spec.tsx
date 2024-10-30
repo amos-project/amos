@@ -3,24 +3,30 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { render } from '@testing-library/react';
-import { createStore, Store } from 'amos-core';
-import { Consumer, Provider } from './context';
+import { renderHook } from '@testing-library/react';
+import { createStore } from 'amos-core';
+import { FC } from 'react';
+import { Provider, useDispatch, useStore } from './context';
 
-describe('provider', () => {
-  it('should provide store', () => {
+describe('Context', () => {
+  it('should use store & dispatch', async () => {
     const store = createStore();
-    let usedStore: Store | null = null;
-    render(
-      <Provider store={store}>
-        <Consumer>
-          {(store1) => {
-            usedStore = store1;
-            return null;
-          }}
-        </Consumer>
-      </Provider>,
-    );
-    expect(usedStore).toBe(store);
+    const wrapper: FC = (props: any) => <Provider store={store}>{props.children}</Provider>;
+
+    const renderStore = renderHook(() => useStore(), { wrapper });
+    expect(renderStore.result.current).toBe(store);
+
+    const renderDispatch = renderHook(() => useDispatch(), { wrapper });
+    expect(renderDispatch.result.current).toBe(store.dispatch);
+
+    expect(
+      renderHook(() => {
+        try {
+          return useStore();
+        } catch (e: any) {
+          return e.message;
+        }
+      }).result.current,
+    ).toBe('It seems you are using hooks without <Provider />.');
   });
 });

@@ -165,17 +165,17 @@ export class Map<K extends ID, V> implements JSONSerializable<Record<K, V>> {
     }
   }
 
-  [Symbol.iterator](): IterableIterator<[K, V]> {
+  [Symbol.iterator](): IterableIterator<[ToString<K>, V]> {
     return this.entries();
   }
 
-  *entries(): IterableIterator<[K, V]> {
+  *entries(): IterableIterator<[ToString<K>, V]> {
     for (const k in this.data) {
       yield [k, this.data[k]!];
     }
   }
 
-  *keys(): IterableIterator<K> {
+  *keys(): IterableIterator<ToString<K>> {
     for (const k in this.data) {
       yield k;
     }

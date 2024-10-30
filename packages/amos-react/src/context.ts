@@ -7,7 +7,7 @@ import { Dispatch, Store } from 'amos';
 import { must } from 'amos-utils';
 import { createContext, createElement, ReactNode, useContext } from 'react';
 
-export const Context = createContext<Store | null>(null);
+const Context = createContext<Store | null>(null);
 
 export interface ProviderProps {
   store: Store;
@@ -18,8 +18,6 @@ export const Provider = ({ store, children }: ProviderProps) => {
   must(store, 'store is required for <Provider />.');
   return createElement(Context.Provider, { value: store }, children);
 };
-
-export const Consumer = Context.Consumer;
 
 export function useStore(): Store {
   const state = useContext(Context);

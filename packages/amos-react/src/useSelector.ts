@@ -13,28 +13,31 @@ import {
   Selector,
 } from 'amos';
 import { __DEV__ } from 'amos-utils';
-import { useCallback, useDebugValue, useLayoutEffect, useReducer, useRef } from 'react';
+import { useCallback, useDebugValue, useLayoutEffect, useReducer, useRef, useState } from 'react';
 import { useStore } from './context';
 
 function useSelect(): Select {
   const [, update] = useReducer((s) => s + 1, 0);
   const store = useStore();
-  const deps = useRef<SelectEntry[]>([]);
-  const rendering = useRef(true);
-  rendering.current = true;
-  deps.current = [];
+  const [state] = useState(() => ({
+    deps: [] as SelectEntry[],
+    rendering: true,
+  }));
+  state.deps = [];
+  state.rendering = true;
   useLayoutEffect(() => {
-    rendering.current = false;
+    state.rendering = false;
   });
   useLayoutEffect(() => {
     return store.subscribe(() => {
-      if (deps.current.some(([s, v]) => !isSelectValueEqual(s, v, store.select(s)))) {
+      if (state.deps.some(([s, v]) => !isSelectValueEqual(s, v, store.select(s)))) {
+        state.deps = [];
         update();
       }
     });
   }, []);
   useDebugValue(
-    deps.current,
+    state.deps,
     __DEV__
       ? (value) => {
           return value.reduce(
@@ -59,17 +62,17 @@ function useSelect(): Select {
   return useCallback(
     (selectable: any) => {
       const value: any = store.select(selectable);
-      if (!rendering.current) {
+      if (!state.rendering) {
         return value;
       }
       if (Array.isArray(selectable)) {
-        deps.current.push(...selectable.map((s, i) => [s, value[i]] as const));
+        state.deps.push(...selectable.map((s, i) => [s, value[i]] as const));
       } else {
-        deps.current.push([selectable, value]);
+        state.deps.push([selectable, value]);
       }
       return value;
     },
-    [store, rendering, deps],
+    [store, state],
   );
 }
 

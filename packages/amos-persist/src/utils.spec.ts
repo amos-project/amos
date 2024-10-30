@@ -45,7 +45,14 @@ describe('persist utils', () => {
       toPersistOptions(countBox),
       toPersistOptions(persistBox),
       toPersistOptions(darkModeBox),
-    ]).toEqual<BoxPersistOptions<any>[]>([{ version: 1 }, { version: 1 }, { version: 2 }]);
+    ]).toEqual<BoxPersistOptions<any>[]>([
+      { version: 1 },
+      { version: 1 },
+      {
+        version: 2,
+        migrate: expect.any(Function),
+      },
+    ]);
   });
 
   it('should shouldPersist', () => {
