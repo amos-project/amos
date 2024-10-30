@@ -49,7 +49,7 @@ export const withCache: () => StoreEnhancer = () => {
           }
         }
         // should check the cache now
-        const key = resolveCacheKey(store, s, void 0);
+        const key = resolveCacheKey(store.select, s, void 0);
         const cache = cacheMap.get(key);
         if (cache) {
           try {

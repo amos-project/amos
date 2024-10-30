@@ -8,7 +8,7 @@ import { PersistEntry, PersistValue } from '../types';
 import type { StorageEngine } from './Storage';
 
 // compat with Web Storage and React Native AsyncStorage
-export interface Storage {
+export interface SimpleStorageDriver {
   length?: number;
   getItem(key: string): ValueOrPromise<string | null>;
   setItem(key: string, value: string): ValueOrPromise<void>;
@@ -20,7 +20,7 @@ export interface Storage {
 export class SimpleStorage implements StorageEngine {
   constructor(
     readonly prefix: string,
-    readonly storage: Storage,
+    readonly driver: SimpleStorageDriver,
   ) {}
 
   async getMulti(items: readonly string[]): Promise<readonly (PersistValue | null)[]> {
@@ -35,24 +35,24 @@ export class SimpleStorage implements StorageEngine {
 
   async setMulti(items: readonly PersistEntry[]): Promise<void> {
     for (const [key, version, value] of items) {
-      this.storage.setItem(this.genKey(key), JSON.stringify([version, value]));
+      this.driver.setItem(this.genKey(key), JSON.stringify([version, value]));
     }
   }
 
   async removeMulti(items: readonly string[]): Promise<void> {
-    await Promise.all(items.map((key) => this.storage.removeItem(this.genKey(key))));
+    await Promise.all(items.map((key) => this.driver.removeItem(this.genKey(key))));
   }
 
   async removePrefix(prefix: string): Promise<void> {
     const keys = await this.allKeys(prefix);
-    await Promise.all(keys.map((k) => this.storage.removeItem(this.genKey(k))));
+    await Promise.all(keys.map((k) => this.driver.removeItem(this.genKey(k))));
   }
 
   /**
    * Get item with key without {@link prefix}.
    */
   private async getItem(key: string): Promise<PersistValue | null> {
-    const v = await this.storage.getItem(this.genKey(key));
+    const v = await this.driver.getItem(this.genKey(key));
     if (!v) {
       return null;
     }
@@ -65,13 +65,13 @@ export class SimpleStorage implements StorageEngine {
   private async allKeys(prefix: string) {
     const keyPrefix = this.genKey(prefix);
     const headSize = this.genKey('').length;
-    if (this.storage.getAllKeys) {
-      const keys = await this.storage.getAllKeys();
+    if (this.driver.getAllKeys) {
+      const keys = await this.driver.getAllKeys();
       return keys.filter((k) => k.startsWith(keyPrefix)).map((k) => k.substring(headSize));
-    } else if (this.storage.length && this.storage.key) {
+    } else if (this.driver.length && this.driver.key) {
       const keys: string[] = [];
-      for (let i = 0, size = this.storage.length; i < size; i++) {
-        const key = this.storage.key(i);
+      for (let i = 0, size = this.driver.length; i < size; i++) {
+        const key = this.driver.key(i);
         if (key?.startsWith(keyPrefix)) {
           keys.push(key!.substring(headSize));
         }

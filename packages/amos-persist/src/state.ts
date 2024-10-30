@@ -11,17 +11,20 @@ import { toKey } from './utils';
 export interface PersistState extends PersistOptions {
   selecting: boolean;
   snapshot: Snapshot;
-  hydrate: NextTicker<PersistKey<any>>;
-  persist: NextTicker<void>;
+  hydrate: NextTicker<PersistKey<any>, void>;
+  persist: NextTicker<void, void>;
 }
 
 export const persistBox = box<PersistState | null>('amos.persist', null);
 
+/**
+ * Make sure box or row is hydrated from persisted state.
+ */
 export const hydrate = action(
   async (dispatch: Dispatch, select: Select, keys: readonly PersistKey<any>[]): Promise<void> => {
     const state = select(persistBox);
     must(state, 'persist middleware is not enabled');
-    await state.hydrate(...keys);
+    await state.hydrate.wait(...keys);
   },
   {
     conflictPolicy: 'always',

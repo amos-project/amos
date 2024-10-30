@@ -32,12 +32,12 @@ describe('core utils', () => {
     const store = createStore();
     store.dispatch(countBox.setState(1));
     expect([
-      resolveCacheKey(store, selectDouble(2), void 0),
-      resolveCacheKey(store, selectDouble(2), countBox),
-      resolveCacheKey(store, selectDouble(2), selectDoubleCount()),
-      resolveCacheKey(store, selectDouble(2), [countBox, selectDoubleCount()]),
-      resolveCacheKey(store, selectDouble(2), (select: Select) => select(countBox)),
-      resolveCacheKey(store, selectDouble(2), (select: Select) => [
+      resolveCacheKey(store.select, selectDouble(2), void 0),
+      resolveCacheKey(store.select, selectDouble(2), countBox),
+      resolveCacheKey(store.select, selectDouble(2), selectDoubleCount()),
+      resolveCacheKey(store.select, selectDouble(2), [countBox, selectDoubleCount()]),
+      resolveCacheKey(store.select, selectDouble(2), (select: Select) => select(countBox)),
+      resolveCacheKey(store.select, selectDouble(2), (select: Select) => [
         select(countBox),
         select(selectDoubleCount()),
       ]),

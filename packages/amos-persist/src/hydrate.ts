@@ -3,22 +3,14 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { type ActionFactory, Actor, Box, type Mutation, type Store } from 'amos-core';
-import {
-  fromJS,
-  type ID,
-  isAmosObject,
-  isArray,
-  must,
-  nextSerialTicker,
-  tryFinally,
-} from 'amos-utils';
+import { Box, type Mutation, type Store } from 'amos-core';
+import { fromJS, type ID, isArray, must, nextSerialTicker, tryFinally } from 'amos-utils';
 import { persistBox } from './state';
 import type { PersistEntry, PersistKey, PersistOptions } from './types';
 import { fromKey, toKey, toPersistOptions } from './utils';
 
 export const createHydrate = (store: Store, finalOptions: PersistOptions) => {
-  return nextSerialTicker<PersistKey<any>>(async (items) => {
+  return nextSerialTicker<PersistKey<any>, void>(async (items) => {
     const state = store.select(persistBox)!;
 
     function migrate(box: Box, v: number, id: string, d: any) {
@@ -27,29 +19,22 @@ export const createHydrate = (store: Store, finalOptions: PersistOptions) => {
         if (!opts.migrate) {
           return void 0;
         }
-        if (isAmosObject<ActionFactory>(opts.migrate, 'action_factory')) {
-          return store.dispatch(opts.migrate(v, id, d));
-        } else {
-          return (
-            opts.migrate as Actor<[version: number, row: ID, state: unknown], unknown | undefined>
-          )(store.dispatch, store.select, v, id, d);
-        }
+        return store.dispatch(opts.migrate(v, id, d));
       }
       return d;
     }
 
-    const targets = new Map<string, null | Set<string> | undefined>();
+    const targets = new Map<string, null | Set<ID> | undefined>();
 
     const addRow = (box: Box, rowId?: ID) => {
       if (rowId === void 0) {
         targets.set(box.key, box.table ? null : void 0);
       } else {
         must(box.table, `${box.key} is not a multi-row box`);
-        const key = toKey(box, rowId);
         if (!targets.has(box.key)) {
           targets.set(box.key, new Set());
         }
-        targets.get(box.key)?.add(key);
+        targets.get(box.key)?.add(rowId);
       }
     };
 
@@ -81,7 +66,7 @@ export const createHydrate = (store: Store, finalOptions: PersistOptions) => {
 
     const [prefixes, exacts] = await Promise.all([
       Promise.all(prefixBoxes.map((key) => state.storage.getPrefix(toKey(key, null)))),
-      exactKeys.length ? state.storage.getMulti(exactKeys.map(([r, i]) => toKey(r, i))) : [],
+      exactKeys.length ? state.storage.getMulti(exactKeys.map(([k, i]) => toKey(k, i))) : [],
     ]);
 
     tryFinally(

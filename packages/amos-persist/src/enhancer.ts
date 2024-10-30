@@ -48,6 +48,7 @@ export function withPersist(options: PartialRequired<PersistOptions, 'storage'>)
           if (state.selecting) {
             return r;
           }
+          // hydrate rows for multi-row boxes
           if (
             loadRows &&
             r === loadRows[0].table!.getRow(loadRows[0].initialState, loadRows[1]) &&
@@ -55,9 +56,11 @@ export function withPersist(options: PartialRequired<PersistOptions, 'storage'>)
           ) {
             hydrate(loadRows);
           }
+          // load entire box only if the box is not multi-row box
           if (
             !loadRows &&
             isBox &&
+            !selectable.table &&
             !selectingRows &&
             r === selectable.initialState &&
             shouldPersist(finalOptions, selectable)

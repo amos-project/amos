@@ -3,7 +3,7 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { expectCalled, expectCalledWith } from 'amos-testing';
+import { expectCalled, expectCalledWith, sleep } from 'amos-testing';
 import {
   ANY,
   defer,
@@ -20,6 +20,40 @@ import {
 } from './misc';
 
 describe('misc utils', () => {
+  it('should run async serial next tick', async () => {
+    const f1 = jest.fn(async (v: number[]) => {
+      await sleep(10);
+      if (v.includes(-1)) {
+        throw -10;
+      }
+      return v.length;
+    });
+    const f2 = jest.fn();
+    const ticker = nextSerialTicker<number, number>(f1, f2);
+    const p1 = ticker.wait(1);
+    const p2 = ticker.wait(2);
+    expect(p1).toBe(p2);
+    expect(p1).toBeInstanceOf(Promise);
+    expect(f1).not.toHaveBeenCalled();
+    await Promise.resolve();
+    expectCalledWith(f1, [[1, 2]]);
+    await Promise.resolve();
+    const p3 = ticker.wait(3);
+    ticker(3.5);
+    const p4 = ticker.wait(4);
+    expect(p3).toBe(p4);
+    expect(p3).not.toBe(p1);
+    expect(f1).not.toHaveBeenCalled();
+    expect(await p1).toBe(2);
+    await Promise.resolve();
+    expectCalledWith(f1, [[3, 3.5, 4]]);
+    expect(await p3).toBe(3);
+    ticker(1);
+    ticker(2);
+    ticker(-1);
+    await expect(ticker.wait(1)).rejects.toBe(-10);
+    expectCalledWith(f2, [-10]);
+  });
   it('should try finally', () => {
     const f1 = jest.fn();
     const f2 = jest.fn();
@@ -67,13 +101,6 @@ describe('misc utils', () => {
       [1, 2],
     ]);
     expect(toArray('abc')).toEqual(['abc']);
-    const f1 = jest.fn();
-    const ticker = nextSerialTicker<number>(f1);
-    ticker(1, 2, 3);
-    ticker(4, 3, 2);
-    expect(f1).not.toHaveBeenCalled();
-    await Promise.resolve();
-    expectCalledWith(f1, [[1, 2, 3, 4, 3, 2]]);
 
     const d = defer<number>();
     const r1 = await d.exec(() => 1);

@@ -39,7 +39,9 @@ export const Jessica = Jerry.set('id', 4).set('firstName', 'Jessica').set('fathe
 export const Morty = Jerry.merge({ id: 5, firstName: 'Morty' });
 export const users = [Rick, Beth, Jerry, Jessica, Morty];
 
-export const userMapBox = recordMapBox('user.userMap', new UserRecord(), 'id');
+export const userMapBox = recordMapBox('unit.users', new UserRecord(), 'id');
 userMapBox.initialState = userMapBox.initialState.setAll(users);
 
-export const onlineUserListBox = listBox<number>('users.onlineList');
+export const onlineUserListBox = listBox<number>('unit.users.onlineList').config({
+  persist: false,
+});

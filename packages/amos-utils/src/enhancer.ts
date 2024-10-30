@@ -49,8 +49,8 @@ export function append<T, K extends keyof T>(
   fn: (...args: FuncParams<T[K]>) => void,
 ) {
   return override(obj, key, ((original: any) => {
-    return (...args: any[]) => {
-      const ret = original(...args);
+    return function (this: any, ...args: any[]) {
+      const ret = original.apply(this, args);
       (fn as any)(...args);
       return ret;
     };

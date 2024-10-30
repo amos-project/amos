@@ -15,8 +15,7 @@ import {
 import { Action } from './action';
 import { Box } from './box';
 import { Selector, SelectorFactory } from './selector';
-import { Store } from './store';
-import { CacheOptions } from './types';
+import { CacheOptions, type Select } from './types';
 
 export function stringify(data: any): string {
   if (Array.isArray(data)) {
@@ -51,20 +50,20 @@ export function stringify(data: any): string {
 }
 
 export function resolveCacheKey(
-  store: Store,
+  select: Select,
   v: Action | Selector,
   key: CacheOptions<any> | undefined,
 ): string {
   let args = v.args;
   if (key) {
     if (isAmosObject<Box>(key, 'box') || isAmosObject<Selector>(key, 'selector')) {
-      args = [...args, store.select(key)];
+      args = [...args, select(key)];
     } else if (Array.isArray(key)) {
-      args = [...args, ...store.select(key)];
+      args = [...args, ...select(key)];
     } else if (isAmosObject<SelectorFactory>(key, 'selector_factory')) {
-      args = toArray(store.select(key(...args)));
+      args = toArray(select(key(...args)));
     } else if (typeof key === 'function') {
-      args = toArray(key(store.select, ...args) as any);
+      args = toArray(key(select, ...args) as any);
     }
   }
   const ck = v.id + ':' + stringify(args);

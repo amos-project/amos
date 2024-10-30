@@ -17,7 +17,7 @@ export function withConcurrent(): StoreEnhancer {
         if (!isAmosObject<Action>(d, 'action') || d.conflictPolicy !== 'leading') {
           return dispatch(d);
         }
-        const key = resolveCacheKey(store, d, d.conflictKey);
+        const key = resolveCacheKey(store.select, d, d.conflictKey);
         if (pending.has(key)) {
           return pending.get(key)!;
         }

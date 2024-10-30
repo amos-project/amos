@@ -51,41 +51,54 @@ export function toArray<T>(items: T[] | Iterable<T> | T): T[] {
   return [items as T];
 }
 
-export interface NextTicker<T> {
-  (...items: T[]): Promise<void>;
+export interface NextTicker<T, R> {
+  (...items: T[]): void;
+  wait(...items: T[]): Promise<R>;
 }
 
-export function nextSerialTicker<T>(
-  fn: (items: T[]) => Promise<void>,
-  noError: (e: unknown) => void,
-): NextTicker<T> {
+export function nextSerialTicker<T, R>(
+  fn: (items: T[]) => Promise<R>,
+  onError: (e: unknown) => void,
+): NextTicker<T, R> {
   let pending: T[] | undefined = void 0;
   let p: Promise<void> | undefined = void 0;
+  let dp: Defer<R> | undefined = void 0;
   const run = () => {
     if (p || pending === void 0) {
       return;
     }
-    p = Promise.resolve()
-      .then(() => {
-        const items = pending!;
-        pending = void 0;
-        return fn(items);
-      })
-      .catch(noError)
-      .finally(() => {
+    p = Promise.resolve().then(async () => {
+      const items = pending!;
+      const _w = dp;
+      dp = void 0;
+      pending = void 0;
+      try {
+        const r = await fn(items);
+        _w?.resolve(r);
+      } catch (e) {
+        onError(e);
+        _w?.reject(e);
+      } finally {
         p = void 0;
         run();
-      });
+      }
+    });
   };
-  return (...items: T[]) => {
+
+  function ticker(...items: T[]) {
     if (pending) {
       pending.push(...items);
     } else {
       pending = items;
       run();
     }
-    return p!;
+  }
+
+  ticker.wait = function (...items: T[]) {
+    ticker(...items);
+    return (dp ??= defer<R>());
   };
+  return ticker;
 }
 
 export function toType(s: unknown) {
@@ -107,7 +120,13 @@ export const __TEST__ = __DEV__ && typeof jest !== 'undefined';
 
 export function noop() {}
 
-export function defer<T = void>() {
+export interface Defer<T> extends Promise<T> {
+  resolve: (value: T | PromiseLike<T>) => void;
+  reject: (reason?: any) => void;
+  exec: (fn: () => PromiseLike<T> | T) => this;
+}
+
+export function defer<T = void>(): Defer<T> {
   let resolve: (value: T | PromiseLike<T>) => void;
   let reject: (reason?: any) => void;
   const p = new Promise<T>((_resolve, _reject) => {
@@ -123,7 +142,7 @@ export function defer<T = void>() {
       } catch (e) {
         reject(e);
       }
-      return p;
+      return p as Defer<T>;
     },
   });
 }

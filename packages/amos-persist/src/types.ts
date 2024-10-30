@@ -23,17 +23,14 @@ export interface BoxPersistOptions<S> {
    * that can be merged by the state's {@link FromJS.fromJS}, not to the state
    * directly.
    */
-  migrate?:
-    | Actor<[version: number, row: ID, state: unknown], unknown | undefined>
-    | ActionFactory<[version: number, row: ID, state: unknown], unknown | undefined>;
+  migrate?: ActionFactory<[version: number, row: ID, state: any]>;
 }
 
+/**
+ * For multi-row boxes, target single row or multi-row
+ */
 export type PersistRowKey<T> = readonly [box: Box<T>, rows: ID | ID[]];
 export type PersistKey<T> = Box<T> | PersistRowKey<T>;
-export type PersistKeyState<T> = T extends PersistKey<infer S> ? S : never;
-export type MapPersistKeys<K extends readonly PersistKey<any>[]> = {
-  [P in keyof K]: PersistKeyState<K[P]>;
-};
 export type PersistValue = readonly [version: number, value: any];
 export type PersistEntry = readonly [key: string, version: number, value: any];
 
