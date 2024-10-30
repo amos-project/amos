@@ -45,7 +45,7 @@ export function Record<P extends object>(props: P): RecordConstructor<P> {
 
     static defaultInstance<T>(this: Constructor<T>): T {
       const k = '_defaultInstance';
-      if (!this.hasOwnProperty(k)) {
+      if (!Object.hasOwn(this, k)) {
         Object.defineProperty(this, k, {
           value: new this(),
           configurable: false,

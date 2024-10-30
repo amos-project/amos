@@ -69,8 +69,8 @@ describe('Box', () => {
     });
     expect([
       new MyBox('my', '').foo(),
-      Box.prototype.hasOwnProperty('foo'),
-      MyBox.prototype.hasOwnProperty('foo'),
+      Object.hasOwn(Box.prototype, 'foo'),
+      Object.hasOwn(MyBox.prototype, 'foo'),
     ]).toEqual([1, false, true]);
   });
 });

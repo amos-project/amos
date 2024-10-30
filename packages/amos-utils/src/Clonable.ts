@@ -43,11 +43,3 @@ export function clone<T>(obj: T, props: WellPartial<T>): T {
   }
   return Object.assign(Object.create(Object.getPrototypeOf(obj)), obj, props);
 }
-
-/**
- * Create an object with null proto, and merge values to it.
- * @param values
- */
-export function nullObject<T>(...values: T[]): T {
-  return Object.assign(Object.create(null), ...values);
-}

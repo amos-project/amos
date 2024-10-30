@@ -51,25 +51,40 @@ export function toArray<T>(items: T[] | Iterable<T> | T): T[] {
   return [items as T];
 }
 
-export function nextTick(fn: () => void) {
-  Promise.resolve().then(fn);
-}
-
 export interface NextTicker<T> {
-  (...items: T[]): void;
+  (...items: T[]): Promise<void>;
 }
 
-export function nextTicker<T>(fn: (items: T[]) => void): NextTicker<T> {
-  let pending: T[] = [];
-  return (...items: T[]) => {
-    if (pending.length === 0) {
-      nextTick(() => {
-        const items = pending;
-        pending = [];
-        fn(items);
-      });
+export function nextSerialTicker<T>(
+  fn: (items: T[]) => Promise<void>,
+  noError: (e: unknown) => void,
+): NextTicker<T> {
+  let pending: T[] | undefined = void 0;
+  let p: Promise<void> | undefined = void 0;
+  const run = () => {
+    if (p || pending === void 0) {
+      return;
     }
-    pending.push(...items);
+    p = Promise.resolve()
+      .then(() => {
+        const items = pending!;
+        pending = void 0;
+        return fn(items);
+      })
+      .catch(noError)
+      .finally(() => {
+        p = void 0;
+        run();
+      });
+  };
+  return (...items: T[]) => {
+    if (pending) {
+      pending.push(...items);
+    } else {
+      pending = items;
+      run();
+    }
+    return p!;
   };
 }
 
@@ -102,8 +117,12 @@ export function defer<T = void>() {
   return Object.assign(p, {
     resolve: resolve!,
     reject: reject!,
-    exec: async (fn: () => PromiseLike<T> | T) => {
-      resolve(fn());
+    exec: (fn: () => PromiseLike<T> | T) => {
+      try {
+        resolve(fn());
+      } catch (e) {
+        reject(e);
+      }
       return p;
     },
   });
@@ -113,5 +132,14 @@ export class NotImplemented extends Error {
   constructor() {
     super('not implemented');
     Object.setPrototypeOf(this, new.target.prototype);
+  }
+}
+
+// make sure there is no async block
+export function tryFinally(_try: () => undefined, _finally: () => undefined) {
+  try {
+    _try();
+  } finally {
+    _finally();
   }
 }

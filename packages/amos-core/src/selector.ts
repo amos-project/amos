@@ -3,15 +3,8 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import {
-  AmosObject,
-  createAmosObject,
-  enhancerCollector,
-  ID,
-  is,
-  ValueOrReadonlyArray,
-} from 'amos-utils';
-import { Box } from './box';
+import { AmosObject, createAmosObject, enhancerCollector, type ID, is } from 'amos-utils';
+import type { Box } from './box';
 import { Select } from './types';
 
 /**
@@ -47,7 +40,7 @@ export interface SelectorOptions<A extends any[] = any, R = any> {
    *
    * @see BoxOptions.table
    */
-  loadRow?: (...args: A) => ValueOrReadonlyArray<readonly [Box, ID]>;
+  loadRow?: (...args: A) => readonly [Box, ID];
 }
 
 /**

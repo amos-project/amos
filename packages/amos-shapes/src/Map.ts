@@ -16,7 +16,6 @@ import {
   isIterable,
   JSONSerializable,
   JSONState,
-  nullObject,
   PartialDictionary,
   PartialRecord,
   toArray,
@@ -25,7 +24,8 @@ import {
 } from 'amos-utils';
 
 export class Map<K extends ID, V> implements JSONSerializable<Record<K, V>> {
-  protected readonly data: Readonly<Record<K, V>> = nullObject();
+  // map write is faster 2x, but clone is very slow 0.1x
+  protected readonly data: Readonly<Record<K, V>> = {} as Record<K, V>;
 
   constructor(readonly defaultValue: V) {}
 
@@ -34,7 +34,7 @@ export class Map<K extends ID, V> implements JSONSerializable<Record<K, V>> {
   }
 
   fromJS(state: JSONState<Record<K, V>>): this {
-    const data: any = nullObject<Record<K, V>>();
+    const data: any = {};
     for (const k in state) {
       data[k] = fromJS(this.defaultValue, state[k]);
     }
@@ -46,7 +46,7 @@ export class Map<K extends ID, V> implements JSONSerializable<Record<K, V>> {
   }
 
   hasItem(key: K): boolean {
-    return key in this.data;
+    return Object.hasOwn(this.data, key);
   }
 
   getItem(key: K): V {
@@ -61,7 +61,7 @@ export class Map<K extends ID, V> implements JSONSerializable<Record<K, V>> {
     if (this.getItem(key) === item) {
       return this;
     }
-    return this.reset(nullObject(this.data, { [key]: item } as any));
+    return this.reset({ ...this.data, [key]: item });
   }
 
   setAll(items: PartialDictionary<K, V> | ArraySource<Entry<K, V>>): this {
@@ -85,7 +85,7 @@ export class Map<K extends ID, V> implements JSONSerializable<Record<K, V>> {
     if (!dirty) {
       return this;
     }
-    return this.reset(nullObject(this.data, up) as any);
+    return this.reset({ ...this.data, ...up });
   }
 
   // only allowed for non-array object item
@@ -130,7 +130,7 @@ export class Map<K extends ID, V> implements JSONSerializable<Record<K, V>> {
       }
     }
     if (bad) {
-      return this.reset(nullObject(this.data, up) as any);
+      return this.reset({ ...this.data, ...up });
     }
     return this;
   }
@@ -144,7 +144,7 @@ export class Map<K extends ID, V> implements JSONSerializable<Record<K, V>> {
     if (!keysArr.length) {
       return this;
     }
-    const data = nullObject(this.data);
+    const data = { ...this.data };
     for (const k of keysArr) {
       delete data[k];
     }

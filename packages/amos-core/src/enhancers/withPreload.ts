@@ -15,7 +15,7 @@ export const withPreload = (): StoreEnhancer => {
     }
     override(store, 'getInitialState', (getInitialState) => {
       return (box) => {
-        if (snapshot.hasOwnProperty(box.key)) {
+        if (Object.hasOwn(snapshot, box.key)) {
           return fromJS(box.initialState, snapshot[box.key]);
         }
         return getInitialState(box);

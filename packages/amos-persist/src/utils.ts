@@ -7,22 +7,21 @@ import { Box } from 'amos-core';
 import { type ID, isObject, must } from 'amos-utils';
 import { BoxPersistOptions, PersistOptions } from './types';
 
-export const defaultVersion = 1;
-export const delimiter = ':';
+const defaultVersion = 1;
+const delimiter = ':';
 
-/**
- * Generate key in storage
- * @param box
- * @param rowId three types
- *      - null: generate multi-row prefix
- *      - undefined: generate single-row key
- *      - ID: generate multi-row key
- */
-export function toKey(box: Box, rowId: ID | undefined | null) {
-  if (rowId === void 0) {
-    return box.key;
+export function toKey(key: string, rowId: ID | undefined | null): string;
+export function toKey(box: Box, rowId?: ID | undefined | null): string;
+export function toKey(box: Box | string, rowId?: ID | undefined | null) {
+  const key = typeof box === 'string' ? box : box.key;
+  if (arguments.length === 1) {
+    must(typeof box !== 'string', 'key must use with rowId');
+    rowId = box.table ? null : void 0;
   }
-  return box.key + delimiter + (rowId === null ? '' : rowId);
+  if (rowId === void 0) {
+    return key;
+  }
+  return key + delimiter + (rowId === null ? '' : rowId);
 }
 
 export function fromKey(key: string): string | undefined {
@@ -45,6 +44,9 @@ export function shouldPersist(options: PersistOptions, box: Box) {
   if (box.persist === false) {
     return false;
   }
+  if (box.key.startsWith('amos.')) {
+    return false;
+  }
   if (options.excludes?.(box)) {
     return false;
   }
@@ -52,15 +54,4 @@ export function shouldPersist(options: PersistOptions, box: Box) {
     return options.includes(box);
   }
   return !!box.persist;
-}
-
-export function resolveBoxPersistOptions(
-  options: PersistOptions,
-  box: Box,
-): BoxPersistOptions<any> {
-  must(shouldPersist(options, box), `box ${box.key} should be persisted.`);
-  if (!box.persist) {
-    return { version: 1 };
-  }
-  return box.persist;
 }

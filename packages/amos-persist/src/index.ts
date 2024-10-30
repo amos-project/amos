@@ -4,7 +4,7 @@
  */
 
 export * from './actions';
-export * from './boxes';
+export * from './state';
 export * from './enhancer';
 export * from './storages/IDBStorage';
 export * from './storages/MemoryStorage';

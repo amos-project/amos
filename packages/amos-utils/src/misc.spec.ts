@@ -3,12 +3,12 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { expectCalledWith } from 'amos-testing';
+import { expectCalled, expectCalledWith } from 'amos-testing';
 import {
   ANY,
   defer,
   must,
-  nextTicker,
+  nextSerialTicker,
   NotImplemented,
   removeElement,
   resolveConstructorValue,
@@ -16,9 +16,21 @@ import {
   toArray,
   toFunc,
   toType,
+  tryFinally,
 } from './misc';
 
 describe('misc utils', () => {
+  it('should try finally', () => {
+    const f1 = jest.fn();
+    const f2 = jest.fn();
+    tryFinally(f1, f2);
+    expectCalled(f1);
+    expectCalled(f2);
+    // @ts-expect-error
+    tryFinally(() => 1, f2);
+    // @ts-expect-error
+    tryFinally(async () => void 0, f2);
+  });
   it('should work as expected', async () => {
     expect(() => must(false, 'MUST')).toThrow(
       Object.assign(new Error('MUST'), {
@@ -56,7 +68,7 @@ describe('misc utils', () => {
     ]);
     expect(toArray('abc')).toEqual(['abc']);
     const f1 = jest.fn();
-    const ticker = nextTicker<number>(f1);
+    const ticker = nextSerialTicker<number>(f1);
     ticker(1, 2, 3);
     ticker(4, 3, 2);
     expect(f1).not.toHaveBeenCalled();

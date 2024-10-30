@@ -53,7 +53,7 @@ export function toJS<T>(v: T): JSONState<T> {
   }
   const o: any = {};
   for (const k in v) {
-    if (!v.hasOwnProperty || v.hasOwnProperty(k)) {
+    if (Object.hasOwn(v, k)) {
       o[k] = toJS(v[k]);
     }
   }
@@ -74,7 +74,7 @@ export function fromJS<T>(v: T, s: unknown): T {
   }
   const o: any = { ...v };
   for (const k in s as any) {
-    if ((s as any).hasOwnProperty(k)) {
+    if (Object.hasOwn(s, k)) {
       o[k] = fromJS(o[k], (s as any)[k]);
     }
   }

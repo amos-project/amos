@@ -4,10 +4,9 @@
  */
 
 import { PersistEntry, PersistValue, StorageEngine } from 'amos-persist';
-import { nullObject } from 'amos-utils';
 
 export class MemoryStorage implements StorageEngine {
-  private readonly data = nullObject<Record<string, PersistValue>>();
+  private readonly data: Record<string, PersistValue> = {};
 
   async getMulti(items: readonly string[]): Promise<readonly (PersistValue | null)[]> {
     return items.map((item) => this.data[item] || null);

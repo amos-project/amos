@@ -60,7 +60,7 @@ export function withDevtools(): StoreEnhancer {
     let root: DevAction | undefined;
     override(store, 'select', (select) => {
       return (s: any): any => {
-        const isPreload = isAmosObject<Box>(s, 'box') && !store.state.hasOwnProperty(s.key);
+        const isPreload = isAmosObject<Box>(s, 'box') && !Object.hasOwn(store.state, s.key);
         const result = select(s);
         if (isPreload) {
           dev.send(

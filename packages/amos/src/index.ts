@@ -92,7 +92,7 @@ export {
   SimpleStorage,
   Storage,
   StorageEngine,
-  hydrateState,
+  hydrate,
   withPersist,
 } from 'amos-persist';
 export {

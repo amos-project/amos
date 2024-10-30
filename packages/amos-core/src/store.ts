@@ -146,7 +146,7 @@ export function createStore(options: StoreOptions = {}, ...enhancers: StoreEnhan
         select: (_selectable: any): any => {
           const selectable: Selectable = _selectable;
           if (isAmosObject<Box>(selectable, 'box')) {
-            if (!store.state.hasOwnProperty(selectable.key)) {
+            if (!(selectable.key in store.state)) {
               store.state[selectable.key] = store.getInitialState(selectable);
             }
             return store.state[selectable.key];

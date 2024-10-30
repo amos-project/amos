@@ -8,7 +8,7 @@ import { isObject } from 'amos-utils';
 export function toURLEncoded<T extends object>(obj: T, prefix?: string): string {
   const str = [];
   for (let key in obj) {
-    if (obj.hasOwnProperty(key)) {
+    if (Object.hasOwn(obj, key)) {
       const fullKey = prefix ? `${prefix}[${key}]` : key;
       const value = obj[key];
       if (isObject(value)) {

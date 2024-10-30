@@ -33,7 +33,7 @@ describe('Cloneable', () => {
       o3.isInitial(),
       o4.isInitial(),
       o5.isInitial(),
-      o5.hasOwnProperty('bar'),
+      Object.hasOwn(o5, 'bar'),
       o5 instanceof Foo,
       o3.foo(),
       o5.foo(),

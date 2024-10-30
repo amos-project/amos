@@ -7,6 +7,7 @@ import { BoxPersistOptions } from 'amos-persist';
 import {
   AmosObject,
   createAmosObject,
+  type ID,
   is,
   IsAny,
   must,
@@ -71,7 +72,7 @@ export interface TableOptions<S = any> {
   /**
    * Get a row from current state
    */
-  getRow: (state: S, key: string) => boolean;
+  getRow: (state: S, rowId: ID) => boolean;
 
   /**
    * Merge the persisted state to current state.
@@ -155,6 +156,7 @@ export interface BoxFactoryStatic<B extends Box> {
 }
 
 export interface BoxFactory<B extends Box = Box> extends BoxFactoryStatic<B> {
+  get(key: string): Box;
   new (key: string, initialState: BoxState<B>): B;
 }
 
@@ -231,6 +233,8 @@ export interface BoxFactoryOptions<TBox extends Box, TParentBox = {}> {
   methods?: Partial<TBox>;
 }
 
+const boxMap = new Map<string, Box>();
+
 function createBoxFactory<B extends Box, SB = {}>(
   { mutations, selectors, name, options = {}, methods = {} }: BoxFactoryOptions<B, SB>,
   Parent?: BoxFactory<any>,
@@ -247,7 +251,14 @@ function createBoxFactory<B extends Box, SB = {}>(
           public initialState: any,
         ) {
           must(!key.includes(':') && !key.includes('/'), 'box key should not contain `:/`');
+          boxMap.set(key, this as any);
           createAmosObject('box', this);
+        }
+
+        static get(key: string) {
+          const box = boxMap.get(key);
+          must(box, `missing box for key ${key}`);
+          return box;
         }
 
         static extends(options: BoxFactoryOptions<any>) {
@@ -311,7 +322,7 @@ function createBoxFactory<B extends Box, SB = {}>(
   for (const k in methods) {
     Object.defineProperty(Box.prototype, k, { value: methods[k] });
   }
-  Object.defineProperty(Box, 'name', { value: name, configurable: true });
+  Object.defineProperty(Box, 'name', { value: name });
   return Box;
 }
 

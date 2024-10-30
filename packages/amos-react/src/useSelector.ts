@@ -45,7 +45,7 @@ function useSelect(): Select {
                   : isAmosObject<Selector>(selectable, 'selector')
                     ? selectable.type
                     : '') || 'anonymous';
-              if (map.hasOwnProperty(type)) {
+              if (Object.hasOwn(map, type)) {
                 type = type + '_' + index;
               }
               map[type] = value;

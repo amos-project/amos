@@ -28,7 +28,8 @@ export interface BoxPersistOptions<S> {
     | ActionFactory<[version: number, row: ID, state: unknown], unknown | undefined>;
 }
 
-export type PersistKey<T> = Box<T> | [box: Box<T>, rows: ID | ID[]];
+export type PersistRowKey<T> = readonly [box: Box<T>, rows: ID | ID[]];
+export type PersistKey<T> = Box<T> | PersistRowKey<T>;
 export type PersistKeyState<T> = T extends PersistKey<infer S> ? S : never;
 export type MapPersistKeys<K extends readonly PersistKey<any>[]> = {
   [P in keyof K]: PersistKeyState<K[P]>;
