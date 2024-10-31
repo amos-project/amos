@@ -14,6 +14,19 @@ export type Actor<A extends any[] = any, R = any> = (
 ) => R;
 
 export interface ActionOptions<A extends any[] = any, R = any> {
+  /**
+   * Action key is used for using {@link useQuery} with SSR.
+   * When you use an action with SSR, you must set a unique key for the action,
+   * or it will dismiss the query status.
+   *
+   * @see AmosObject.key
+   */
+  key: string;
+
+  /**
+   * Action type is used as debug label in devtools.
+   * You can use {@link amosBabelPlugin} or {@link createAmosTransformer} to generate it.
+   */
   type: string;
 
   /**
@@ -23,7 +36,7 @@ export interface ActionOptions<A extends any[] = any, R = any> {
    * The default value is always when no conflictKey is set.
    *
    * Note: we have no plan to implement `trailing` mode,
-   * it should be controlled by user space.
+   * it should be controlled in user space.
    */
   conflictPolicy: 'always' | 'leading';
 
@@ -61,14 +74,13 @@ export function action<A extends any[], R>(
   const finalOptions = { type: '', ...options } as ActionOptions;
   finalOptions.conflictPolicy ??= options.conflictKey ? 'leading' : 'always';
   return enhanceAction.apply([actor, finalOptions], (actor, options) => {
-    const factory = createAmosObject<ActionFactory>(
+    return createAmosObject<ActionFactory>(
       'action_factory',
       Object.assign(
         (...args: any[]) => {
           return createAmosObject<Action>('action', {
             ...options,
             actor: (dispatch, select) => actor(dispatch, select, ...args),
-            id: factory.id,
             args: args,
           });
         },
@@ -77,7 +89,6 @@ export function action<A extends any[], R>(
         },
       ) as ActionFactory,
     );
-    return factory;
   });
 }
 

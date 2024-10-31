@@ -7,14 +7,12 @@ import { createStore } from 'amos-core';
 import { runMutations } from 'amos-testing';
 import { arrayBox } from './arrayBox';
 
-const unitArrayBox = arrayBox<number>('points').config({
-  initialState: [1, 2, 11],
-});
+const unitArrayBox = arrayBox<number>('points').setInitialState(() => [1, 2, 11]);
 
 describe('ArrayBox', () => {
   it('should create mutations', () => {
     expect(
-      runMutations(unitArrayBox.initialState, [
+      runMutations(unitArrayBox.getInitialState(), [
         unitArrayBox.push(1, 2),
         unitArrayBox.pop(),
         unitArrayBox.unshift(1, 2),

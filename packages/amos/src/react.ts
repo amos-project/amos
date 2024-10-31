@@ -6,7 +6,7 @@
 export {
   Provider,
   ProviderProps,
-  QueryState,
+  QueryResult,
   UseQuery,
   useDispatch,
   useQuery,

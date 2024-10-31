@@ -9,6 +9,7 @@ import {
   isFromJS,
   isJSONSerializable,
   isToJSON,
+  jsonEmpty,
   JSONSerializable,
   JSONState,
   toJS,
@@ -16,6 +17,9 @@ import {
 import { ANY } from './misc';
 
 describe('JSONSerializable', () => {
+  it('should omit json', () => {
+    expect(JSON.stringify(jsonEmpty({}))).toEqual(void 0);
+  });
   it('should derive JSONState', () => {
     class Foo {
       toJSON(): {

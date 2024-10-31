@@ -14,7 +14,7 @@ describe('RecordMapBox', () => {
     expect(select(postMapBox.size())).toEqual(0);
     const v4 = new PostRecord({ id: 4, title: 'Forth' });
     expect(
-      runMutations(postMapBox.initialState.mergeItem(4, { title: 'Forth' }), [
+      runMutations(postMapBox.getInitialState().mergeItem(4, { title: 'Forth' }), [
         postMapBox.setItem(new PostRecord({ id: 1, title: 'Hello world' })),
         postMapBox.setItem(2, new PostRecord({ id: 2, title: 'Second' })),
         postMapBox.mergeItem(3, { title: 'Third' }),

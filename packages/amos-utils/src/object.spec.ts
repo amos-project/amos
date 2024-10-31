@@ -10,21 +10,19 @@ describe('object utils', () => {
     expect($amos).toEqual(expect.any(Symbol));
     expect($amos).not.toEqual(expect.any(Object));
     const o1 = createAmosObject<any>('o1', {
-      type: 'o1',
+      key: 'k1',
+      type: 't1',
     });
     expect(o1).toEqual({
       [$amos]: 'o1',
-      type: 'o1',
       id: expect.any(String),
+      key: 'k1',
+      type: 't1',
     });
-    const o2 = createAmosObject<any>('o2', { id: 'A', key: null, type: 'o2' });
-    expect(o2).toEqual({ [$amos]: 'o2', id: 'A', key: null, type: 'o2' });
-    const o3 = createAmosObject<any>('o1', { type: 'o3' });
+    const o2 = createAmosObject<any>('o2', { id: 'A', key: null, type: 't2' });
+    expect(o2).toEqual({ [$amos]: 'o2', id: expect.any(String), key: o2.id, type: 't2' });
+    const o3 = createAmosObject<any>('o1', { type: 't3' });
     expect(o1.id).not.toEqual(o3.id);
-
-    expect(() => createAmosObject('foo', {})).toThrow();
-    createAmosObject<any>('foo_factory', { type: 'a' });
-    expect(() => createAmosObject<any>('foo_factory', { type: 'a' })).toThrow();
   });
   it('should check is amos object', () => {
     const o1 = createAmosObject<any>('o1', { type: 'o1' });

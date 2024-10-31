@@ -4,6 +4,7 @@
  */
 
 import { isArray, isObject } from './equals';
+import { noop } from './misc';
 import { IsAny } from './types';
 
 export type JSONState<S> =
@@ -35,6 +36,10 @@ export function isToJSON(obj: unknown): obj is ToJSON<any> {
 
 export function isFromJS(obj: unknown): obj is FromJS<any> {
   return isObject(obj) && 'fromJS' in obj;
+}
+
+export function jsonEmpty<T extends object>(v: T): T & ToJSON<void> {
+  return Object.assign(v, { toJSON: noop });
 }
 
 export function isJSONSerializable(obj: unknown): obj is JSONSerializable<any> {

@@ -4,7 +4,7 @@
  */
 
 import { addFourfoldAsync, addTwiceAsync } from 'amos-testing';
-import { $amos, createAmosObject } from 'amos-utils';
+import { $amos } from 'amos-utils';
 import { Action } from './action';
 import { createStore } from './store';
 
@@ -19,20 +19,20 @@ describe('action', () => {
     });
   });
   it('should create action', async () => {
-    const a0 = addFourfoldAsync(1);
-    const action = addFourfoldAsync(2);
-    expect(action).toEqual<Action>(
-      createAmosObject<Action>('action', {
-        id: a0.id,
-        type: 'amos/addFourfoldAsync',
-        conflictPolicy: 'always',
-        conflictKey: void 0,
-        args: [2],
-        actor: expect.any(Function),
-      }),
-    );
+    const a1 = addFourfoldAsync(1);
+    const a2 = addFourfoldAsync(2);
+    expect(a2).toEqual<Action>({
+      [$amos]: 'action',
+      id: a2.id,
+      key: a1.key,
+      type: 'amos/addFourfoldAsync',
+      conflictPolicy: 'always',
+      conflictKey: void 0,
+      args: [2],
+      actor: expect.any(Function),
+    });
     const store = createStore();
-    expect(action.actor(store.dispatch, store.select)).toBeInstanceOf(Promise);
-    expect(await action.actor(store.dispatch, store.select)).toEqual(8);
+    expect(a2.actor(store.dispatch, store.select)).toBeInstanceOf(Promise);
+    expect(await a2.actor(store.dispatch, store.select)).toEqual(8);
   });
 });

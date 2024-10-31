@@ -87,10 +87,10 @@ export const createHydrate = (store: Store, finalOptions: PersistOptions) => {
               prefixes.push(tablePrefixMap[key]);
             }
             tablePrefixMap[key].push([toKey(key, rowId), ...value]);
-          } else if (store.select(Box.get(key)) === box.initialState) {
+          } else if (store.select(box) === state.initial.get(box.key)) {
             const js = migrate(box, value[0], '', value[1]);
             if (js !== void 0) {
-              exactEntries.push(box.setState(fromJS(box.initialState, js)));
+              exactEntries.push(box.setState(fromJS(box.getInitialState(), js)));
             }
           }
         });
@@ -99,14 +99,16 @@ export const createHydrate = (store: Store, finalOptions: PersistOptions) => {
           prefixes
             .map((p, i): Mutation[] => {
               const box = Box.get(prefixBoxes[i]);
-              const state = store.select(box);
+              const curr = store.select(box);
               const data: Record<string, any> = {};
               for (let [k, v, d] of p) {
                 const id = fromKey(k);
                 if (id === void 0) {
                   continue;
                 }
-                if (box.table!.getRow(state, id) !== box.table!.getRow(box.initialState, id)) {
+                if (
+                  box.table!.getRow(curr, id) !== box.table!.getRow(state.initial.get(box.key), id)
+                ) {
                   continue;
                 }
                 d = migrate(box, v, id, d);
@@ -117,7 +119,7 @@ export const createHydrate = (store: Store, finalOptions: PersistOptions) => {
               if (Object.keys(data).length === 0) {
                 return [];
               }
-              return [box.setState(box.table!.hydrate(state, data))];
+              return [box.setState(box.table!.hydrate(curr, data))];
             })
             .flat()
             .concat(exactEntries),

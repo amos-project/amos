@@ -13,12 +13,12 @@ export const withPreload = (): StoreEnhancer => {
     if (!snapshot) {
       return store;
     }
-    override(store, 'getInitialState', (getInitialState) => {
-      return (box) => {
+    override(store, 'getPreloadedState', (getPreloadedState) => {
+      return (box, initialState) => {
         if (Object.hasOwn(snapshot, box.key)) {
-          return fromJS(box.initialState, snapshot[box.key]);
+          return fromJS(initialState, snapshot[box.key]);
         }
-        return getInitialState(box);
+        return getPreloadedState(box, initialState);
       };
     });
     return store;

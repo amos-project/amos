@@ -10,7 +10,7 @@ import { onlineUserListBox, runMutations } from 'amos-testing';
 describe('ListBox', () => {
   it('should create mutation', () => {
     expect(
-      runMutations(onlineUserListBox.initialState.reset([0, 1, 3, 2]), [
+      runMutations(onlineUserListBox.getInitialState().reset([0, 1, 3, 2]), [
         onlineUserListBox.concat([1, 2, 3]),
         onlineUserListBox.copyWithin(2, 0, 2),
         onlineUserListBox.fill(-1, 1, 3),

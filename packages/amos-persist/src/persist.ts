@@ -22,15 +22,15 @@ export const createPersist = (store: Store, finalOptions: PersistOptions) => {
         continue;
       }
       const curr = snapshot[k];
-      const prev = state.snapshot[k];
-      const hasPrev = Object.hasOwn(state.snapshot, k);
-      if (hasPrev ? curr === prev : curr === box.initialState) {
+      const prev = state.snapshot.has(k);
+      const hasPrev = state.snapshot.has(k);
+      if (hasPrev ? curr === prev : curr === state.initial.get(box.key)) {
         continue;
       }
-      state.snapshot[k] = curr;
+      state.snapshot.set(k, curr);
       if (box.table) {
         const currRows = box.table.toRows(curr);
-        const prevRows = box.table.toRows(hasPrev ? prev : box.initialState);
+        const prevRows = box.table.toRows(hasPrev ? prev : state.initial.get(box.key));
         const keys = Object.keys(currRows);
         if (keys.length === 0) {
           removePrefixes.push(toKey(box));

@@ -4,7 +4,7 @@
  */
 
 import { select, selectDouble, selectFourfold, selectUser } from 'amos-testing';
-import { $amos, createAmosObject, is } from 'amos-utils';
+import { $amos, is } from 'amos-utils';
 import { Selector } from './selector';
 
 describe('selector', () => {
@@ -18,15 +18,15 @@ describe('selector', () => {
   });
   it('should create selector', () => {
     const s = selectDouble(3);
-    expect(s).toEqual(
-      createAmosObject<Selector>('selector', {
-        compute: expect.any(Function),
-        type: 'amos/selectDouble',
-        equal: is,
-        args: [3],
-        id: expect.any(String),
-      }),
-    );
+    expect(s).toEqual<Selector>({
+      [$amos]: 'selector',
+      id: expect.any(String),
+      key: expect.any(String),
+      type: 'amos/selectDouble',
+      compute: expect.any(Function),
+      equal: is,
+      args: [3],
+    });
     expect(s.compute(select)).toEqual(6);
     expect(selectFourfold(3).compute(select)).toEqual(12);
     expect(s.id).toEqual(selectDouble(4).id);

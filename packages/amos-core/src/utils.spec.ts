@@ -28,7 +28,7 @@ describe('core utils', () => {
     );
   });
   it('should create cache key', () => {
-    const prefix = 'amos/selectDouble:' + selectDouble(1).id + ':';
+    const prefix = selectDouble(1).key + ':';
     const store = createStore();
     store.dispatch(countBox.setState(1));
     expect([

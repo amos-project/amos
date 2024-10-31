@@ -18,7 +18,7 @@ describe('withPreload', () => {
     });
     expect(store.select([countBox, userMapBox, sessionIdBox])).toEqual([
       1,
-      userMapBox.initialState.clear().setItem(Rick),
+      userMapBox.getInitialState().clear().setItem(Rick),
       0,
     ]);
   });

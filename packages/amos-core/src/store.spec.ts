@@ -45,20 +45,20 @@ describe('store', () => {
     expect(s2).toBeInstanceOf(Promise);
     const s3 = await s2;
     state[sessionIdBox.key] = s3;
-    state[sessionMapBox.key] = sessionMapBox.initialState.mergeItem(s3, { userId: 1 });
-    state[userMapBox.key] = userMapBox.initialState;
+    state[sessionMapBox.key] = sessionMapBox.getInitialState().mergeItem(s3, { userId: 1 });
+    state[userMapBox.key] = userMapBox.getInitialState();
     expect(store.snapshot()).toEqual(state);
 
     // signal
     const s4 = store.dispatch(LOGOUT({ userId: 1, sessionId: s3 }));
     expect(s4).toEqual<LogoutEvent>({ userId: 1, sessionId: s3 });
-    state[sessionMapBox.key] = sessionMapBox.initialState;
+    state[sessionMapBox.key] = sessionMapBox.getInitialState();
     expect(pick(store.snapshot(), Object.keys(state))).toMatchObject(state);
   });
 
   it('should select base selectable', async () => {
     const { select, dispatch } = createStore();
-    expect(select(sessionMapBox)).toBe(sessionMapBox.initialState);
+    expect(select(sessionMapBox)).toEqual(sessionMapBox.getInitialState());
     const id = await dispatch(addTodo({ title: 'Hello', description: 'World' }));
     expect(pick(select(todoMapBox.getItem(id)).toJSON(), ['id', 'title', 'description'])).toEqual({
       id: id,

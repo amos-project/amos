@@ -11,7 +11,7 @@ import { createStore } from './store';
 describe('Box', () => {
   it('should implement mutations', () => {
     expect(
-      applyMutations(sessionIdBox.initialState, [
+      applyMutations(sessionIdBox.getInitialState(), [
         sessionIdBox.setState(2),
         sessionIdBox.setState(),
         sessionIdBox.setState((state) => state + 4),
@@ -29,7 +29,7 @@ describe('Box', () => {
         countBox.setState(10),
         countBox.setState(),
       ]),
-    ).toEqual([11, 6, 18, 3, 1, 12, 10, countBox.initialState]);
+    ).toEqual([11, 6, 18, 3, 1, 12, 10, countBox.getInitialState()]);
   });
   it('should implement selectors', () => {
     const store = createStore();
@@ -42,7 +42,7 @@ describe('Box', () => {
       store.select(todoMapBox.getItem(1)).toJSON().id,
       todoMapBox.getItem(1).loadRow?.(1),
     ]).toEqual([
-      countBox.initialState.toFixed(2),
+      countBox.getInitialState().toFixed(2),
       2,
       (2).toExponential(2),
       0,
@@ -53,7 +53,7 @@ describe('Box', () => {
   });
   it('should implement options', () => {
     expect([
-      todoMapBox.table?.toRows(todoMapBox.initialState),
+      todoMapBox.table?.toRows(todoMapBox.getInitialState()),
       countBox.table?.toRows(0),
       mapBox('m1', 1, 1).config({ table: void 0 }).table,
       mapBox('m2', 1, 1).table === todoMapBox.table,

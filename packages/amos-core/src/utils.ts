@@ -3,15 +3,7 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import {
-  __DEV__,
-  isAmosObject,
-  isObject,
-  isPlainObject,
-  isToJSON,
-  toArray,
-  toType,
-} from 'amos-utils';
+import { isAmosObject, isObject, isPlainObject, isToJSON, toArray, toType } from 'amos-utils';
 import { Action } from './action';
 import { Box } from './box';
 import { Selector, SelectorFactory } from './selector';
@@ -66,9 +58,5 @@ export function resolveCacheKey(
       args = toArray(key(select, ...args) as any);
     }
   }
-  const ck = v.id + ':' + stringify(args);
-  if (__DEV__) {
-    return v.type + ':' + ck;
-  }
-  return ck;
+  return v.key + ':' + stringify(args);
 }

@@ -10,7 +10,7 @@ describe('NumberBox', function () {
     // @ts-expect-error
     countBox.add('2');
     expect(
-      applyMutations(countBox.initialState, [
+      applyMutations(countBox.getInitialState(), [
         countBox.add(1),
         countBox.minus(-1),
         countBox.multiply(2),

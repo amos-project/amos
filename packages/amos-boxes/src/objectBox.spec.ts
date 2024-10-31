@@ -9,7 +9,7 @@ import { objectBox } from './objectBox';
 
 const objBox = objectBox('unit.box.obj', { foo: 'bar', bar: 1 });
 const pickObj = selector(
-  <K extends keyof (typeof objBox)['initialState']>(select: Select, ...keys: K[]) => {
+  <K extends 'foo' | 'bar'>(select: Select, ...keys: K[]) => {
     return select(objBox.pick(...keys));
   },
   {
@@ -24,7 +24,7 @@ describe('objectBox', () => {
       baa: 3,
     });
     expect(
-      runMutations(objBox.initialState, [
+      runMutations(objBox.getInitialState(), [
         objBox.setState({ foo: 'baz', bar: 2 }),
         objBox.mergeState({ bar: 3 }),
         objBox.setState(),

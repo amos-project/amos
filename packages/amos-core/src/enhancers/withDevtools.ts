@@ -4,7 +4,7 @@
  */
 
 import { $amos, __DEV__, append, isAmosObject, override } from 'amos-utils';
-import { Action, Box, Mutation, Signal, StoreEnhancer } from '../index';
+import { Action, Mutation, Signal, StoreEnhancer } from '../index';
 
 export interface DevAction {
   type: string;
@@ -57,24 +57,21 @@ export function withDevtools(): StoreEnhancer {
     }
 
     const dev = extension.connect({ name: options.name });
+
     let root: DevAction | undefined;
-    override(store, 'select', (select) => {
-      return (s: any): any => {
-        const isPreload = isAmosObject<Box>(s, 'box') && !Object.hasOwn(store.state, s.key);
-        const result = select(s);
-        if (isPreload) {
-          dev.send(
-            {
-              type: `P:${s.key}`,
-              args: [result],
-              root: root,
-            },
-            { ...store.snapshot() },
-          );
-        }
-        return result;
-      };
+
+    append(store, 'onInit', () => dev.init({ ...store.snapshot() }));
+    append(store, 'onMount', (box, initialState, loadedState) => {
+      dev.send(
+        {
+          type: `P:${box.key}`,
+          args: [initialState, loadedState],
+          root: root,
+        },
+        { ...store.snapshot() },
+      );
     });
+
     override(store, 'dispatch', (dispatch) => {
       return (task: any): any => {
         if (
@@ -103,7 +100,6 @@ export function withDevtools(): StoreEnhancer {
         }
       };
     });
-    append(store, 'init', () => dev.init({ ...store.snapshot() }));
     return store;
   };
 }

@@ -10,6 +10,7 @@ import {
   Enhancer,
   isAmosObject,
   isObject,
+  noop,
   toType,
   Unsubscribe,
 } from 'amos-utils';
@@ -77,16 +78,19 @@ export interface EnhanceableStore extends Store {
   state: Snapshot;
 
   /**
-   * Get initial state for box, default is {@link Box.initialState}.
-   * If {@link StoreOptions.preloadedState} is set, will be parsed by
-   * {@link fromJS} via {@link withPreload}.
+   * Get preloaded state for box.
    */
-  getInitialState: <S>(box: Box<S>) => S;
+  getPreloadedState: <S>(box: Box<S>, initialState: S) => S | undefined;
 
   /**
    * This function will be called after the store created.
    */
-  init: () => void;
+  onInit: () => void;
+
+  /**
+   * This function will be called after a box is mounted
+   */
+  onMount: <S>(box: Box<S>, initialState: S, preloadedState: S | undefined) => void;
 }
 
 export type StoreEnhancer = Enhancer<[StoreOptions], EnhanceableStore>;
@@ -100,8 +104,10 @@ export function createStore(options: StoreOptions = {}, ...enhancers: StoreEnhan
       let isDispatching = false;
       return {
         state: {},
-        getInitialState: (box) => box.initialState,
-        init: () => void 0,
+        getPreloadedState: () => void 0,
+        onInit: noop,
+        onMount: noop,
+
         snapshot: () => store.state,
         subscribe: ec.subscribe,
         // only accepts Dispatchable here
@@ -146,8 +152,11 @@ export function createStore(options: StoreOptions = {}, ...enhancers: StoreEnhan
         select: (_selectable: any): any => {
           const selectable: Selectable = _selectable;
           if (isAmosObject<Box>(selectable, 'box')) {
-            if (!(selectable.key in store.state)) {
-              store.state[selectable.key] = store.getInitialState(selectable);
+            if (!Object.hasOwn(store.state, selectable.key)) {
+              const initial = selectable.getInitialState();
+              const preloaded = store.getPreloadedState(selectable, initial);
+              store.state[selectable.key] = preloaded === void 0 ? initial : preloaded;
+              store.onMount(selectable, initial, preloaded);
             }
             return store.state[selectable.key];
           }
@@ -156,7 +165,7 @@ export function createStore(options: StoreOptions = {}, ...enhancers: StoreEnhan
       };
     },
   );
-  store.init();
+  store.onInit();
   return {
     snapshot: store.snapshot,
     subscribe: store.subscribe,

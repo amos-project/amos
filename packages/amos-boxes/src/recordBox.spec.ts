@@ -9,7 +9,7 @@ import { exampleBox, ExampleRecord, runMutations } from 'amos-testing';
 describe('RecordBox', () => {
   it('should create mutations', () => {
     expect(
-      runMutations(exampleBox.initialState, [
+      runMutations(exampleBox.getInitialState(), [
         exampleBox.set('title', 'A'),
         exampleBox.merge({ title: 'B' }),
         exampleBox.update('title', (v, t) => v + ':' + t.title + ':' + 'C'),

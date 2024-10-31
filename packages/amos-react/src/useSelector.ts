@@ -13,7 +13,7 @@ import {
   Selector,
 } from 'amos';
 import { __DEV__ } from 'amos-utils';
-import { useCallback, useDebugValue, useLayoutEffect, useReducer, useRef, useState } from 'react';
+import { useCallback, useDebugValue, useLayoutEffect, useReducer, useState } from 'react';
 import { useStore } from './context';
 
 function useSelect(): Select {
@@ -31,7 +31,6 @@ function useSelect(): Select {
   useLayoutEffect(() => {
     return store.subscribe(() => {
       if (state.deps.some(([s, v]) => !isSelectValueEqual(s, v, store.select(s)))) {
-        state.deps = [];
         update();
       }
     });
@@ -82,13 +81,6 @@ export interface UseSelector extends Select {
 
 export const useSelector: UseSelector = (selectors?: Selectable | readonly Selectable[]): any => {
   const select = useSelect();
-  const size = Array.isArray(selectors) ? selectors.length : selectors === void 0 ? -2 : -1;
-  const sizeRef = useRef(size);
-  if (sizeRef.current !== size) {
-    throw new Error(
-      `selector size should be immutable, previous is ${sizeRef.current}, current is ${size}`,
-    );
-  }
   if (!selectors) {
     return select;
   }

@@ -62,7 +62,7 @@ describe('withPersist', () => {
 
     expect(store.select([countBox, userMapBox])).toEqual([
       1,
-      userMapBox.initialState.setItem(Rick.set('firstName', 'F1')),
+      userMapBox.getInitialState().setItem(Rick.set('firstName', 'F1')),
     ]);
     const r2 = store.select(userMapBox.getItem(Morty.id));
     expect(r2).toBe(Morty);

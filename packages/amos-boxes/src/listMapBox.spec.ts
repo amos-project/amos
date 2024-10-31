@@ -11,19 +11,26 @@ import { toJS } from 'amos-utils';
 describe('ListMapBox', () => {
   it('should create mutations', () => {
     expect(
-      runMutations(postMediaListBox.initialState.setAll({ 1: [1, 2, 3], 2: [2, 3], 3: [3] }), [
-        postMediaListBox.setItem(1, [1]),
-        postMediaListBox.setItem(1, new List([1])),
-        postMediaListBox.setAll({ 0: [], 1: [1] }),
-        postMediaListBox.setAll([
-          [0, [1]],
-          [1, [2]],
-        ]),
-        postMediaListBox.pushIn(1, 2),
-        postMediaListBox.popIn(1),
-        postMediaListBox.shiftIn(1),
-        postMediaListBox.unshiftIn(1, 2, 3),
-      ]).map((v) => toJS(v)),
+      runMutations(
+        postMediaListBox.getInitialState().setAll({
+          1: [1, 2, 3],
+          2: [2, 3],
+          3: [3],
+        }),
+        [
+          postMediaListBox.setItem(1, [1]),
+          postMediaListBox.setItem(1, new List([1])),
+          postMediaListBox.setAll({ 0: [], 1: [1] }),
+          postMediaListBox.setAll([
+            [0, [1]],
+            [1, [2]],
+          ]),
+          postMediaListBox.pushIn(1, 2),
+          postMediaListBox.popIn(1),
+          postMediaListBox.shiftIn(1),
+          postMediaListBox.unshiftIn(1, 2, 3),
+        ],
+      ).map((v) => toJS(v)),
     ).toEqual([
       { 1: [1], 2: [2, 3], 3: [3] },
       { 1: [1], 2: [2, 3], 3: [3] },

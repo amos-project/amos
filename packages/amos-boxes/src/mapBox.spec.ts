@@ -17,11 +17,13 @@ enum MK {
   K6,
 }
 
-const unitMapBox = mapBox('amos.unit.map', MK.K0, Rick as UserRecord | number);
-unitMapBox.initialState = unitMapBox.initialState.setAll({
-  1: 1,
-  2: Morty,
-});
+const unitMapBox = mapBox('amos.unit.map', MK.K0, Rick as UserRecord | number).setInitialState(
+  (s) =>
+    s.setAll({
+      1: 1,
+      2: Morty,
+    }),
+);
 
 describe('MapBox', () => {
   it(
@@ -42,7 +44,7 @@ describe('MapBox', () => {
   );
   it('should create mutations', () => {
     expect(
-      runMutations(unitMapBox.initialState, [
+      runMutations(unitMapBox.getInitialState(), [
         unitMapBox.setItem(1, Rick),
         unitMapBox.setItem(2, 2),
         unitMapBox.setItem(3, Morty),
@@ -131,7 +133,9 @@ describe('MapBox', () => {
       {},
       { 1: 2, 3: Morty },
     ]);
-    expect(runMutations(unitMapBox.initialState.clear(), [unitMapBox.clear()])).toEqual([void 0]);
+    expect(runMutations(unitMapBox.getInitialState().clear(), [unitMapBox.clear()])).toEqual([
+      void 0,
+    ]);
   });
   it('should create selectors', () => {
     const store = createStore();
@@ -147,16 +151,17 @@ describe('MapBox', () => {
     ).toEqual([1, Morty, Rick, true, false, 2]);
   });
   it('should should init options', () => {
+    const initialState = unitMapBox.getInitialState();
     expect([
-      unitMapBox.table!.getRow(unitMapBox.initialState, '1'),
-      unitMapBox.table!.getRow(unitMapBox.initialState, '3'),
-      unitMapBox.table!.toRows(unitMapBox.initialState),
-      unitMapBox.table!.hydrate(unitMapBox.initialState, { 1: 2, 3: Jessica.toJSON() }),
+      unitMapBox.table!.getRow(initialState, '1'),
+      unitMapBox.table!.getRow(initialState, '3'),
+      unitMapBox.table!.toRows(initialState),
+      unitMapBox.table!.hydrate(initialState, { 1: 2, 3: Jessica.toJSON() }),
     ]).toEqual([
       1,
       Rick,
       { 1: 1, 2: Morty },
-      unitMapBox.initialState.setAll({ 1: UserRecord.defaultInstance(), 3: Jessica }),
+      initialState.setAll({ 1: UserRecord.defaultInstance(), 3: Jessica }),
     ]);
   });
 });

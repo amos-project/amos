@@ -94,5 +94,8 @@ export function recordMapBox<R extends Record<any>, KF extends IDKeyof<RecordPro
   defaultValue: ValueOrConstructor<R>,
   keyField: KF,
 ): RecordMapBox<RecordMap<R, KF>> {
-  return new RecordMapBox(key, new RecordMap(resolveConstructorValue(defaultValue), keyField));
+  return new RecordMapBox(
+    key,
+    () => new RecordMap(resolveConstructorValue(defaultValue), keyField),
+  );
 }

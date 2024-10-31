@@ -19,16 +19,11 @@ export function isSelectValueEqual<R>(s: Selectable<R>, a: R, b: R) {
   return s.equal(a, b);
 }
 
-export interface CachesState {
-  caches: Map<string, readonly [value: any, deps: readonly SelectEntry[]]>;
-  stack: Array<SelectEntry[] | null>;
-}
-
 export const withCache: () => StoreEnhancer = () => {
   return (next) => (options) => {
     const store = next(options);
-    const cacheMap: CachesState['caches'] = new Map();
-    const stack: CachesState['stack'] = [];
+    const cacheMap = new Map<string, readonly [id: string, value: any, deps: SelectEntry[]]>();
+    const stack = new Array<SelectEntry[] | null>();
     const peak = () => stack[stack.length - 1];
     override(store, 'select', (select) => {
       return (s: any) => {
@@ -50,12 +45,16 @@ export const withCache: () => StoreEnhancer = () => {
         }
         // should check the cache now
         const key = resolveCacheKey(store.select, s, void 0);
-        const cache = cacheMap.get(key);
+        let cache = cacheMap.get(key);
+        if (cache && cache[0] !== s.id) {
+          cacheMap.delete(key);
+          cache = void 0;
+        }
         if (cache) {
           try {
             // make sure the cache compute is not collected to the deps
             stack.push(null);
-            if (cache[1].every(([s, v]) => isSelectValueEqual(s, v, store.select(s)))) {
+            if (cache[2].every(([s, v]) => isSelectValueEqual(s, v, store.select(s)))) {
               parent?.push([s, cache[0]]);
               return cache[0];
             } else {
@@ -72,7 +71,7 @@ export const withCache: () => StoreEnhancer = () => {
             v = cache[0];
           }
           parent?.push([s, v]);
-          cacheMap.set(key, [v, peak()!]);
+          cacheMap.set(key, [s.id, v, peak()!]);
           return v;
         } finally {
           stack.pop();

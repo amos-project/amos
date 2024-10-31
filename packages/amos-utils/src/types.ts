@@ -46,6 +46,7 @@ export interface NoArray {
 export type PartialDictionary<K extends keyof any, V> = PartialRecord<K, V> & NoArray;
 
 export type PartialRequired<T, K extends keyof T> = Required<Pick<T, K>> & Partial<Omit<T, K>>;
+export type PartialOptional<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>> & Partial<Pick<T, K>>;
 export type Entry<K, V> = readonly [K, V];
 
 export type PrimitiveOf<T> = Exclude<T, object>;
@@ -68,6 +69,7 @@ export type MustNever<T extends never> = T;
 
 export type IsAny<T> = 0 extends 1 & T ? true : false;
 export type IsUnknown<T> = unknown extends T ? (T extends unknown ? true : false) : false;
+export type IsNoType<T> = IsAny<T> extends true ? true : IsUnknown<T> extends true ? true : false;
 
 export type OmitKeys<T, K extends keyof T> = Omit<T, K>;
 
