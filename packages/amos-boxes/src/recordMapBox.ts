@@ -19,6 +19,7 @@ import {
   type ArraySource,
   Entry,
   IDKeyof,
+  once,
   PartialDictionary,
   resolveConstructorValue,
   ValueOrConstructor,
@@ -96,6 +97,6 @@ export function recordMapBox<R extends Record<any>, KF extends IDKeyof<RecordPro
 ): RecordMapBox<RecordMap<R, KF>> {
   return new RecordMapBox(
     key,
-    () => new RecordMap(resolveConstructorValue(defaultValue), keyField),
+    once(() => new RecordMap(resolveConstructorValue(defaultValue), keyField)),
   );
 }

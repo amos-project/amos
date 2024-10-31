@@ -5,7 +5,7 @@
 
 import { Box, ShapeBox } from 'amos-core';
 import { Map } from 'amos-shapes';
-import { ID, IDOf } from 'amos-utils';
+import { ID, IDOf, once } from 'amos-utils';
 
 export interface MapBox<M extends Map<any, any> = Map<any, any>>
   extends Box<M>,
@@ -56,5 +56,8 @@ export const MapBox = Box.extends<MapBox>({
 });
 
 export function mapBox<K, V>(key: string, inferKey: K, defaultValue: V): MapBox<Map<IDOf<K>, V>> {
-  return new MapBox(key, new Map<IDOf<K>, V>(defaultValue));
+  return new MapBox(
+    key,
+    once(() => new Map<IDOf<K>, V>(defaultValue)),
+  );
 }

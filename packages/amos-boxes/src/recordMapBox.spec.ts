@@ -3,9 +3,21 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { checkType, postMapBox, PostRecord, runMutations, select } from 'amos-testing';
+import {
+  checkType,
+  postMapBox,
+  PostRecord,
+  runMutations,
+  select,
+  sessionMapBox,
+  userMapBox,
+} from 'amos-testing';
 
 describe('RecordMapBox', () => {
+  it('should cache initialState', () => {
+    expect(sessionMapBox.getInitialState()).toBe(sessionMapBox.getInitialState());
+    expect(userMapBox.getInitialState()).not.toBe(userMapBox.getInitialState());
+  });
   it('should create RecordMapBox', () => {
     checkType(() => {
       // @ts-expect-error

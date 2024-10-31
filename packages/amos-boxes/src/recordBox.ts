@@ -5,7 +5,7 @@
 
 import { Box, Mutation, Selector, ShapeBox } from 'amos-core';
 import { Record, RecordProps } from 'amos-shapes';
-import { resolveConstructorValue, ValueOrConstructor } from 'amos-utils';
+import { once, resolveConstructorValue, ValueOrConstructor } from 'amos-utils';
 
 export interface RecordBox<R extends Record<any>>
   extends Box<R>,
@@ -31,5 +31,8 @@ export function recordBox<R extends Record<any>>(
   key: string,
   initialState: ValueOrConstructor<R>,
 ): RecordBox<R> {
-  return new RecordBox(key, resolveConstructorValue(initialState) as any);
+  return new RecordBox(
+    key,
+    once(() => resolveConstructorValue(initialState)),
+  );
 }

@@ -161,3 +161,13 @@ export function tryFinally(_try: () => undefined, _finally: () => undefined) {
     _finally();
   }
 }
+
+export function once<T>(fn: () => T): () => T {
+  let _v: T[] = [];
+  return () => {
+    if (!_v.length) {
+      _v.push(fn());
+    }
+    return _v[0];
+  };
+}

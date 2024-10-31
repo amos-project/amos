@@ -5,7 +5,7 @@
 
 import { ShapeBox } from 'amos-core';
 import { List, ListMap } from 'amos-shapes';
-import { IDOf } from 'amos-utils';
+import { IDOf, once } from 'amos-utils';
 import { MapBox } from './mapBox';
 
 export interface ListMapBox<LM extends ListMap<any, any>>
@@ -67,5 +67,8 @@ export function listMapBox<K, E>(
   inferKey: K,
   defaultElement: E,
 ): ListMapBox<ListMap<IDOf<K>, List<E>>> {
-  return new ListMapBox(key, new ListMap(new List()));
+  return new ListMapBox(
+    key,
+    once(() => new ListMap(new List())),
+  );
 }

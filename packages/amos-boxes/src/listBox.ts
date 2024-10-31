@@ -5,6 +5,7 @@
 
 import { Box, type Selector, ShapeBox } from 'amos-core';
 import { isSameList, List } from 'amos-shapes';
+import { once } from 'amos-utils';
 
 export interface ListBox<L extends List<any>>
   extends Box<L>,
@@ -80,5 +81,8 @@ export function listBox<E>(
   key: string,
   initialItems?: ArrayLike<E> | Iterable<E>,
 ): ListBox<List<E>> {
-  return new ListBox(key, new List(initialItems));
+  return new ListBox(
+    key,
+    once(() => new List(initialItems)),
+  );
 }
