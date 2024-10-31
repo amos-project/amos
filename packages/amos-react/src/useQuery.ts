@@ -3,7 +3,7 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { Action, box, SelectableAction } from 'amos';
+import { action, Action, type Box, box, isAmosObject, SelectableAction, selector } from 'amos';
 import { resolveCacheKey } from 'amos-core';
 import {
   clone,
@@ -14,36 +14,36 @@ import {
   type WellPartial,
 } from 'amos-utils';
 import { useEffect } from 'react';
+import { useDispatch } from './context';
 import { useSelector } from './useSelector';
 
-export interface QueryResultJSON<R> extends Pick<QueryResult<R>, 'status' | 'value' | 'error'> {}
+export interface QueryResultJSON<R> extends Pick<QueryResult<R>, 'status' | 'value'> {}
 
 export class QueryResult<R> implements JSONSerializable<QueryResultJSON<R>> {
   /** @internal */
   id: string | undefined;
-  status: 'pending' | 'fulfilled' | 'rejected' = 'pending';
+  /** @internal */
+  _nextId: string | undefined;
+  status: 'initial' | 'pending' | 'fulfilled' | 'rejected' = 'initial';
   promise: Defer<void> = defer();
-  value: Awaited<R> | undefined;
-  error: any;
+  value: Awaited<R> | undefined = void 0;
+  error: any = void 0;
 
   toJSON(): QueryResultJSON<R> {
     return {
       status: this.status,
       value: this.value,
-      error: this.error,
     };
   }
 
   fromJS(state: JSONState<QueryResultJSON<R>>): this {
-    return clone(this, {
+    const p = defer<void>();
+    const r = clone(this, {
       ...state,
-      promise:
-        state.status === 'pending'
-          ? defer()
-          : state.status === 'rejected'
-            ? Promise.reject(state.error)
-            : Promise.resolve(state.value),
+      promise: p,
     } as WellPartial<this>);
+    r.isRejected() ? p.reject(new Error('Server error')) : r.isFulfilled() ? p.resolve() : void 0;
+    return r;
   }
 
   isPending() {
@@ -80,8 +80,12 @@ export class QueryResultMap
   getItem(key: string, id: string): QueryResult<any> {
     let item = this.get(key);
     if (item) {
-      if (!item.id) {
-        item.id = id;
+      if (item.id === void 0) {
+        if (item._nextId === void 0) {
+          item._nextId = id;
+        } else if (item._nextId !== id) {
+          item = void 0;
+        }
       } else if (item.id !== id) {
         item = void 0;
       }
@@ -95,7 +99,20 @@ export class QueryResultMap
   }
 }
 
+// Immutable state conflicts with react suspense use.
 export const queryMapBox = box('amos.queries', () => new QueryResultMap());
+
+export const selectQuery = selector((select, key: string, id: string) => {
+  return select(queryMapBox).getItem(key, id);
+});
+
+export const updateQuery = action((dispatch, select, key: string, query: QueryResult<any>) => {
+  const map = select(queryMapBox);
+  if (map.get(key) === query) {
+    map.set(key, clone(query, {}));
+  }
+  dispatch(queryMapBox.setState(map));
+});
 
 export interface UseQuery {
   <A extends any[] = any, R = any, S = any>(
@@ -115,11 +132,38 @@ export interface UseQuery {
  */
 export const useQuery: UseQuery = (action: Action | SelectableAction): [any, QueryResult<any>] => {
   const select = useSelector();
+  const dispatch = useDispatch();
   const key = resolveCacheKey(select, action, action.conflictKey);
-  const result = select(queryMapBox).getItem(key, action.id);
-  useEffect(() => {}, [key]);
+  const result = select(selectQuery(key, action.id));
+  const shouldDispatch = result.status !== 'pending' && result.id !== void 0;
+  if (shouldDispatch) {
+    result.status = 'pending';
+  }
+  useEffect(() => {
+    if (shouldDispatch) {
+      (async () => {
+        try {
+          result.value = await dispatch(action);
+          result.status = 'fulfilled';
+          result.promise.resolve();
+        } catch (e) {
+          result.error = e;
+          result.status = 'rejected';
+          result.promise.reject(e);
+        }
+        dispatch(updateQuery(key, result));
+      })();
+    }
+  }, [key, shouldDispatch]);
   if ('selector' in action) {
-    return [select(action.selector(...action.args)), result];
+    return [
+      select(
+        isAmosObject<Box>(action.selector, 'box')
+          ? action.selector
+          : action.selector(...action.args),
+      ),
+      result,
+    ];
   } else {
     return [result.value, result];
   }

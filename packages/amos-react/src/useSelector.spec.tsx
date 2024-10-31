@@ -22,7 +22,7 @@ import { arrayEqual } from 'amos-utils';
 import { Provider } from './context';
 import { useSelector } from './useSelector';
 
-function renderDynamicHook<P, T>(
+export function renderDynamicHook<P, T>(
   fn: (props: P) => T,
   preloadedState?: Snapshot,
   initialProps?: P,

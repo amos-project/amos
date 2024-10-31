@@ -67,7 +67,7 @@ export const withCache: () => StoreEnhancer = () => {
         stack.push([]);
         try {
           let v = select(s);
-          if (cache && isSelectValueEqual(s, cache[1], v)) {
+          if (cache && s.equal(cache[1], v)) {
             v = cache[1];
           }
           parent?.push([s, v]);

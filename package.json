@@ -19,6 +19,7 @@
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^12.1.1",
     "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^6.6.2",
     "@testing-library/react": "^16.0.1",
     "@types/babel__core": "^7",
     "@types/fs-extra": "^11.0.4",

@@ -20,6 +20,7 @@ const leadingFn = jest.fn(async (dispatch: Dispatch, select: Select, id: number)
 });
 
 const leadingAsync = action(leadingFn, {
+  conflictPolicy: 'leading',
   conflictKey: [countBox],
 });
 

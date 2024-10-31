@@ -4,6 +4,7 @@
  */
 
 import { AmosObject, createAmosObject, enhancerCollector } from 'amos-utils';
+import type { Box } from './box';
 import { SelectorFactory } from './selector';
 import { CacheOptions, Dispatch, Select } from './types';
 
@@ -31,9 +32,8 @@ export interface ActionOptions<A extends any[] = any, R = any> {
 
   /**
    * How to handle conflicted action dispatch.
-   * - always: will always dispatch.
+   * - always: will always dispatch. (default)
    * - leading: only take first to dispatch.
-   * The default value is always when no conflictKey is set.
    *
    * Note: we have no plan to implement `trailing` mode,
    * it should be controlled in user space.
@@ -43,9 +43,6 @@ export interface ActionOptions<A extends any[] = any, R = any> {
   /**
    * Use for checking if the action is equal to another one, if so,
    * dispatch will respect {@link conflictPolicy} strategy.
-   *
-   * If set this option, conflictPolicy's default value is 'first'.
-   * This option is required for {@link import('amos-react').useQuery}.
    */
   conflictKey?: CacheOptions<A>;
 }
@@ -71,8 +68,7 @@ export function action<A extends any[], R>(
   actor: Actor<A, R>,
   options: Partial<ActionOptions<A, R>> = {},
 ): ActionFactory<A, R> {
-  const finalOptions = { type: '', ...options } as ActionOptions;
-  finalOptions.conflictPolicy ??= options.conflictKey ? 'leading' : 'always';
+  const finalOptions = { type: '', conflictPolicy: 'always', ...options } as ActionOptions;
   return enhanceAction.apply([actor, finalOptions], (actor, options) => {
     const factory = createAmosObject<ActionFactory>(
       'action_factory',
@@ -99,7 +95,7 @@ export interface SelectableActionOptions<A extends any[] = any, S = any> {
    * Use for {@link import('amos-react').useQuery} derive the state even if
    * the action is running.
    */
-  selector: SelectorFactory<A, S>;
+  selector: SelectorFactory<A, S> | Box<S>;
 }
 
 export interface SelectableAction<A extends any[] = any, R = any, S = any>
@@ -107,7 +103,7 @@ export interface SelectableAction<A extends any[] = any, R = any, S = any>
     SelectableActionOptions<A, S> {}
 
 export interface ActionFactoryStatic<A extends any[] = any, R = any> {
-  select<S>(selector: SelectorFactory<A, S>): SelectableActionFactory<A, R, S>;
+  select<S>(selector: SelectorFactory<A, S> | Box<S>): SelectableActionFactory<A, R, S>;
 }
 
 export interface SelectableActionFactory<A extends any[] = any, R = any, S = any>
