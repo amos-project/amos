@@ -24,6 +24,8 @@ export const loginSync = action((dispatch, select, userId: number) => {
 export const loginAsync = action(async (dispatch, select, userId: number) => {
   await sleep(5);
   return dispatch(loginSync(userId));
+}, {
+  key: 'loginAsync',
 });
 
 export const logoutSync = action((dispatch, select) => {

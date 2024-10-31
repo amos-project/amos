@@ -5,6 +5,7 @@ exports[`withDevtools should send event: devtools events 1`] = `
   "00:P:count": {
     "args": [
       0,
+      undefined,
     ],
     "root": "ROOT",
     "state": {
@@ -63,6 +64,7 @@ exports[`withDevtools should send event: devtools events 1`] = `
   "06:P:sessions": {
     "args": [
       {},
+      undefined,
     ],
     "root": "ROOT",
     "state": {
@@ -116,9 +118,7 @@ exports[`withDevtools should send event: devtools events 1`] = `
             2,
           ],
           "conflictPolicy": "always",
-          "id": "amos/addFourfoldAsync",
           "type": "amos/addFourfoldAsync",
-          Symbol($amos): "action",
         },
         {
           "actor": [Function],
@@ -126,9 +126,7 @@ exports[`withDevtools should send event: devtools events 1`] = `
             1,
           ],
           "conflictPolicy": "always",
-          "id": "amos/loginAsync",
           "type": "amos/loginAsync",
-          Symbol($amos): "action",
         },
         {
           "args": [
@@ -139,24 +137,17 @@ exports[`withDevtools should send event: devtools events 1`] = `
           ],
           "creator": [Function],
           "factory": [Function],
-          "id": "session.logout",
           "type": "session.logout",
-          Symbol($amos): "signal",
         },
         {
           "args": [
             1,
           ],
           "box": NumberBox {
-            "id": "count",
-            "initialState": 0,
-            "key": "count",
-            Symbol($amos): "box",
+            "getInitialState": [Function],
           },
-          "id": "count/setState",
           "mutator": [Function],
           "type": "count/setState",
-          Symbol($amos): "mutation",
         },
       ],
     ],
@@ -213,6 +204,7 @@ exports[`withDevtools should send event: devtools events 1`] = `
   "14:P:sessions.currentId": {
     "args": [
       0,
+      undefined,
     ],
     "root": "ROOT",
     "state": {
@@ -290,6 +282,7 @@ exports[`withDevtools should send event: devtools events 1`] = `
           "motherId": 0,
         },
       },
+      undefined,
     ],
     "root": "ROOT",
     "state": {
@@ -422,30 +415,20 @@ exports[`withDevtools should send event: devtools events 1`] = `
             },
           ],
           "box": RecordMapBox {
-            "id": "sessions",
-            "initialState": {},
-            "key": "sessions",
-            Symbol($amos): "box",
+            "getInitialState": [Function],
           },
-          "id": "sessions/mergeItem",
           "mutator": [Function],
           "type": "sessions/mergeItem",
-          Symbol($amos): "mutation",
         },
         {
           "args": [
             10001,
           ],
           "box": Box {
-            "id": "sessions.currentId",
-            "initialState": 0,
-            "key": "sessions.currentId",
-            Symbol($amos): "box",
+            "getInitialState": [Function],
           },
-          "id": "sessions.currentId/setState",
           "mutator": [Function],
           "type": "sessions.currentId/setState",
-          Symbol($amos): "mutation",
         },
         {
           "args": [
@@ -455,56 +438,10 @@ exports[`withDevtools should send event: devtools events 1`] = `
             },
           ],
           "box": RecordMapBox {
-            "id": "user.userMap",
-            "initialState": {
-              "1": {
-                "createdAt": 2020-01-01T08:00:00.000Z,
-                "fatherId": 0,
-                "firstName": "Rick",
-                "id": 1,
-                "lastName": "Sanchez",
-                "motherId": 0,
-              },
-              "2": {
-                "createdAt": 2020-01-01T08:00:00.000Z,
-                "fatherId": 1,
-                "firstName": "Beth",
-                "id": 2,
-                "lastName": "Sanchez",
-                "motherId": 0,
-              },
-              "3": {
-                "createdAt": 2020-01-01T08:00:00.000Z,
-                "fatherId": 0,
-                "firstName": "Jerry",
-                "id": 3,
-                "lastName": "Sanchez",
-                "motherId": 0,
-              },
-              "4": {
-                "createdAt": 2020-01-01T08:00:00.000Z,
-                "fatherId": 3,
-                "firstName": "Jessica",
-                "id": 4,
-                "lastName": "Sanchez",
-                "motherId": 0,
-              },
-              "5": {
-                "createdAt": 2020-01-01T08:00:00.000Z,
-                "fatherId": 0,
-                "firstName": "Morty",
-                "id": 5,
-                "lastName": "Sanchez",
-                "motherId": 0,
-              },
-            },
-            "key": "user.userMap",
-            Symbol($amos): "box",
+            "getInitialState": [Function],
           },
-          "id": "user.userMap/mergeItem",
           "mutator": [Function],
           "type": "user.userMap/mergeItem",
-          Symbol($amos): "mutation",
         },
       ],
     ],

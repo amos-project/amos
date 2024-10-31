@@ -288,6 +288,7 @@ function createBoxFactory<B extends Box, SB = {}>(
         setInitialState(initialState: ValueOrFunc<unknown, [unknown]>) {
           const original = this.getInitialState;
           this.getInitialState = () => resolveFuncValue(initialState, original());
+          return this;
         }
 
         subscribe<D>(this: B, signal: SignalFactory<any, D>, fn: (state: any, data: D) => any) {
@@ -307,7 +308,8 @@ function createBoxFactory<B extends Box, SB = {}>(
               : (state: any, ...args: any[]) =>
                   (mutations[k] as BoxFactoryMutationOptions<B>).update(this, state, ...args);
         return createAmosObject<Mutation>('mutation', {
-          key: `${this.id}/${k as string}`,
+          id: `${this.id}/${k as string}`,
+          key: `${this.key}/${k as string}`,
           type: `${this.key}/${k as string}`,
           mutator: (state: any) => fn(state, ...args),
           args: args,
@@ -325,7 +327,8 @@ function createBoxFactory<B extends Box, SB = {}>(
         return createAmosObject<Selector>('selector', {
           equal: is,
           ...resolvedOptions,
-          key: `${this.id}/${k as string}`,
+          id: `${this.id}/${k as string}`,
+          key: `${this.key}/${k as string}`,
           type: `${this.key}/${k as string}`,
           compute: (select: Select) => derive(select(this), ...args),
           args: args,

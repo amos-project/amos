@@ -112,8 +112,8 @@ export function selector<A extends any[], R>(
         (...args: A) => {
           return createAmosObject<Selector<A, R>>('selector', {
             ...options,
+            id: factory.id,
             compute: (select) => compute(select, ...args),
-            key: factory.id,
             args,
           });
         },

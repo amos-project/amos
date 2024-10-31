@@ -55,8 +55,8 @@ export const withCache: () => StoreEnhancer = () => {
             // make sure the cache compute is not collected to the deps
             stack.push(null);
             if (cache[2].every(([s, v]) => isSelectValueEqual(s, v, store.select(s)))) {
-              parent?.push([s, cache[0]]);
-              return cache[0];
+              parent?.push([s, cache[1]]);
+              return cache[1];
             } else {
               cacheMap.delete(key);
             }
@@ -67,8 +67,8 @@ export const withCache: () => StoreEnhancer = () => {
         stack.push([]);
         try {
           let v = select(s);
-          if (cache && isSelectValueEqual(s, cache[0], v)) {
-            v = cache[0];
+          if (cache && isSelectValueEqual(s, cache[1], v)) {
+            v = cache[1];
           }
           parent?.push([s, v]);
           cacheMap.set(key, [s.id, v, peak()!]);

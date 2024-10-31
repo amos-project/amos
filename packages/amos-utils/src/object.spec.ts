@@ -14,13 +14,10 @@ describe('object utils', () => {
       type: 't1',
     });
     expect(o1).toEqual({
-      [$amos]: 'o1',
-      id: expect.any(String),
-      key: 'k1',
       type: 't1',
     });
     const o2 = createAmosObject<any>('o2', { id: 'A', key: null, type: 't2' });
-    expect(o2).toEqual({ [$amos]: 'o2', id: expect.any(String), key: o2.id, type: 't2' });
+    expect(o2).toEqual({ type: 't2' });
     const o3 = createAmosObject<any>('o1', { type: 't3' });
     expect(o1.id).not.toEqual(o3.id);
   });

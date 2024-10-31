@@ -87,7 +87,7 @@ export const createHydrate = (store: Store, finalOptions: PersistOptions) => {
               prefixes.push(tablePrefixMap[key]);
             }
             tablePrefixMap[key].push([toKey(key, rowId), ...value]);
-          } else if (store.select(box) === state.initial.get(box.key)) {
+          } else if (store.select(box) === state.getInitial(box)) {
             const js = migrate(box, value[0], '', value[1]);
             if (js !== void 0) {
               exactEntries.push(box.setState(fromJS(box.getInitialState(), js)));
@@ -106,9 +106,7 @@ export const createHydrate = (store: Store, finalOptions: PersistOptions) => {
                 if (id === void 0) {
                   continue;
                 }
-                if (
-                  box.table!.getRow(curr, id) !== box.table!.getRow(state.initial.get(box.key), id)
-                ) {
+                if (box.table!.getRow(curr, id) !== box.table!.getRow(state.getInitial(box), id)) {
                   continue;
                 }
                 d = migrate(box, v, id, d);

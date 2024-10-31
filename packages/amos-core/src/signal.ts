@@ -16,13 +16,14 @@ import { Dispatch, Select } from './types';
 export type Creator<A extends any[] = any, D = any> = (select: Select, ...args: A) => D;
 
 export interface SignalOptions<A extends any[] = any, D = any> {
+  key: string;
   type: string;
   creator: Creator<A, D>;
 }
 
 export interface Signal<A extends any[] = any, D = any>
   extends AmosObject<'signal'>,
-    SignalOptions<A, D> {
+    Readonly<SignalOptions<A, D>> {
   args: A;
   factory: SignalFactory<any, D>;
 }

@@ -3,14 +3,14 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { action, box, type Dispatch, type Select } from 'amos-core';
+import { action, type Box, box, type Dispatch, type Select } from 'amos-core';
 import { isArray, must, type NextTicker, toArray } from 'amos-utils';
 import type { PersistKey, PersistOptions } from './types';
 import { toKey } from './utils';
 
 export interface PersistState extends PersistOptions {
   selecting: boolean;
-  initial: Map<string, any>;
+  getInitial: (box: Box) => any;
   snapshot: Map<string, any>;
   hydrate: NextTicker<PersistKey<any>, void>;
   persist: NextTicker<void, void>;

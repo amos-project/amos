@@ -46,7 +46,16 @@ describe('withPersist', () => {
     append(engine, 'removePrefix', removePrefix);
     append(engine, 'removeMulti', removeMulti);
 
-    const store = createStore(void 0, withPersist({ storage: engine, includes: () => true }));
+    const store = createStore(
+      void 0,
+      withPersist({
+        storage: engine,
+        includes: () => true,
+        onError: (e) => {
+          throw e;
+        },
+      }),
+    );
     const r1 = await store.dispatch(
       hydrate([countBox, [userMapBox, Rick.id], [sessionMapBox, [1, 2]]]),
     );
@@ -78,7 +87,7 @@ describe('withPersist', () => {
     expectCalledWith(getPrefix, [toKey(userMapBox)]);
 
     store.dispatch(userMapBox.mergeIn(Jerry.id, { firstName: 'F3' }));
-    await sleep(1);
+    await sleep(2);
     expect(await engine.getPrefix(toKey(userMapBox))).toEqual([
       [toKey(userMapBox, Rick.id), 1, Rick.set('firstName', 'F1')],
       [toKey(userMapBox, Morty.id), 1, Morty.set('firstName', 'F2')],

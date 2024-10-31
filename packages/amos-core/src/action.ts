@@ -74,12 +74,13 @@ export function action<A extends any[], R>(
   const finalOptions = { type: '', ...options } as ActionOptions;
   finalOptions.conflictPolicy ??= options.conflictKey ? 'leading' : 'always';
   return enhanceAction.apply([actor, finalOptions], (actor, options) => {
-    return createAmosObject<ActionFactory>(
+    const factory = createAmosObject<ActionFactory>(
       'action_factory',
       Object.assign(
         (...args: any[]) => {
           return createAmosObject<Action>('action', {
             ...options,
+            id: factory.id,
             actor: (dispatch, select) => actor(dispatch, select, ...args),
             args: args,
           });
@@ -89,6 +90,7 @@ export function action<A extends any[], R>(
         },
       ) as ActionFactory,
     );
+    return factory;
   });
 }
 

@@ -10,7 +10,9 @@ export interface LogoutEvent {
   sessionId: number;
 }
 
-export const LOGOUT = signal<LogoutEvent>('session.logout');
+export const LOGOUT = signal<LogoutEvent>('session.logout', {
+  key: 'LOGOUT',
+});
 
 export interface LoginEvent {
   userId: number;

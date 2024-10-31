@@ -23,18 +23,32 @@ export function withPersist(options: PartialRequired<PersistOptions, 'storage'>)
     const hydrate = createHydrate(store, finalOptions);
     const persist = createPersist(store, finalOptions);
 
+    const initial = new Map<string, any>();
+
     const state: PersistState = {
       ...finalOptions,
       selecting: false,
-      initial: new Map(),
       snapshot: new Map(),
+      getInitial: (box) => {
+        if (initial.has(box.key)) {
+          return initial.get(box.key);
+        }
+        const selecting = state.selecting;
+        state.selecting = true;
+        try {
+          store.select(box);
+        } finally {
+          state.selecting = selecting;
+        }
+        return state.getInitial(box);
+      },
       hydrate,
       persist,
     };
 
     append(store, 'onInit', () => store.dispatch(persistBox.setState(state)));
     append(store, 'onMount', (box, initialState, preloadedState) => {
-      state.initial.set(box.key, initialState);
+      initial.set(box.key, initialState);
     });
 
     let selectingRows: PersistRowKey<any> | undefined = void 0;
@@ -55,7 +69,7 @@ export function withPersist(options: PartialRequired<PersistOptions, 'storage'>)
           // hydrate rows for multi-row boxes
           if (
             loadRows &&
-            r === loadRows[0].table!.getRow(state.initial.get(loadRows[0].key), loadRows[1]) &&
+            r === loadRows[0].table!.getRow(state.getInitial(loadRows[0]), loadRows[1]) &&
             shouldPersist(finalOptions, loadRows[0])
           ) {
             hydrate(loadRows);
@@ -66,7 +80,7 @@ export function withPersist(options: PartialRequired<PersistOptions, 'storage'>)
             isBox &&
             !selectable.table &&
             !selectingRows &&
-            r === state.initial.get(selectable.key) &&
+            r === state.getInitial(selectable) &&
             shouldPersist(finalOptions, selectable)
           ) {
             hydrate(selectable);
