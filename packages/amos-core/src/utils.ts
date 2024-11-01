@@ -4,10 +4,10 @@
  */
 
 import { isAmosObject, isObject, isPlainObject, isToJSON, toArray, toType } from 'amos-utils';
-import { Action } from './action';
-import { Box } from './box';
-import { Selector, SelectorFactory } from './selector';
-import { CacheOptions, type Select } from './types';
+import type { Action } from './action';
+import type { Box } from './box';
+import type { Selector, SelectorFactory } from './selector';
+import type { CacheOptions, Select } from './types';
 
 export function stringify(data: any): string {
   if (Array.isArray(data)) {

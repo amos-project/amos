@@ -3,8 +3,8 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { act, renderHook, type RenderHookResult } from '@testing-library/react';
-import { createStore, Select, Selectable, selector, Snapshot, Store } from 'amos-core';
+import { act } from '@testing-library/react';
+import { Select, Selectable, selector, Snapshot } from 'amos-core';
 import {
   addTwiceAsync,
   countBox,
@@ -19,28 +19,8 @@ import {
   userMapBox,
 } from 'amos-testing';
 import { arrayEqual } from 'amos-utils';
-import { Provider } from './context';
+import { renderDynamicHook } from './testUtils';
 import { useSelector } from './useSelector';
-
-export function renderDynamicHook<P, T>(
-  fn: (props: P) => T,
-  preloadedState?: Snapshot,
-  initialProps?: P,
-): RenderHookResult<T, P> & Store & { mockFn: jest.Mock } {
-  const store = createStore({ preloadedState });
-  const mockFn = jest.fn();
-  const hook = renderHook(
-    (props: P) => {
-      mockFn(props);
-      return fn(props);
-    },
-    {
-      wrapper: (props) => <Provider store={store}>{props.children}</Provider>,
-      initialProps,
-    },
-  );
-  return Object.assign(hook, store, { mockFn: mockFn });
-}
 
 function renderUseSelector<P, Rs extends readonly Selectable[] | []>(
   fn: (props: P) => Rs,

@@ -13,19 +13,21 @@ import {
   type JSONState,
   type WellPartial,
 } from 'amos-utils';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useDispatch } from './context';
 import { useSelector } from './useSelector';
 
-export interface QueryResultJSON<R> extends Pick<QueryResult<R>, 'status' | 'value'> {}
+export interface QueryResultJSON<R> extends Pick<QueryResult<R>, 'status' | 'value' | 'error'> {}
 
 export class QueryResult<R> implements JSONSerializable<QueryResultJSON<R>> {
   /** @internal */
+  isFromJS: boolean = false;
+  /** @internal */
   id: string | undefined;
   /** @internal */
-  _nextId: string | undefined;
+  q: Defer<void> = defer();
+
   status: 'initial' | 'pending' | 'fulfilled' | 'rejected' = 'initial';
-  promise: Defer<void> = defer();
   value: Awaited<R> | undefined = void 0;
   error: any = void 0;
 
@@ -33,21 +35,19 @@ export class QueryResult<R> implements JSONSerializable<QueryResultJSON<R>> {
     return {
       status: this.status,
       value: this.value,
+      error: this.error,
     };
   }
 
   fromJS(state: JSONState<QueryResultJSON<R>>): this {
-    const p = defer<void>();
-    const r = clone(this, {
-      ...state,
-      promise: p,
-    } as WellPartial<this>);
-    r.isRejected() ? p.reject(new Error('Server error')) : r.isFulfilled() ? p.resolve() : void 0;
+    const q = defer<void>();
+    const r = clone(this, { ...state, q, isFromJS: true } as WellPartial<this>);
+    r.isRejected() ? q.reject(r.error) : r.isFulfilled() ? q.resolve() : void 0;
     return r;
   }
 
   isPending() {
-    return this.status === 'pending';
+    return this.status === 'pending' || this.status === 'initial';
   }
 
   isFulfilled() {
@@ -81,11 +81,7 @@ export class QueryResultMap
     let item = this.get(key);
     if (item) {
       if (item.id === void 0) {
-        if (item._nextId === void 0) {
-          item._nextId = id;
-        } else if (item._nextId !== id) {
-          item = void 0;
-        }
+        item.id = id;
       } else if (item.id !== id) {
         item = void 0;
       }
@@ -106,13 +102,15 @@ export const selectQuery = selector((select, key: string, id: string) => {
   return select(queryMapBox).getItem(key, id);
 });
 
-export const updateQuery = action((dispatch, select, key: string, query: QueryResult<any>) => {
-  const map = select(queryMapBox);
-  if (map.get(key) === query) {
-    map.set(key, clone(query, {}));
-  }
-  dispatch(queryMapBox.setState(map));
-});
+export const updateQuery = action(
+  (dispatch, select, key: string, query: QueryResult<any>, props: Partial<QueryResult<any>>) => {
+    const map = select(queryMapBox);
+    if (map.get(key) === query) {
+      map.set(key, clone(query, props));
+    }
+    dispatch(queryMapBox.setState(map));
+  },
+);
 
 export interface UseQuery {
   <A extends any[] = any, R = any, S = any>(
@@ -135,26 +133,41 @@ export const useQuery: UseQuery = (action: Action | SelectableAction): [any, Que
   const dispatch = useDispatch();
   const key = resolveCacheKey(select, action, action.conflictKey);
   const result = select(selectQuery(key, action.id));
-  const shouldDispatch = result.status !== 'pending' && result.id !== void 0;
+  const lastKey = useRef<string>();
+
+  const isFromJS = result.isFromJS;
+  const shouldDispatch = lastKey.current !== key && !isFromJS && result.status !== 'pending';
   if (shouldDispatch) {
+    if (result.status !== 'initial') {
+      result.q = defer();
+    }
     result.status = 'pending';
   }
+  lastKey.current = key;
   useEffect(() => {
-    if (shouldDispatch) {
-      (async () => {
-        try {
-          result.value = await dispatch(action);
-          result.status = 'fulfilled';
-          result.promise.resolve();
-        } catch (e) {
-          result.error = e;
-          result.status = 'rejected';
-          result.promise.reject(e);
-        }
-        dispatch(updateQuery(key, result));
-      })();
+    if (result.isFromJS) {
+      // only actions used in first time mounted component will not be dispatched
+      result.isFromJS = false;
+      return;
     }
-  }, [key, shouldDispatch]);
+    if (!shouldDispatch) {
+      return;
+    }
+    (async () => {
+      const props: Partial<QueryResult<any>> = {};
+      try {
+        props.value = await dispatch(action);
+        props.status = 'fulfilled';
+        result.q.resolve();
+      } catch (e) {
+        props.error = e;
+        props.status = 'rejected';
+        result.q.reject(e);
+      }
+      dispatch(updateQuery(key, result, props));
+    })();
+  }, [key]);
+
   if ('selector' in action) {
     return [
       select(
@@ -181,7 +194,7 @@ export interface UseSuspenseQuery {
 export const useSuspenseQuery: UseSuspenseQuery = (action: Action): any => {
   const [value, result] = useQuery(action);
   if (result.isPending()) {
-    throw result.promise;
+    throw result.q;
   } else if (result.isRejected()) {
     throw result.error;
   }
