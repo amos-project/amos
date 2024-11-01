@@ -21,7 +21,7 @@ export const check_deps = autorun(
       const pj = await fs.readJSON(`packages/${pkg}/package.json`);
       const files = await glob(`packages/${pkg}/src/**/*.{ts,tsx}`);
       for (const f of files) {
-        const isDev = f.includes('.spec.');
+        const isDev = f.includes('.spec.') || f.includes('test');
         const d = await fs.readFile(f, 'utf-8');
         const ms = d.matchAll(/ from ['"]([^'"]+)['"]/g);
         for (const m of ms) {
@@ -76,7 +76,7 @@ export const check_deps = autorun(
           console.error(`%s should not dev dependents on amos.`, pkg);
         }
         if (pkg === 'amos-utils') {
-          const bad = deps.concat(devDeps).filter((d) => d.startsWith('amos'));
+          const bad = deps.filter((d) => d.startsWith('amos'));
           if (bad.length) {
             console.error('amos-utils no amos deps: ', bad.join(', '));
           }

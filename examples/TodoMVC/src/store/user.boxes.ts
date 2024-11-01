@@ -4,6 +4,7 @@
  */
 
 import { box, Record, recordMapBox, signal } from 'amos';
+import { hashCode } from './todo.boxes';
 
 export interface UserModel {
   id: number;
@@ -24,7 +25,9 @@ export const signOutSignal = signal<SignOutEvent>('user.signOut');
 
 export const signInSignal = signal<UserModel>('user.signIn');
 
-export const userMapBox = recordMapBox('users', UserRecord, 'id');
+export const userMapBox = recordMapBox('users', UserRecord, 'id').setInitialState((s) => {
+  return s.mergeItem(hashCode('Amos'), { name: 'Amos' });
+});
 
 userMapBox.subscribe(signOutSignal, (state, data) => {
   if (!data.keepData) {
@@ -33,4 +36,4 @@ userMapBox.subscribe(signOutSignal, (state, data) => {
   return state;
 });
 
-export const currentUserIdBox = box('users.currentUserId', 0);
+export const currentUserIdBox = box('users.currentUserId', hashCode('Amos'));
