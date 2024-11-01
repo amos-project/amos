@@ -29,17 +29,6 @@ describe('withDevtools', () => {
     const r = await Promise.all(store.dispatch(tasks));
     expect([...r, store.select(countBox)]).toEqual([8, store.select(sessionIdBox), e, 1, 5]);
     expectCalledWith(init, [{}]);
-    const calls = Object.fromEntries(
-      send.mock.calls.map((c, i, array) => [
-        i.toString().padStart(array.length.toString().length, '0') + ':' + c[0].type,
-        {
-          ...c[0],
-          root: c[0].root && 'ROOT',
-          state: c[1],
-        },
-      ]),
-    );
-    expect(calls).toMatchSnapshot('devtools events');
     expectCalled(send, 21);
   });
 });

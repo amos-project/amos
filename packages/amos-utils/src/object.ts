@@ -37,25 +37,9 @@ export function createAmosObject<T extends AmosObject<string>>(
   props: Omit<PartialOptional<T, 'key' | 'id'>, typeof $amos>,
 ): T {
   const mv = props as Mutable<T>;
-  Object.defineProperty(mv, $amos, {
-    value: kind,
-    configurable: true,
-    writable: false,
-    enumerable: false,
-  });
-
-  Object.defineProperty(mv, 'id', {
-    value: mv.id ?? prefix + ++nextId,
-    configurable: true,
-    writable: false,
-    enumerable: false,
-  });
-  Object.defineProperty(mv, 'key', {
-    value: mv.key ?? mv.id,
-    configurable: true,
-    writable: false,
-    enumerable: false,
-  });
+  mv[$amos] = kind;
+  mv.id ??= prefix + ++nextId;
+  mv.key ??= mv.id;
   return mv;
 }
 

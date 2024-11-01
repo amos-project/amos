@@ -12,17 +12,17 @@ import {
   SelectEntry,
   Selector,
 } from 'amos';
-import { __DEV__ } from 'amos-utils';
 import { useCallback, useDebugValue, useLayoutEffect, useReducer, useState } from 'react';
 import { useStore } from './context';
 
-function useSelect(): Select {
+export interface UseSelector extends Select {
+  (): Select;
+}
+
+export const useSelector: UseSelector = (selectors?: Selectable | readonly Selectable[]): any => {
   const [, update] = useReducer((s) => s + 1, 0);
   const store = useStore();
-  const [state] = useState(() => ({
-    deps: [] as SelectEntry[],
-    rendering: true,
-  }));
+  const [state] = useState(() => ({ deps: [] as SelectEntry[], rendering: true }));
   state.deps = [];
   state.rendering = true;
   useLayoutEffect(() => {
@@ -35,30 +35,30 @@ function useSelect(): Select {
       }
     });
   }, []);
-  useDebugValue(
-    state.deps,
-    __DEV__
-      ? (value) => {
-          return value.reduce(
-            (map, [selectable, value], index) => {
-              let type =
-                (isAmosObject<Box>(selectable, 'box')
-                  ? selectable.key
-                  : isAmosObject<Selector>(selectable, 'selector')
-                    ? selectable.type
-                    : '') || 'anonymous';
-              if (Object.hasOwn(map, type)) {
-                type = type + '_' + index;
-              }
-              map[type] = value;
-              return map;
-            },
-            {} as Record<string, any>,
-          );
-        }
-      : void 0,
-  );
-  return useCallback(
+  useDebugValue(state, (value) => {
+    return {
+      get state() {
+        return value.deps.reduce(
+          (map, [selectable, value], index) => {
+            let type =
+              (isAmosObject<Box>(selectable, 'box')
+                ? selectable.key
+                : isAmosObject<Selector>(selectable, 'selector')
+                  ? selectable.type
+                  : '') || 'anonymous';
+            if (Object.hasOwn(map, type)) {
+              type = type + '_' + index;
+            }
+            map[type] = value;
+            return map;
+          },
+          {} as Record<string, any>,
+        );
+      },
+    };
+  });
+
+  const select = useCallback(
     (selectable: any) => {
       const value: any = store.select(selectable);
       if (!state.rendering) {
@@ -73,14 +73,7 @@ function useSelect(): Select {
     },
     [store, state],
   );
-}
 
-export interface UseSelector extends Select {
-  (): Select;
-}
-
-export const useSelector: UseSelector = (selectors?: Selectable | readonly Selectable[]): any => {
-  const select = useSelect();
   if (!selectors) {
     return select;
   }

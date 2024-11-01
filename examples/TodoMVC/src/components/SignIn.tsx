@@ -3,14 +3,16 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { useDispatch, useSelector } from 'amos/react';
-import { memo, useState } from 'react';
+import { hydrate } from 'amos';
+import { useDispatch, useQuery, useSelector } from 'amos/react';
+import { Fragment, memo, useState } from 'react';
 import { signIn } from '../store/user.actions';
 import { userMapBox } from '../store/user.boxes';
 
 export const SignIn = memo(() => {
   const [input, setInput] = useState('');
   const dispatch = useDispatch();
+  useQuery(hydrate([userMapBox]));
   const userMap = useSelector(userMapBox);
   return (
     <div className="sign-in">
@@ -25,12 +27,10 @@ export const SignIn = memo(() => {
           <br />
           <span>Users:&nbsp;</span>
           {Array.from(userMap.values(), (u) => (
-            <>
-              <button key={u.id} onClick={() => dispatch(signIn(u.name))}>
-                {u.name}
-              </button>
+            <Fragment key={u.id}>
+              <button onClick={() => dispatch(signIn(u.name))}>{u.name}</button>
               &nbsp;
-            </>
+            </Fragment>
           ))}
         </div>
       )}

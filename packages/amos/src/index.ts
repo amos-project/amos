@@ -70,12 +70,12 @@ export {
   TableOptions,
   action,
   box,
+  computeCacheKey,
   createStore,
   enhanceAction,
   enhanceSelector,
   enhanceSignal,
   isSelectValueEqual,
-  computeCacheKey,
   selector,
   signal,
 } from 'amos-core';
@@ -121,4 +121,12 @@ export {
   implementMapDelegations,
   isSameList,
 } from 'amos-shapes';
-export { AmosObject, Enhancer, arrayEqual, isAmosObject, shallowEqual, toJS } from 'amos-utils';
+export {
+  AmosObject,
+  Enhancer,
+  JSONState,
+  arrayEqual,
+  isAmosObject,
+  shallowEqual,
+  toJS,
+} from 'amos-utils';

@@ -29,6 +29,7 @@ export const hydrate = action(
     await state.hydrate.wait(...keys);
   },
   {
+    key: 'amos/hydrate',
     conflictPolicy: 'always',
     conflictKey: (select: Select, keys: PersistKey<any>[]) => {
       return keys

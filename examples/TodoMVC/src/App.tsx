@@ -15,6 +15,7 @@ import { currentUserIdBox } from './store/user.boxes';
 export const App = memo(() => {
   const userId = useSelector(currentUserIdBox);
   const [, gate] = useQuery(hydrate([currentUserIdBox]));
+
   if (gate.isPending()) {
     return <div>Loading...</div>;
   }
