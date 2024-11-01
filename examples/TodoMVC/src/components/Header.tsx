@@ -11,17 +11,20 @@ import { selectCurrentUser } from '../store/user.selectors';
 export const Header = memo(() => {
   const dispatch = useDispatch();
   const user = useSelector(selectCurrentUser());
-  const handleSignOut = () => {
-    const keepData = confirm('You will be signed out, do you want to keep your data?');
-    dispatch(signOut(keepData));
-  };
-  if (!user.isInitial()) {
+  if (user.isInitial()) {
     return null;
   }
   return (
-    <div>
-      <span>Welcome, {user.name}. </span>
-      <button onClick={handleSignOut}>Sign out</button>
+    <div className="header flex">
+      <span className="expand" />
+      <span>Welcome,</span>
+      &nbsp;
+      <strong>{user.name}</strong>
+      <span>.</span>
+      &nbsp;
+      <button onClick={() => dispatch(signOut(false))}>Sign out</button>
+      &nbsp;
+      <button onClick={() => dispatch(signOut(true))}>Switch user</button>
     </div>
   );
 });

@@ -6,7 +6,7 @@
 import { countBox, Rick, selectDouble, selectDoubleCount, UserRecord } from 'amos-testing';
 import { createStore } from './store';
 import { Select } from './types';
-import { resolveCacheKey, stringify } from './utils';
+import { computeCacheKey, stringify } from './utils';
 
 describe('core utils', () => {
   it('should stringify params', () => {
@@ -32,12 +32,12 @@ describe('core utils', () => {
     const store = createStore();
     store.dispatch(countBox.setState(1));
     expect([
-      resolveCacheKey(store.select, selectDouble(2), void 0),
-      resolveCacheKey(store.select, selectDouble(2), countBox),
-      resolveCacheKey(store.select, selectDouble(2), selectDoubleCount()),
-      resolveCacheKey(store.select, selectDouble(2), [countBox, selectDoubleCount()]),
-      resolveCacheKey(store.select, selectDouble(2), (select: Select) => select(countBox)),
-      resolveCacheKey(store.select, selectDouble(2), (select: Select) => [
+      computeCacheKey(store.select, selectDouble(2), void 0),
+      computeCacheKey(store.select, selectDouble(2), countBox),
+      computeCacheKey(store.select, selectDouble(2), selectDoubleCount()),
+      computeCacheKey(store.select, selectDouble(2), [countBox, selectDoubleCount()]),
+      computeCacheKey(store.select, selectDouble(2), (select: Select) => select(countBox)),
+      computeCacheKey(store.select, selectDouble(2), (select: Select) => [
         select(countBox),
         select(selectDoubleCount()),
       ]),

@@ -12,7 +12,7 @@ import { QueryResult, QueryResultMap, useQuery } from './useQuery';
 
 const fn = async (dispatch: Dispatch, select: Select, multiply: number) => {
   dispatch(countBox.multiply(multiply));
-  await sleep(10);
+  await sleep(20);
   dispatch(countBox.multiply(multiply));
   return multiply;
 };
@@ -29,68 +29,73 @@ const state = action(stateFn, {
 
 describe('useQuery', () => {
   it('should useQuery', async () => {
-    const a1 = simple(1);
     const { result, mockFn, rerender } = renderDynamicHook(
       ({ multiply }) => useQuery(simple(multiply)),
       { count: 1 },
-      { multiply: 1 },
+      { multiply: 2 },
     );
     expectCalled(mockFn, 1);
-    expect(result.current).toEqual([
-      void 0,
-      clone(new QueryResult(), {
-        id: a1.id,
-        status: 'pending',
-        q: expect.any(Promise),
-        value: void 0,
-        error: void 0,
-      }),
-    ]);
+    const q1 = clone(new QueryResult(), {
+      status: 'pending',
+      _q: expect.any(Promise),
+      value: void 0,
+      error: void 0,
+    });
+    expect(result.current).toEqual([void 0, q1]);
     await act(async () => {
-      await result.current[1].q;
-      await sleep(1);
+      await result.current[1]._q;
     });
     expectCalled(mockFn, 1);
     expectCalled(simpleFn, 1);
+    const q2 = clone(q1, { status: 'fulfilled', _q: void 0, value: 2 });
+    expect(result.current).toEqual([2, q2]);
+    const q3 = result.current[1];
+
+    rerender({ multiply: 2 });
+    expectCalled(mockFn, 1);
+    expect(result.current[0]).toBe(2);
+    expectCalled(simpleFn, 0);
+    expect(result.current).toEqual([2, q2]);
+    expect(result.current[1]).toBe(q3);
+
     rerender({ multiply: 1 });
     expectCalled(mockFn, 1);
-    expect(result.current[0]).toBe(1);
+    expect(result.current[0]).toBe(void 0);
     expectCalled(simpleFn, 0);
+
+    await act(async () => {
+      await result.current[1]._q;
+    });
+    expectCalled(mockFn, 1);
+    expect(result.current[0]).toBe(1);
+    expectCalled(simpleFn, 1);
   });
 
   it('should useQuery with selector', async () => {
-    const a1 = state(1);
     const { result, mockFn } = renderDynamicHook(
       ({ multiply }) => useQuery(state(multiply)),
       { count: 1 },
       { multiply: 2 },
     );
-    /**
-     * `renderHook` will auto perform useEffect synchronously, very tricky
-     * the {@link state} update count synchronously and select that.
-     * Then the component should be rendered twice as it watches countBox.
-     * And the select result should be 2.
-     */
-    expectCalled(mockFn, 2);
-    expectCalled(stateFn, 1);
-    const query = clone(new QueryResult(), {
-      id: a1.id,
+    expectCalled(mockFn, 1);
+    expectCalled(stateFn, 0);
+    const q1 = clone(new QueryResult(), {
       status: 'pending',
-      q: expect.any(Promise),
+      _q: expect.any(Promise),
       value: void 0,
       error: void 0,
     });
-    expect(result.current).toEqual([2, query]);
+    expect(result.current).toEqual([1, q1]);
     await act(async () => {
-      await result.current[1].q;
+      await result.current[1]._q;
     });
-    expectCalledWith(mockFn, [
-      { multiply: 2 },
-      [4, clone(query, { status: 'fulfilled', value: 2 })],
-    ]);
+    expectCalled(stateFn, 1);
+    const q2 = clone(q1, { status: 'fulfilled', value: 2, _q: void 0 });
+    expect(result.current).toEqual([4, q2]);
+    expectCalledWith(mockFn, [{ multiply: 2 }, [4, q2]]);
   });
 
-  it('should not dispatch for SSR', () => {
+  it('should not dispatch for SSR', async () => {
     const { result, mockFn, rerender } = renderDynamicHook(
       ({ m, n }) => [useQuery(simple(m)), useQuery(n % 2 ? simple(n) : state(n))],
       {
@@ -103,28 +108,37 @@ describe('useQuery', () => {
       },
       { m: 2, n: 2 },
     );
+    expectCalled(mockFn, 1);
+    expect(result.current[0][1]._q).toBeUndefined();
+    await act(async () => {
+      await result.current[1][1]._q;
+    });
     expectCalled(simpleFn, 0);
     expectCalled(stateFn, 1);
     expectCalled(mockFn, 1);
     expect(result.current[0][0]).toEqual(3);
     expect(result.current[1][0]).toEqual(0);
     rerender({ m: 2, n: 5 });
+    expectCalled(mockFn, 1);
+    expect(result.current[1][0]).toEqual(void 0);
+    await act(async () => {
+      await result.current[1][1]._q;
+    });
     expectCalled(simpleFn, 1);
     expectCalled(stateFn, 0);
     expectCalled(mockFn, 1);
     expect(result.current[0][0]).toEqual(3);
-    expect(result.current[1][0]).toEqual(void 0);
+    expect(result.current[1][0]).toEqual(5);
   });
 
   it('should serialize', () => {
-    const result = Object.assign(new QueryResult(), {
-      isFromJS: true,
-      q: expect.any(Promise),
+    const r1 = clone(new QueryResult(), {
+      _q: expect.any(Promise),
       status: 'fulfilled',
       value: 3, // fake value
       error: void 0,
     });
-    expect(result.toJSON()).toEqual({
+    expect(r1.toJSON()).toEqual({
       status: 'fulfilled',
       value: 3,
       error: void 0,
@@ -142,16 +156,17 @@ describe('useQuery', () => {
           value: void 0,
           error: {},
         },
+        '3': {
+          status: 'pending',
+          value: void 0,
+          error: {},
+        },
       })
       .toJSON();
-    expect(queryMap[2].q).rejects.toEqual({});
+    const r2 = clone(r1, { _q: void 0, _ssr: 1 });
     expect(queryMap).toEqual({
-      '1': result,
-      '2': clone(result, {
-        status: 'rejected',
-        value: void 0,
-        error: {},
-      }),
+      '1': r2,
+      '2': clone(r2, { status: 'rejected', value: void 0, error: {} }),
     });
   });
 });

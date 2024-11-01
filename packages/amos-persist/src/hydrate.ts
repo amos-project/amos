@@ -12,6 +12,7 @@ import { fromKey, toKey, toPersistOptions } from './utils';
 export const createHydrate = (store: Store, finalOptions: PersistOptions) => {
   return nextSerialTicker<PersistKey<any>, void>(async (items) => {
     const state = store.select(persistBox)!;
+    await state.init();
 
     function migrate(box: Box, v: number, id: string, d: any) {
       const opts = toPersistOptions(box);

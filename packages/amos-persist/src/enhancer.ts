@@ -4,7 +4,7 @@
  */
 
 import { Box, type Selectable, type Selector, StoreEnhancer } from 'amos-core';
-import { append, isAmosObject, override, PartialRequired } from 'amos-utils';
+import { append, isAmosObject, once, override, PartialRequired } from 'amos-utils';
 import { createHydrate } from './hydrate';
 import { createPersist } from './persist';
 import { persistBox, type PersistState } from './state';
@@ -28,6 +28,7 @@ export function withPersist(options: PartialRequired<PersistOptions, 'storage'>)
     const state: PersistState = {
       ...finalOptions,
       selecting: false,
+      init: once(async () => options.storage.init?.()),
       snapshot: new Map(),
       getInitial: (box) => {
         if (initial.has(box.key)) {

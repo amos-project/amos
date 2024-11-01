@@ -3,7 +3,7 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { isSameList, selector } from 'amos';
+import { selector } from 'amos';
 import { todoMapBox, TodoStatusFilter, todoStatusFilterBox, userTodoListBox } from './todo.boxes';
 import { currentUserIdBox } from './user.boxes';
 
@@ -24,6 +24,6 @@ export const selectVisibleUserTodoList = selector(
     });
   },
   {
-    equal: isSameList,
+    cache: true,
   },
 );

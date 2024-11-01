@@ -59,7 +59,7 @@ export const build = autorun(
                 before: [
                   createAmosTransformer(void 0, {
                     prefix: 'amos/',
-                    format: 'lower_underscore',
+                    format: 'lowerCamelCase',
                   }),
                 ],
               },

@@ -3,13 +3,13 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { useQuery } from 'amos/react';
+import { useSelector } from 'amos/react';
 import { memo } from 'react';
-import { getTodoList } from '../store/todo.actions';
+import { selectVisibleUserTodoList } from '../store/todo.selectors';
 import { TodoItem } from './TodoItem';
 
 export const TodoList = memo(() => {
-  const [todoList] = useQuery(getTodoList());
+  const todoList = useSelector(selectVisibleUserTodoList());
   return (
     <div>
       {todoList.map((id) => (

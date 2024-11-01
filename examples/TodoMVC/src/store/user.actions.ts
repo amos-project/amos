@@ -25,7 +25,7 @@ export const signOut = action(async (dispatch, select, keepData: boolean) => {
   // do real sign out
   await doAsync(void 0);
   const userId = select(currentUserIdBox);
-  dispatch(currentUserIdBox.setState());
+  dispatch(currentUserIdBox.setState(0));
   // notify boxes to clean data
   dispatch(signOutSignal({ userId, keepData }));
 });

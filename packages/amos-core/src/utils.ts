@@ -41,7 +41,7 @@ export function stringify(data: any): string {
   return data.toString();
 }
 
-export function resolveCacheKey(
+export function computeCacheKey(
   select: Select,
   v: Action | Selector,
   key: CacheOptions<any> | undefined,

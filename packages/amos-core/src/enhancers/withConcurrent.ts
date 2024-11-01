@@ -6,7 +6,7 @@
 import { isAmosObject, override } from 'amos-utils';
 import { Action } from '../action';
 import { StoreEnhancer } from '../store';
-import { resolveCacheKey } from '../utils';
+import { computeCacheKey } from '../utils';
 
 export function withConcurrent(): StoreEnhancer {
   return (next) => (options) => {
@@ -17,7 +17,7 @@ export function withConcurrent(): StoreEnhancer {
         if (!isAmosObject<Action>(d, 'action') || d.conflictPolicy !== 'leading') {
           return dispatch(d);
         }
-        const key = resolveCacheKey(store.select, d, d.conflictKey);
+        const key = computeCacheKey(store.select, d, d.conflictKey);
         if (pending.has(key)) {
           return pending.get(key)!;
         }

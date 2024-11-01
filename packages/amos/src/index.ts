@@ -75,6 +75,7 @@ export {
   enhanceSelector,
   enhanceSignal,
   isSelectValueEqual,
+  computeCacheKey,
   selector,
   signal,
 } from 'amos-core';

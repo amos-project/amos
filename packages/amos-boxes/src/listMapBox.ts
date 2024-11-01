@@ -65,7 +65,7 @@ export const ListMapBox = MapBox.extends<ListMapBox<any>>({
 export function listMapBox<K, E>(
   key: string,
   inferKey: K,
-  defaultElement: E,
+  inferElement: E,
 ): ListMapBox<ListMap<IDOf<K>, List<E>>> {
   return new ListMapBox(
     key,

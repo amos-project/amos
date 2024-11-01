@@ -12,11 +12,14 @@ export const TodoItem = memo(({ id }: { id: number }) => {
   const dispatch = useDispatch();
   const todo = useSelector(todoMapBox.getItem(id));
   return (
-    <div>
-      <span>{todo.title}</span>
+    <div className="todo flex">
+      <strong>{todo.title}</strong>
+      &nbsp;
+      <span className="expand" />
       {todo.completed ? null : (
         <button onClick={() => dispatch(completeTodo(id))}>Mark as completed</button>
       )}
+      &nbsp;
       <button onClick={() => dispatch(deleteTodo(id))}>Delete</button>
     </div>
   );

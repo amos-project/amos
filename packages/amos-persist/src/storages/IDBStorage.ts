@@ -4,6 +4,7 @@
  */
 
 import { PersistEntry, PersistModel, PersistValue, StorageEngine } from 'amos-persist';
+import { toJS } from 'amos-utils';
 
 const version = 1;
 
@@ -70,7 +71,11 @@ export class IDBStorage implements StorageEngine {
       transaction.onerror = reject;
       let objectStore = transaction.objectStore(this.table);
       items.forEach(([key, version, value]) => {
-        const request = objectStore.put({ key, version, value } satisfies PersistModel);
+        const request = objectStore.put({
+          key,
+          version,
+          value: toJS(value),
+        } satisfies PersistModel);
         request.onerror = reject;
       });
     });

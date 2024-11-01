@@ -3,7 +3,8 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { useSelector } from 'amos/react';
+import { hydrate } from 'amos';
+import { useQuery, useSelector } from 'amos/react';
 import { memo } from 'react';
 import { Filter } from './components/Filter';
 import { Header } from './components/Header';
@@ -13,11 +14,15 @@ import { currentUserIdBox } from './store/user.boxes';
 
 export const App = memo(() => {
   const userId = useSelector(currentUserIdBox);
+  const [, gate] = useQuery(hydrate([currentUserIdBox]));
+  if (gate.isPending()) {
+    return <div>Loading...</div>;
+  }
   if (!userId) {
     return <SignIn />;
   }
   return (
-    <div>
+    <div className="app">
       <Header />
       <Filter />
       <TodoList />

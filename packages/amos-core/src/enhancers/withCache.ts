@@ -8,7 +8,7 @@ import { Box } from '../box';
 import { Selector } from '../selector';
 import { StoreEnhancer } from '../store';
 import { Selectable } from '../types';
-import { resolveCacheKey } from '../utils';
+import { computeCacheKey } from '../utils';
 
 export type SelectEntry<R = any> = Entry<Selectable<R>, R>;
 
@@ -44,7 +44,7 @@ export const withCache: () => StoreEnhancer = () => {
           }
         }
         // should check the cache now
-        const key = resolveCacheKey(store.select, s, void 0);
+        const key = computeCacheKey(store.select, s, void 0);
         let cache = cacheMap.get(key);
         if (cache && cache[0] !== s.id) {
           cacheMap.delete(key);

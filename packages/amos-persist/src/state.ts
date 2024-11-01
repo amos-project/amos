@@ -9,6 +9,7 @@ import type { PersistKey, PersistOptions } from './types';
 import { toKey } from './utils';
 
 export interface PersistState extends PersistOptions {
+  init: () => Promise<void>;
   selecting: boolean;
   getInitial: (box: Box) => any;
   snapshot: Map<string, any>;

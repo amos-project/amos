@@ -11,8 +11,9 @@ export const SignIn = memo(() => {
   const [input, setInput] = useState('');
   const dispatch = useDispatch();
   return (
-    <div>
-      <input placeholder="Your name" value={input} onChange={(e) => setInput(e.target.value)} />{' '}
+    <div className="sign-in">
+      <input placeholder="Your name" value={input} onChange={(e) => setInput(e.target.value)} />
+      &nbsp;
       <button disabled={!input.trim()} onClick={() => dispatch(signIn(input))}>
         Sign In
       </button>

@@ -3,17 +3,20 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { action, Action, type Box, box, isAmosObject, SelectableAction, selector } from 'amos';
-import { resolveCacheKey } from 'amos-core';
 import {
-  clone,
-  defer,
-  Defer,
-  type JSONSerializable,
-  type JSONState,
-  type WellPartial,
-} from 'amos-utils';
-import { useEffect, useRef } from 'react';
+  action,
+  Action,
+  type Box,
+  box,
+  computeCacheKey,
+  type Dispatch,
+  isAmosObject,
+  type Select,
+  SelectableAction,
+  selector,
+} from 'amos';
+import { clone, type JSONSerializable, type JSONState, type Mutable } from 'amos-utils';
+import { useRef } from 'react';
 import { useDispatch } from './context';
 import { useSelector } from './useSelector';
 
@@ -21,15 +24,13 @@ export interface QueryResultJSON<R> extends Pick<QueryResult<R>, 'status' | 'val
 
 export class QueryResult<R> implements JSONSerializable<QueryResultJSON<R>> {
   /** @internal */
-  isFromJS: boolean = false;
+  _ssr: 1 | 2 | undefined;
   /** @internal */
-  id: string | undefined;
-  /** @internal */
-  q: Defer<void> = defer();
+  _q: Promise<void> | undefined;
 
-  status: 'initial' | 'pending' | 'fulfilled' | 'rejected' = 'initial';
-  value: Awaited<R> | undefined = void 0;
-  error: any = void 0;
+  readonly status: 'pending' | 'fulfilled' | 'rejected' = 'pending';
+  readonly value: Awaited<R> | undefined = void 0;
+  readonly error: any = void 0;
 
   toJSON(): QueryResultJSON<R> {
     return {
@@ -40,14 +41,13 @@ export class QueryResult<R> implements JSONSerializable<QueryResultJSON<R>> {
   }
 
   fromJS(state: JSONState<QueryResultJSON<R>>): this {
-    const q = defer<void>();
-    const r = clone(this, { ...state, q, isFromJS: true } as WellPartial<this>);
-    r.isRejected() ? q.reject(r.error) : r.isFulfilled() ? q.resolve() : void 0;
+    const r = clone(this, state as any);
+    (r as Mutable<this>)._ssr = 1;
     return r;
   }
 
   isPending() {
-    return this.status === 'pending' || this.status === 'initial';
+    return this.status === 'pending';
   }
 
   isFulfilled() {
@@ -66,7 +66,7 @@ export class QueryResultMap
   fromJS(state: JSONState<Record<string, QueryResult<any>>>): this {
     const dft = new QueryResult<any>();
     for (const k in state) {
-      if (Object.hasOwn(state, k)) {
+      if (Object.hasOwn(state, k) && state[k].status !== 'pending') {
         this.set(k, dft.fromJS(state[k]));
       }
     }
@@ -74,35 +74,74 @@ export class QueryResultMap
   }
 
   toJSON(): Record<string, QueryResult<any>> {
-    return Object.fromEntries(this.entries());
-  }
-
-  getItem(key: string, id: string): QueryResult<any> {
-    let item = this.get(key);
-    if (item) {
-      if (item.id === void 0) {
-        item.id = id;
-      } else if (item.id !== id) {
-        item = void 0;
+    const items = Object.fromEntries(this.entries());
+    for (const k in items) {
+      if (items[k].isPending()) {
+        delete items[k];
       }
     }
-    if (!item) {
-      item = new QueryResult<any>();
-      item.id = id;
-      this.set(key, item);
-    }
-    return item;
+    return items;
   }
 }
 
 // Immutable state conflicts with react suspense use.
-export const queryMapBox = box('amos.queries', () => new QueryResultMap());
+const queryMapBox = box('amos.queries', () => new QueryResultMap());
 
-export const selectQuery = selector((select, key: string, id: string) => {
-  return select(queryMapBox).getItem(key, id);
+const selectQuery = selector((select, key: string) => {
+  return select(queryMapBox).get(key);
 });
 
-export const updateQuery = action(
+function performQuery(
+  dispatch: Dispatch,
+  select: Select,
+  key: string,
+  action: Action,
+  lastKey: string | undefined,
+) {
+  const map = select(queryMapBox);
+  let query = map.get(key);
+
+  if (query) {
+    // From SSR
+    if (query._ssr === 1) {
+      query._ssr = 2;
+      setTimeout(() => (query!._ssr = void 0), 0);
+      return;
+    } else if (query._ssr === 2) {
+      return;
+    }
+
+    // same key
+    if (lastKey === key) {
+      return;
+    }
+
+    if (query.isPending()) {
+      return;
+    }
+    query = clone(query, { status: 'pending' });
+  } else {
+    query = new QueryResult<any>();
+  }
+  map.set(key, query);
+  query._q = Promise.resolve().then(async () => {
+    // dispatch action
+    const props: Mutable<Partial<QueryResult<any>>> = {};
+    try {
+      props.value = await dispatch(action);
+      props.status = 'fulfilled';
+    } catch (e) {
+      props.error = e;
+      props.status = 'rejected';
+      throw e;
+    } finally {
+      props._q = void 0;
+      dispatch(updateQuery(key, query, props));
+    }
+  });
+}
+
+const updateQuery = action(
   (dispatch, select, key: string, query: QueryResult<any>, props: Partial<QueryResult<any>>) => {
     const map = select(queryMapBox);
     if (map.get(key) === query) {
@@ -131,42 +170,11 @@ export interface UseQuery {
 export const useQuery: UseQuery = (action: Action | SelectableAction): [any, QueryResult<any>] => {
   const select = useSelector();
   const dispatch = useDispatch();
-  const key = resolveCacheKey(select, action, action.conflictKey);
-  const result = select(selectQuery(key, action.id));
+  const key = computeCacheKey(select, action, action.conflictKey);
   const lastKey = useRef<string>();
-
-  const isFromJS = result.isFromJS;
-  const shouldDispatch = lastKey.current !== key && !isFromJS && result.status !== 'pending';
-  if (shouldDispatch) {
-    if (result.status !== 'initial') {
-      result.q = defer();
-    }
-    result.status = 'pending';
-  }
+  performQuery(dispatch, select, key, action, lastKey.current);
+  const result = select(selectQuery(key))!;
   lastKey.current = key;
-  useEffect(() => {
-    if (result.isFromJS) {
-      // only actions used in first time mounted component will not be dispatched
-      result.isFromJS = false;
-      return;
-    }
-    if (!shouldDispatch) {
-      return;
-    }
-    (async () => {
-      const props: Partial<QueryResult<any>> = {};
-      try {
-        props.value = await dispatch(action);
-        props.status = 'fulfilled';
-        result.q.resolve();
-      } catch (e) {
-        props.error = e;
-        props.status = 'rejected';
-        result.q.reject(e);
-      }
-      dispatch(updateQuery(key, result, props));
-    })();
-  }, [key]);
 
   if ('selector' in action) {
     return [
@@ -194,7 +202,7 @@ export interface UseSuspenseQuery {
 export const useSuspenseQuery: UseSuspenseQuery = (action: Action): any => {
   const [value, result] = useQuery(action);
   if (result.isPending()) {
-    throw result.q;
+    throw result._q;
   } else if (result.isRejected()) {
     throw result.error;
   }

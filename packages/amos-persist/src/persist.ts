@@ -12,6 +12,8 @@ import { shouldPersist, toKey, toPersistOptions } from './utils';
 export const createPersist = (store: Store, finalOptions: PersistOptions) => {
   return nextSerialTicker<void, void>(async () => {
     const state = store.select(persistBox)!;
+    await state.init();
+
     const snapshot = store.snapshot();
     const entries: PersistEntry[] = [];
     const removes: string[] = [];

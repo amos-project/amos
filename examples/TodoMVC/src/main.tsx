@@ -5,10 +5,25 @@ import { createRoot } from 'react-dom/client';
 import { App } from './App';
 import './index.css';
 import { hashCode } from './store/todo.boxes';
+import { currentUserIdBox, userMapBox } from './store/user.boxes';
+
+const userId = hashCode('Amos');
 
 const store = createStore(
-  { preloadedState: { 'users.currentUserId': hashCode('Amos') } },
-  withPersist({ storage: new IDBStorage('todo', 'todo') }),
+  {
+    name: 'Amos - TodoMVC',
+    devtools: true,
+    preloadedState: {
+      [currentUserIdBox.key]: userId,
+      [userMapBox.key]: {
+        [userId]: { id: userId, name: 'Amos' },
+      },
+    },
+  },
+  withPersist({
+    storage: new IDBStorage('todo', 'todo'),
+    includes: () => true,
+  }),
 );
 
 createRoot(document.getElementById('root')!).render(
