@@ -4,7 +4,7 @@
  */
 
 import { Box, Mutation, ShapeBox } from 'amos-core';
-import { removeElement } from 'amos-utils';
+import { removeElement, type ValueOrFunc } from 'amos-utils';
 
 export interface ArrayBox<E>
   extends Box<readonly E[]>,
@@ -45,6 +45,6 @@ export const ArrayBox = Box.extends<ArrayBox<any>>({
   },
 });
 
-export function arrayBox<E>(key: string, initialState: readonly E[] = []): ArrayBox<E> {
+export function arrayBox<E>(key: string, initialState: ValueOrFunc<readonly E[]> = []): ArrayBox<E> {
   return new ArrayBox(key, initialState);
 }

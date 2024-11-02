@@ -4,7 +4,7 @@
  */
 
 import { Box, Mutation, Selector } from 'amos-core';
-import { resolveFuncValue, shallowEqual } from 'amos-utils';
+import { resolveFuncValue, shallowEqual, type ValueOrFunc } from 'amos-utils';
 
 export interface ObjectBox<T extends object> extends Box<Readonly<T>> {
   mergeState(state: Partial<T>): Mutation<Readonly<T>>;
@@ -31,6 +31,6 @@ export const ObjectBox = Box.extends<ObjectBox<any>>({
   },
 });
 
-export function objectBox<T extends object>(key: string, initialState: T): ObjectBox<T> {
+export function objectBox<T extends object>(key: string, initialState: ValueOrFunc<T>): ObjectBox<T> {
   return new ObjectBox(key, initialState);
 }
