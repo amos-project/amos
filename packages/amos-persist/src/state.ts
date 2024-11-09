@@ -10,7 +10,7 @@ import { toKey } from './utils';
 
 export interface PersistState extends PersistOptions {
   init: () => Promise<void>;
-  selecting: boolean;
+  select: Select;
   getInitial: (box: Box) => any;
   snapshot: Map<string, any>;
   hydrate: NextTicker<PersistKey<any>, void>;

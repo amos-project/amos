@@ -75,7 +75,7 @@ describe('withPersist', () => {
     ]);
     const r2 = store.select(userMapBox.getItem(Morty.id));
     expect(r2).toBe(Morty);
-    await sleep(1);
+    await store.dispatch(hydrate([]));
     const r3 = store.select(userMapBox.getItem(Morty.id));
     expect(r3).toEqual(Morty.set('firstName', 'F2'));
     expectCalledWith(getMulti, [[toKey(userMapBox, Morty.id)]]);
@@ -111,5 +111,37 @@ describe('withPersist', () => {
     await sleep(1);
     const r5 = store.select(darkModeBox);
     expect([r4, r5]).toEqual([false, 3 * 2 + 1]);
+  });
+
+  it('should not hydrate non-selected row', async () => {
+    const storage = new MemoryStorage();
+    await storage.setMulti([
+      [toKey(countBox), 1, 1],
+      [toKey(userMapBox, Rick.id), 1, Rick.set('firstName', 'F1')],
+    ]);
+    const store = createStore(void 0, withPersist({ storage, includes: () => true }));
+    store.select(countBox);
+    await store.dispatch(hydrate([]));
+    expect(store.select(userMapBox.getItem(Rick.id)).firstName).toBe(Rick.firstName);
+  });
+
+  it('should hydrate rows selected in listener', async () => {
+    const storage = new MemoryStorage();
+    await storage.setMulti([
+      [toKey(countBox), 1, 1],
+      [toKey(userMapBox, Rick.id), 1, Rick.set('firstName', 'F1')],
+    ]);
+    const store = createStore(void 0, withPersist({ storage, includes: () => true }));
+    store.subscribe(() => {
+      if (store.select(countBox) === 1) {
+        store.select(userMapBox.getItem(Rick.id));
+      }
+    });
+    store.select(countBox);
+    await store.dispatch(hydrate([]));
+    expect(store.select(countBox)).toBe(1);
+    expect(store.select(userMapBox.getIn(Rick.id, 'firstName'))).toBe(Rick.firstName);
+    await store.dispatch(hydrate([]));
+    expect(store.select(userMapBox.getIn(Rick.id, 'firstName'))).toBe('F1');
   });
 });

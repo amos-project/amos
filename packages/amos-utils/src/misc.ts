@@ -4,7 +4,7 @@
  */
 
 import { isIterable } from './equals';
-import { ValueOrConstructor, ValueOrFunc } from './types';
+import { type AnyFunc, ValueOrConstructor, ValueOrFunc } from './types';
 
 export function must<T>(value: T, message: string): asserts value {
   if (!value) {
@@ -49,6 +49,21 @@ export function toArray<T>(items: T[] | Iterable<T> | T): T[] {
     return Array.from(items);
   }
   return [items as T];
+}
+
+export class StackObserver {
+  count = 0;
+
+  observe<T extends AnyFunc>(fn: T) {
+    return ((...args: any[]) => {
+      this.count++;
+      try {
+        return fn(...args);
+      } finally {
+        this.count--;
+      }
+    }) as T;
+  }
 }
 
 export interface NextTicker<T, R> {

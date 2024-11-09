@@ -3,8 +3,8 @@
  * @author junbao <junbao@mymoement.com>
  */
 
-import { Box, type Selectable, type Selector, StoreEnhancer } from 'amos-core';
-import { append, isAmosObject, once, override, PartialRequired } from 'amos-utils';
+import { Box, type Mutation, type Selectable, type Selector, StoreEnhancer } from 'amos-core';
+import { append, isAmosObject, once, override, PartialRequired, StackObserver } from 'amos-utils';
 import { createHydrate } from './hydrate';
 import { createPersist } from './persist';
 import { persistBox, type PersistState } from './state';
@@ -23,24 +23,19 @@ export function withPersist(options: PartialRequired<PersistOptions, 'storage'>)
     const hydrate = createHydrate(store, finalOptions);
     const persist = createPersist(store, finalOptions);
 
+    const selecting = new StackObserver();
     const initial = new Map<string, any>();
 
     const state: PersistState = {
       ...finalOptions,
-      selecting: false,
       init: once(async () => options.storage.init?.()),
       snapshot: new Map(),
+      select: selecting.observe((s: any) => store.select(s)),
       getInitial: (box) => {
         if (initial.has(box.key)) {
           return initial.get(box.key);
         }
-        const selecting = state.selecting;
-        state.selecting = true;
-        try {
-          store.select(box);
-        } finally {
-          state.selecting = selecting;
-        }
+        state.select(box);
         return state.getInitial(box);
       },
       hydrate,
@@ -50,6 +45,21 @@ export function withPersist(options: PartialRequired<PersistOptions, 'storage'>)
     append(store, 'onInit', () => store.dispatch(persistBox.setState(state)));
     append(store, 'onMount', (box, initialState, preloadedState) => {
       initial.set(box.key, initialState);
+    });
+
+    let dispatchingMutation = 0;
+    override(store, 'dispatch', (dispatch) => {
+      return (dispatchables: any) => {
+        if (!isAmosObject<Mutation>(dispatchables, 'mutation')) {
+          return dispatch(dispatchables);
+        }
+        try {
+          dispatchingMutation++;
+          return dispatch(dispatchables);
+        } finally {
+          dispatchingMutation--;
+        }
+      };
     });
 
     let selectingRows: PersistRowKey<any> | undefined = void 0;
@@ -64,7 +74,7 @@ export function withPersist(options: PartialRequired<PersistOptions, 'storage'>)
         }
         try {
           const r = select(selectable as Selectable);
-          if (state.selecting) {
+          if (selecting.count || dispatchingMutation) {
             return r;
           }
           // hydrate rows for multi-row boxes
