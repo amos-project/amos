@@ -85,7 +85,7 @@ export function withPersist(options: PartialRequired<PersistOptions, 'storage'>)
           }
           // hydrate rows for multi-row boxes
           if (
-            loadRows &&
+            loadRows?.[1] &&
             (getInitial(loadRows[0])[1] === void 0 ||
               !loadRows[0].table!.hasRow(getInitial(loadRows[0])[0], loadRows[1])) &&
             !hydrated.has(toKey(loadRows[0])) &&
