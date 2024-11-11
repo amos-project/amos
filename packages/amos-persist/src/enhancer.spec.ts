@@ -8,6 +8,7 @@ import {
   countBox,
   darkModeBox,
   dispatch,
+  expectCalled,
   expectCalledWith,
   Jerry,
   Morty,
@@ -143,5 +144,32 @@ describe('withPersist', () => {
     expect(store.select(userMapBox.getIn(Rick.id, 'firstName'))).toBe(Rick.firstName);
     await store.dispatch(hydrate([]));
     expect(store.select(userMapBox.getIn(Rick.id, 'firstName'))).toBe('F1');
+  });
+
+  it('should not loop infinite', async () => {
+    const storage = new MemoryStorage();
+    await storage.setMulti([
+      [toKey(countBox), 1, countBox.getInitialState()],
+      [toKey(userMapBox, Rick.id), 1, Rick],
+    ]);
+    const store = createStore(void 0, withPersist({ storage, includes: () => true }));
+    store.subscribe(() => {
+      store.select(countBox);
+      store.select(userMapBox.getItem(Rick.id));
+      store.select(userMapBox.getItem(Morty.id));
+      store.select(userMapBox.getItem(10000));
+    });
+    const getMulti = jest.fn();
+    append(storage, 'getMulti', getMulti);
+    store.select(countBox);
+    store.select(userMapBox.getItem(Rick.id));
+    store.select(userMapBox.getItem(Morty.id));
+    store.select(userMapBox.getItem(10000));
+    store.select(userMapBox.getItem(10001));
+    await store.dispatch(hydrate([]));
+    expectCalled(getMulti, 1);
+    await Promise.resolve();
+    await store.dispatch(hydrate([]));
+    expectCalled(getMulti, 0);
   });
 });

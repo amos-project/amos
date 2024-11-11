@@ -11,8 +11,9 @@ import { toKey } from './utils';
 export interface PersistState extends PersistOptions {
   init: () => Promise<void>;
   select: Select;
-  getInitial: (box: Box) => any;
-  snapshot: Map<string, any>;
+  getInitial: (box: Box) => [initial: any, preloaded: any];
+  hydrated: Set<string>;
+  persisted: Map<string, any>;
   hydrate: NextTicker<PersistKey<any>, void>;
   persist: NextTicker<void, void>;
 }

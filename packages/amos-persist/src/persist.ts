@@ -24,8 +24,8 @@ export const createPersist = (store: Store, finalOptions: PersistOptions) => {
         continue;
       }
       const curr = snapshot[k];
-      const prev = state.snapshot.has(k) ? state.snapshot.get(k) : state.getInitial(box);
-      state.snapshot.set(k, curr);
+      const prev = state.persisted.has(k) ? state.persisted.get(k) : state.getInitial(box)[0];
+      state.persisted.set(k, curr);
       if (curr === prev) {
         continue;
       }

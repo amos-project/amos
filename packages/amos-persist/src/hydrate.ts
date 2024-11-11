@@ -29,9 +29,16 @@ export const createHydrate = (store: Store, finalOptions: PersistOptions) => {
 
     const addRow = (box: Box, rowId?: ID) => {
       if (rowId === void 0) {
+        if (state.hydrated.has(toKey(box))) {
+          return;
+        }
+        state.hydrated.add(toKey(box));
         targets.set(box.key, box.table ? null : void 0);
+      } else if (state.hydrated.has(toKey(box)) || state.hydrated.has(toKey(box, rowId))) {
+        return;
       } else {
         must(box.table, `${box.key} is not a multi-row box`);
+        state.hydrated.add(toKey(box, rowId));
         if (!targets.has(box.key)) {
           targets.set(box.key, new Set());
         }
@@ -65,6 +72,10 @@ export const createHydrate = (store: Store, finalOptions: PersistOptions) => {
       }
     });
 
+    if (prefixBoxes.length === 0 && exactKeys.length === 0) {
+      return;
+    }
+
     const [prefixes, exacts] = await Promise.all([
       Promise.all(prefixBoxes.map((key) => state.storage.getPrefix(toKey(key, null)))),
       exactKeys.length ? state.storage.getMulti(exactKeys.map(([k, i]) => toKey(k, i))) : [],
@@ -85,10 +96,10 @@ export const createHydrate = (store: Store, finalOptions: PersistOptions) => {
           prefixes.push(tablePrefixMap[key]);
         }
         tablePrefixMap[key].push([toKey(key, rowId), ...value]);
-      } else if (state.select(box) === state.getInitial(box)) {
+      } else if (state.select(box) === state.getInitial(box)[0]) {
         const js = migrate(box, value[0], '', value[1]);
         if (js !== void 0) {
-          exactEntries.push(box.setState(fromJS(state.getInitial(box), js)));
+          exactEntries.push(box.setState(fromJS(state.getInitial(box)[0], js)));
         }
       }
     });
@@ -104,7 +115,7 @@ export const createHydrate = (store: Store, finalOptions: PersistOptions) => {
             if (id === void 0) {
               continue;
             }
-            if (box.table!.getRow(curr, id) !== box.table!.getRow(state.getInitial(box), id)) {
+            if (box.table!.getRow(curr, id) !== box.table!.getRow(state.getInitial(box)[0], id)) {
               continue;
             }
             d = migrate(box, v, id, d);

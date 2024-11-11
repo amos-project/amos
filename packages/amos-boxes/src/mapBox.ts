@@ -49,6 +49,7 @@ export const MapBox = Box.extends<MapBox>({
   options: {
     table: {
       toRows: (state: Map<any, any>) => state.toJSON(),
+      hasRow: (state: Map<any, any>, key) => state.hasItem(key),
       getRow: (state: Map<any, any>, key) => state.getItem(key),
       hydrate: (state: Map<any, any>, rows) => state.setAll(state.fromJS(rows).toJSON()),
     },

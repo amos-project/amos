@@ -74,7 +74,12 @@ export interface TableOptions<S = any> {
   /**
    * Get a row from current state
    */
-  getRow: (state: S, rowId: ID) => boolean;
+  hasRow: (state: S, rowId: ID) => boolean;
+
+  /**
+   * Get a row from current state
+   */
+  getRow: (state: S, rowId: ID) => any;
 
   /**
    * Merge the persisted state to current state.

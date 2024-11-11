@@ -7,9 +7,9 @@ import { Box, type Mutation, type Selectable, type Selector, StoreEnhancer } fro
 import { append, isAmosObject, once, override, PartialRequired, StackObserver } from 'amos-utils';
 import { createHydrate } from './hydrate';
 import { createPersist } from './persist';
-import { persistBox, type PersistState } from './state';
+import { persistBox } from './state';
 import { PersistOptions, type PersistRowKey } from './types';
-import { shouldPersist } from './utils';
+import { shouldPersist, toKey } from './utils';
 
 export function withPersist(options: PartialRequired<PersistOptions, 'storage'>): StoreEnhancer {
   return (next) => (_options) => {
@@ -22,29 +22,35 @@ export function withPersist(options: PartialRequired<PersistOptions, 'storage'>)
 
     const hydrate = createHydrate(store, finalOptions);
     const persist = createPersist(store, finalOptions);
-
+    const hydrated = new Set<string>();
+    const persisted = new Map();
+    const initial = new Map<string, [any, any]>();
     const selecting = new StackObserver();
-    const initial = new Map<string, any>();
-
-    const state: PersistState = {
-      ...finalOptions,
-      init: once(async () => options.storage.init?.()),
-      snapshot: new Map(),
-      select: selecting.observe((s: any) => store.select(s)),
-      getInitial: (box) => {
-        if (initial.has(box.key)) {
-          return initial.get(box.key);
-        }
-        state.select(box);
-        return state.getInitial(box);
-      },
-      hydrate,
-      persist,
+    const init = once(async () => options.storage.init?.());
+    const select = selecting.observe((s: any) => store.select(s));
+    const getInitial = (box: Box) => {
+      if (!initial.has(box.key)) {
+        select(box);
+      }
+      return initial.get(box.key)!;
     };
 
-    append(store, 'onInit', () => store.dispatch(persistBox.setState(state)));
+    append(store, 'onInit', () =>
+      store.dispatch(
+        persistBox.setState({
+          ...finalOptions,
+          init,
+          select,
+          getInitial,
+          hydrated,
+          persisted,
+          hydrate,
+          persist,
+        }),
+      ),
+    );
     append(store, 'onMount', (box, initialState, preloadedState) => {
-      initial.set(box.key, initialState);
+      initial.set(box.key, [initialState, preloadedState]);
     });
 
     let dispatchingMutation = 0;
@@ -80,7 +86,10 @@ export function withPersist(options: PartialRequired<PersistOptions, 'storage'>)
           // hydrate rows for multi-row boxes
           if (
             loadRows &&
-            r === loadRows[0].table!.getRow(state.getInitial(loadRows[0]), loadRows[1]) &&
+            (getInitial(loadRows[0])[1] === void 0 ||
+              !loadRows[0].table!.hasRow(getInitial(loadRows[0])[0], loadRows[1])) &&
+            !hydrated.has(toKey(loadRows[0])) &&
+            !hydrated.has(toKey(loadRows[0], loadRows[1])) &&
             shouldPersist(finalOptions, loadRows[0])
           ) {
             hydrate(loadRows);
@@ -91,7 +100,8 @@ export function withPersist(options: PartialRequired<PersistOptions, 'storage'>)
             isBox &&
             !selectable.table &&
             !selectingRows &&
-            r === state.getInitial(selectable) &&
+            getInitial(selectable)[1] === void 0 &&
+            !hydrated.has(toKey(selectable)) &&
             shouldPersist(finalOptions, selectable)
           ) {
             hydrate(selectable);
