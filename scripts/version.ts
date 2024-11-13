@@ -57,6 +57,6 @@ export const version = autorun(
       pj.version = version;
       await fs.outputJSON(pjFile, pj, { spaces: 2 });
     }
-    child_process.execSync(`git add -A; git commit -m "feat: v${version}"`, { stdio: 'inherit' });
+    child_process.execSync(`yarn; git add -A; git commit -m "feat: v${version}"`, { stdio: 'inherit' });
   },
 );
