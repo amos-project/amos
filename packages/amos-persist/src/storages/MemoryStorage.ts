@@ -22,13 +22,13 @@ export class MemoryStorage implements StorageEngine {
     items.forEach(([k, v, d]) => (this.data[k] = [v, d]));
   }
 
-  async removeMulti(items: readonly string[]): Promise<void> {
+  async deleteMulti(items: readonly string[]): Promise<void> {
     items.forEach((k) => {
       delete this.data[k];
     });
   }
 
-  async removePrefix(prefix: string): Promise<void> {
+  async deletePrefix(prefix: string): Promise<void> {
     for (const k in this.data) {
       if (k.startsWith(prefix)) {
         delete this.data[k];

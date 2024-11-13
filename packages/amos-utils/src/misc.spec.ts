@@ -10,7 +10,7 @@ import {
   must,
   nextSerialTicker,
   NotImplemented,
-  removeElement,
+  deleteElement,
   resolveConstructorValue,
   resolveFuncValue,
   toArray,
@@ -91,7 +91,7 @@ describe('misc utils', () => {
     expect(resolveFuncValue((v: number) => v * 2, 3)).toEqual(6);
 
     const arr = [1, 3, 2, 3, 1];
-    expect(removeElement(arr, 3) === arr).toBe(true);
+    expect(deleteElement(arr, 3) === arr).toBe(true);
     expect(arr).toEqual([1, 2, 3, 1]);
 
     expect(toArray(1)).toEqual([1]);

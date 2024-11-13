@@ -39,13 +39,13 @@ describe('withPersist', () => {
     const setMulti = jest.fn();
     const getMulti = jest.fn();
     const getPrefix = jest.fn();
-    const removePrefix = jest.fn();
-    const removeMulti = jest.fn();
+    const deletePrefix = jest.fn();
+    const deleteMulti = jest.fn();
     append(engine, 'getPrefix', getPrefix);
     append(engine, 'getMulti', getMulti);
     append(engine, 'setMulti', setMulti);
-    append(engine, 'removePrefix', removePrefix);
-    append(engine, 'removeMulti', removeMulti);
+    append(engine, 'deletePrefix', deletePrefix);
+    append(engine, 'deleteMulti', deleteMulti);
 
     const store = createStore(
       void 0,
@@ -96,12 +96,12 @@ describe('withPersist', () => {
     ]);
     expectCalledWith(getPrefix, [toKey(userMapBox)]);
 
-    store.dispatch(userMapBox.removeItem(Rick.id));
+    store.dispatch(userMapBox.deleteItem(Rick.id));
     await sleep(1);
-    expectCalledWith(removeMulti, [[toKey(userMapBox, Rick.id)]]);
+    expectCalledWith(deleteMulti, [[toKey(userMapBox, Rick.id)]]);
     store.dispatch(userMapBox.clear());
     await sleep(1);
-    expectCalledWith(removePrefix, [toKey(userMapBox)]);
+    expectCalledWith(deletePrefix, [toKey(userMapBox)]);
     await store.dispatch(hydrate([sessionMapBox]));
     expectCalledWith(getPrefix, [toKey(sessionMapBox)]);
     store.select(postMapBox.getItem(1));

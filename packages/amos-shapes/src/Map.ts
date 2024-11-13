@@ -135,11 +135,11 @@ export class Map<K extends ID, V> implements JSONSerializable<Record<K, V>> {
     return this;
   }
 
-  removeItem(key: K): this {
-    return this.removeAll([key]);
+  deleteItem(key: K): this {
+    return this.deleteAll([key]);
   }
 
-  removeAll(keys: Iterable<K> | readonly K[]) {
+  deleteAll(keys: Iterable<K> | readonly K[]) {
     const keysArr = toArray(keys).filter((k) => this.hasItem(k));
     if (!keysArr.length) {
       return this;

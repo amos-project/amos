@@ -24,7 +24,7 @@ export interface ToJSON<T> {
 
 export interface FromJS<T> {
   // should satisfy the expression: state === toJS(fromJS(state))
-  // which means: should fully remove current state, and merge deeply.
+  // which means: should fully delete current state, and merge deeply.
   fromJS(state: JSONState<T>): this;
 }
 

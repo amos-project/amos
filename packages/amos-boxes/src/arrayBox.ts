@@ -4,7 +4,7 @@
  */
 
 import { Box, Mutation, ShapeBox } from 'amos-core';
-import { removeElement, type ValueOrFunc } from 'amos-utils';
+import { deleteElement, type ValueOrFunc } from 'amos-utils';
 
 export interface ArrayBox<E>
   extends Box<readonly E[]>,
@@ -35,7 +35,7 @@ export const ArrayBox = Box.extends<ArrayBox<any>>({
     },
     sort: (state, compare) => state.slice().sort(compare),
     filter: null,
-    delete: (state, ...items) => removeElement(state.slice(), ...items),
+    delete: (state, ...items) => deleteElement(state.slice(), ...items),
   },
   selectors: {
     at: null,

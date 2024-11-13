@@ -75,7 +75,7 @@ export class SQLiteStorage implements StorageEngine {
     );
   }
 
-  async removeMulti(items: readonly string[]): Promise<void> {
+  async deleteMulti(items: readonly string[]): Promise<void> {
     const rows = items.map(() => '?').join(', ');
     await this.db.runAsync(
       `DELETE
@@ -85,7 +85,7 @@ export class SQLiteStorage implements StorageEngine {
     );
   }
 
-  async removePrefix(prefix: string): Promise<void> {
+  async deletePrefix(prefix: string): Promise<void> {
     await this.db.runAsync(
       `DELETE
        FROM ${this.table}

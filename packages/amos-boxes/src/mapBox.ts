@@ -17,8 +17,8 @@ export interface MapBox<M extends Map<any, any> = Map<any, any>>
       | 'mergeAll'
       | 'updateItem'
       | 'updateAll'
-      | 'removeItem'
-      | 'removeAll'
+      | 'deleteItem'
+      | 'deleteAll'
       | 'clear'
       | 'reset',
       'getItem' | 'hasItem' | 'size',
@@ -34,8 +34,8 @@ export const MapBox = Box.extends<MapBox>({
     mergeAll: null,
     updateItem: null,
     updateAll: null,
-    removeItem: null,
-    removeAll: null,
+    deleteItem: null,
+    deleteAll: null,
     clear: null,
     reset: null,
   },

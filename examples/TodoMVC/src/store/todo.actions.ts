@@ -26,7 +26,7 @@ export const completeTodo = action(async (dispatch, select, id: number) => {
 
 export const deleteTodo = action(async (dispatch, select, id: number) => {
   await doAsync(void 0);
-  dispatch([todoMapBox.removeItem(id), userTodoListBox.deleteIn(select(currentUserIdBox), id)]);
+  dispatch([todoMapBox.deleteItem(id), userTodoListBox.deleteIn(select(currentUserIdBox), id)]);
 });
 
 export const getTodoList = action(

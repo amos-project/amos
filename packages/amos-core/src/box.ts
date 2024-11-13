@@ -375,7 +375,7 @@ export type ShapeBox<
   TShape,
   TMutationKeys extends keyof TShape,
   TSelectorKeys extends keyof TShape,
-  KLimiter = TShape /* tricky for WebStorm go to definitions to shape method, if TypeScript allows P in keyof S & KM, this should be removed */,
+  KLimiter = TShape /* tricky for WebStorm go to definitions to shape method, if TypeScript allows P in keyof S & KM, this should be deleted */,
 > = {
   [P in keyof KLimiter & TMutationKeys]: TShape[P] extends (...args: infer A) => TShape
     ? MutationFactory<A, TShape>

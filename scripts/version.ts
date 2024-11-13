@@ -5,6 +5,7 @@
 
 import * as fs from 'fs-extra';
 import { pick } from 'lodash';
+import * as child_process from 'node:child_process';
 import yargs from 'yargs';
 import { autorun } from './utils';
 
@@ -56,5 +57,6 @@ export const version = autorun(
       pj.version = version;
       await fs.outputJSON(pjFile, pj, { spaces: 2 });
     }
+    child_process.execSync(`git add -A; git commit -m "feat: v${version}"`, { stdio: 'inherit' });
   },
 );

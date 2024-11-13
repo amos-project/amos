@@ -81,7 +81,7 @@ export class IDBStorage implements StorageEngine {
     });
   }
 
-  removeMulti(items: readonly string[]): Promise<void> {
+  deleteMulti(items: readonly string[]): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       let transaction = this.db.transaction([this.table], 'readwrite');
       transaction.oncomplete = () => resolve();
@@ -94,7 +94,7 @@ export class IDBStorage implements StorageEngine {
     });
   }
 
-  removePrefix(prefix: string): Promise<void> {
+  deletePrefix(prefix: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       let transaction = this.db.transaction([this.table], 'readwrite');
       transaction.oncomplete = () => resolve();

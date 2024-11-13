@@ -3,7 +3,7 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { must, removeElement } from './misc';
+import { must, deleteElement } from './misc';
 import { FuncParams, Unsubscribe } from './types';
 
 export type Enhancer<A extends any[], V> = (next: (...args: A) => V) => (...args: A) => V;
@@ -30,7 +30,7 @@ export function enhancerCollector<A extends any[], V>(): EnhancerCollector<A, V>
       must(!enhancers.includes(e), 'enhancer is already exists');
       enhancers.push(e);
       return () => {
-        removeElement(enhancers, e);
+        deleteElement(enhancers, e);
       };
     },
     {

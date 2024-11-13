@@ -16,8 +16,8 @@ export const createPersist = (store: Store, finalOptions: PersistOptions) => {
 
     const snapshot = store.snapshot();
     const entries: PersistEntry[] = [];
-    const removes: string[] = [];
-    const removePrefixes: string[] = [];
+    const deletes: string[] = [];
+    const deletePrefixes: string[] = [];
     for (const k in snapshot) {
       const box = Box.get(k);
       if (!shouldPersist(state, box)) {
@@ -34,7 +34,7 @@ export const createPersist = (store: Store, finalOptions: PersistOptions) => {
         const prevRows = box.table.toRows(prev);
         const keys = Object.keys(currRows);
         if (keys.length === 0) {
-          removePrefixes.push(toKey(box));
+          deletePrefixes.push(toKey(box));
         } else {
           for (const k of keys) {
             if (prevRows[k] !== currRows[k]) {
@@ -43,7 +43,7 @@ export const createPersist = (store: Store, finalOptions: PersistOptions) => {
           }
           for (const k in prevRows) {
             if (!Object.hasOwn(currRows, k)) {
-              removes.push(toKey(box, k));
+              deletes.push(toKey(box, k));
             }
           }
         }
@@ -53,8 +53,8 @@ export const createPersist = (store: Store, finalOptions: PersistOptions) => {
     }
     await Promise.all([
       entries.length ? state.storage.setMulti(entries) : void 0,
-      removes.length ? state.storage.removeMulti(removes) : void 0,
-      ...removePrefixes.map((p) => state.storage.removePrefix(p)),
+      deletes.length ? state.storage.deleteMulti(deletes) : void 0,
+      ...deletePrefixes.map((p) => state.storage.deletePrefix(p)),
     ]);
   }, finalOptions.onError);
 };

@@ -34,7 +34,7 @@ signOutSignal.subscribe((dispatch, select, data) => {
     return;
   }
   const userTodoList = select(userTodoListBox.getItem(data.userId));
-  dispatch([todoMapBox.removeAll(userTodoList), userTodoListBox.removeItem(data.userId)]);
+  dispatch([todoMapBox.deleteAll(userTodoList), userTodoListBox.deleteItem(data.userId)]);
 });
 
 export enum TodoStatusFilter {

@@ -31,7 +31,7 @@ export const userMapBox = recordMapBox('users', UserRecord, 'id').setInitialStat
 
 userMapBox.subscribe(signOutSignal, (state, data) => {
   if (!data.keepData) {
-    return state.removeItem(data.userId);
+    return state.deleteItem(data.userId);
   }
   return state;
 });

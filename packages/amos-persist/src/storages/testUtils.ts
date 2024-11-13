@@ -31,7 +31,7 @@ export async function testStorage(s: StorageEngine) {
       ]),
     ]),
   ).toEqual([void 0, void 0]);
-  expect(await Promise.all([s.removeMulti(['A:2', 'B:3']), s.removePrefix('C:')])).toEqual([
+  expect(await Promise.all([s.deleteMulti(['A:2', 'B:3']), s.deletePrefix('C:')])).toEqual([
     void 0,
     void 0,
   ]);

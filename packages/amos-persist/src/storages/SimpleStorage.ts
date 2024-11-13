@@ -39,11 +39,11 @@ export class SimpleStorage implements StorageEngine {
     }
   }
 
-  async removeMulti(items: readonly string[]): Promise<void> {
+  async deleteMulti(items: readonly string[]): Promise<void> {
     await Promise.all(items.map((key) => this.driver.removeItem(this.genKey(key))));
   }
 
-  async removePrefix(prefix: string): Promise<void> {
+  async deletePrefix(prefix: string): Promise<void> {
     const keys = await this.allKeys(prefix);
     await Promise.all(keys.map((k) => this.driver.removeItem(this.genKey(k))));
   }

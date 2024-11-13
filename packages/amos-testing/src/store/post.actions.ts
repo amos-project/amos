@@ -22,11 +22,11 @@ export const updatePost = createHttpAction({
   mutations: (select, result, args) => postMapBox.mergeItem(args),
 });
 
-export const removePost = createHttpAction({
+export const deletePost = createHttpAction({
   key: 'DELETE/posts.deletePost',
   optimistic: true,
   mutations: (select, result, args) => [
-    postMapBox.removeItem(args.id),
+    postMapBox.deleteItem(args.id),
     userPostListBox.deleteIn(select(selectUserId()), args.id),
   ],
 });
@@ -63,11 +63,11 @@ export const addPostMedia = createHttpAction({
   mutations: (select, r) => [postMediaListBox.pushIn(r.postId, r.id), mediaMapBox.mergeItem(r)],
 });
 
-export const removePostMedia = createHttpAction({
+export const deletePostMedia = createHttpAction({
   key: 'DELETE/postMedias.deletePostMedia',
   optimistic: true,
   mutations: (select, result, args) => [
     postMediaListBox.deleteIn(select(mediaMapBox.getItem(args.id)).postId, args.id),
-    mediaMapBox.removeItem(args.id),
+    mediaMapBox.deleteItem(args.id),
   ],
 });

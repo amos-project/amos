@@ -31,7 +31,7 @@ export function resolveFuncValue<V, A extends any[]>(value: ValueOrFunc<V, A>, .
   return toFunc(value)(...args);
 }
 
-export function removeElement<T>(input: T[], ...items: T[]) {
+export function deleteElement<T>(input: T[], ...items: T[]) {
   for (const item of items) {
     const index = input.indexOf(item);
     if (index > -1) {

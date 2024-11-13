@@ -31,8 +31,8 @@ describe('Map', () => {
       m1.mergeAll([[3, -1]]),
       m1.updateItem(3, takeFirst),
       m1.updateAll(takeFirst),
-      m1.removeItem(4),
-      m1.removeAll([4, 5]),
+      m1.deleteItem(4),
+      m1.deleteAll([4, 5]),
     ]).toEqual([m1, m1, m1, m1, m1, m1, m1, m1, m1, m1, m1]);
   });
   it('should update map', () => {
@@ -60,10 +60,10 @@ describe('Map', () => {
         m1.updateItem(3, (v) => v - 1),
         m1.updateItem(4, (v) => v + 2),
         m1.updateAll((v) => v * 2),
-        m1.removeItem(3),
-        m1.removeItem(4),
-        m1.removeAll([3, 4]),
-        m1.removeAll([3, 2].values()),
+        m1.deleteItem(3),
+        m1.deleteItem(4),
+        m1.deleteAll([3, 4]),
+        m1.deleteAll([3, 2].values()),
         m1.clear(),
       ].map((v) => (v instanceof Map ? v.toJSON() : void 0)),
     ).toEqual([

@@ -3,7 +3,7 @@
  * @author junbao <junbao@moego.pet>
  */
 
-import { PartialRequired, removeElement } from 'amos-utils';
+import { PartialRequired, deleteElement } from 'amos-utils';
 import { MediaModel, PostModel } from './store/post.boxes';
 
 export interface HttpEndpoints {
@@ -86,12 +86,12 @@ export const mockServer: {
     return {};
   },
   'DELETE/postMedias.deletePostMedia': (req) => {
-    removeElement(postMedias[medias[req.id].id], req.id);
+    deleteElement(postMedias[medias[req.id].id], req.id);
     delete medias[req.id];
     return {};
   },
   'DELETE/posts.deletePost': (req) => {
-    removeElement(userPosts[posts[req.id].authorId], req.id);
+    deleteElement(userPosts[posts[req.id].authorId], req.id);
     delete posts[req.id];
     return {};
   },

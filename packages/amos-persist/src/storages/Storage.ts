@@ -9,6 +9,6 @@ export interface StorageEngine {
   getMulti(items: readonly string[]): Promise<readonly (PersistValue | null)[]>;
   getPrefix(prefix: string): Promise<readonly PersistEntry[]>;
   setMulti(items: readonly PersistEntry[]): Promise<void>;
-  removeMulti(items: readonly string[]): Promise<void>;
-  removePrefix(prefix: string): Promise<void>;
+  deleteMulti(items: readonly string[]): Promise<void>;
+  deletePrefix(prefix: string): Promise<void>;
 }
