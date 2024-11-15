@@ -69,14 +69,17 @@ export class Map<K extends ID, V> implements JSONSerializable<Record<K, V>> {
     let dirty = false;
     if (Array.isArray(items) || isIterable(items)) {
       for (const [k, v] of items) {
-        if (v !== this.getItem(k)) {
+        if (!this.hasItem(k) || v !== this.getItem(k)) {
           dirty ||= true;
           up[k as K] = v;
         }
       }
     } else {
       for (const k in items) {
-        if ((items as PartialRecord<K, V>)[k as K] !== this.getItem(k as K)) {
+        if (
+          !this.hasItem(k as K) ||
+          (items as PartialRecord<K, V>)[k as K] !== this.getItem(k as K)
+        ) {
           dirty ||= true;
           up[k as K] = (items as PartialRecord<K, V>)[k as K];
         }

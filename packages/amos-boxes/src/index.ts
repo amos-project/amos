@@ -8,6 +8,7 @@ export * from './boolBox';
 export * from './listBox';
 export * from './listMapBox';
 export * from './mapBox';
+export * from './mapMapBox';
 export * from './numberBox';
 export * from './objectBox';
 export * from './recordBox';

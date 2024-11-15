@@ -4,7 +4,7 @@
  */
 
 import { checkType, expectCalledWith } from 'amos-testing';
-import { takeFirst, isIterable, isIterableIterator } from 'amos-utils';
+import { isIterable, isIterableIterator, takeFirst } from 'amos-utils';
 import { Map } from './Map';
 
 describe('Map', () => {
@@ -20,6 +20,7 @@ describe('Map', () => {
     // @ts-expect-error
     m1.mergeAll({ 3: [3, 1] as const });
   });
+
   it('should not update', () => {
     expect([
       m1,
