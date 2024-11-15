@@ -12,8 +12,9 @@ import {
   SelectEntry,
   Selector,
 } from 'amos';
-import { useCallback, useDebugValue, useLayoutEffect, useReducer, useState } from 'react';
+import { useCallback, useDebugValue, useReducer, useState } from 'react';
 import { useStore } from './context';
+import useIsomorphicLayoutEffect from './utils';
 
 export interface UseSelector extends Select {
   (): Select;
@@ -25,10 +26,10 @@ export const useSelector: UseSelector = (selectors?: Selectable | readonly Selec
   const [state] = useState(() => ({ deps: [] as SelectEntry[], rendering: true }));
   state.deps = [];
   state.rendering = true;
-  useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     state.rendering = false;
   });
-  useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     return store.subscribe(() => {
       if (state.deps.some(([s, v]) => !isSelectValueEqual(s, v, store.select(s)))) {
         update();
